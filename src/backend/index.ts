@@ -1,13 +1,7 @@
-import Data from "./database/database";
+import Elysia from "elysia";
+const PORT = 2222;
+const App = new Elysia()
 
-console.log("Database setup")
+App.get('/',"Hello there");
 
-console.log(await Data.add("kakashi","ONEPIECE"))
-console.log("data setup")
-
-const res = await Data.get("kakashi");
-res.forEach(row => {
-        console.log(row)
-})
-
-Data.end();
+App.listen(PORT);

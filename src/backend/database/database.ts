@@ -1,4 +1,7 @@
 import postgres from "postgres";
+import { UserFindingError, UserNotCreated, UserNotFound, UserPassWrong } from "../helper/errors";
+import type { JWT_PAYLOAD } from "../interfaces/jwt_payload";
+import type { UserData } from "./interfaces";
 
 const database_url = Bun.env.DATABASE_URL;
 const host = Bun.env.HOST;
@@ -15,23 +18,58 @@ const psql = postgres(database_url?database_url:"",{
 });
 
 class Data{
-        static async setup(){
-                console.log("Started setting up")
-                const file = Bun.file("src/backend/database/SETUP.sql")
-                const command = await file.text();
-                const response = await psql`${command}`;
-                return response;
+
+        static async getUser(username:string):Promise<UserData | Error>{
+                try{
+                        const users = await psql<UserData[]>`SELECT * FROM Users WHERE username = ${username}`
+                        if(users[0] == undefined){
+                                return UserNotFound
+                        }
+
+                        return users[0]
+                }
+                catch (error){
+                        return UserNotFound;
+                }
+
         }
-        static async add(username:string, hashPass:string){
-                const response = await psql`INSERT INTO Users (username,hashPass) VALUES(${username},${hashPass})`
-                return response;
+
+        static async createUser(username:string, pass:string):Promise<JWT_PAYLOAD | Error>{
+                const hashPass:string = Bun.password.hashSync(pass)
+                try{
+                        await psql<UserData[]>`INSERT INTO Users (username,hashPass) VALUES(${username},${hashPass})`
+
+                        const user = await this.getUser(username)
+                        if(!(user instanceof Error)){
+                                return {
+                                        username:user.username,
+                                        userId:user.id
+                                }
+                        }
+                        return UserNotCreated
+                }
+                catch (error){
+                        return UserNotCreated;
+                }
         }
-        static async get(username:string){
-                const response = await psql`SELECT * FROM Users WHERE username = ${username}`
-                return response;
-        }
-        static async end(){
-                psql.end()
+
+        static async verifyUser(username:string, pass:string):Promise<JWT_PAYLOAD | Error>{
+                const users = await psql<UserData[]>`SELECT * FROM Users WHERE username = ${username}`;
+                if(users.length != 1){
+                        return UserFindingError;
+                }
+
+                const user = users[0]
+
+                if(Bun.password.verifySync(pass, (user?.hashpass==undefined?"":user?.hashpass))){
+                        return {
+                                username:user?.username,
+                                userId:user?.id
+                        } as JWT_PAYLOAD
+                }
+                else{
+                        return UserPassWrong;
+                }
         }
 }
 
