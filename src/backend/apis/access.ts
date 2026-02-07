@@ -2,6 +2,7 @@ import Elysia from "elysia";
 import Data from "../database/database";
 import { sign } from "../helper/jwt";
 import { userCreateZod } from "../interfaces/zod_types";
+import { set } from "zod";
 
 export const access = new Elysia();
 
@@ -23,7 +24,14 @@ access.post('/user/create', async ({body}) => {
                         token:token
                 }
         }
-        catch (e){
+        catch (e: any){
+                
+                if (e.message === "DATABSE Table DNE Error"){
+                    return {
+                        error: true,
+                        message: "Error 500. User Could not be created. Something went wrong on Server. Please try again later."
+                    }
+                }
                 return{
                         error:true,
                         message:e
