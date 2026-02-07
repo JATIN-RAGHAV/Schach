@@ -6,3 +6,4 @@ const App = new Elysia()
 App.use(router)
 
 App.listen(PORT);
+console.log(`Listening on: ${App.server?.hostname}:${App.server?.port}`)
