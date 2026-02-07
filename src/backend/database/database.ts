@@ -19,22 +19,21 @@ const psql = postgres(database_url?database_url:"",{
 
 class Data{
 
-        static async getUser(username:string):Promise<UserData | Error>{
+        static async getUser(username:string):Promise<UserData>{
                 try{
                         const users = await psql<UserData[]>`SELECT * FROM Users WHERE username = ${username}`
                         if(users[0] == undefined){
-                                return UserNotFound
+                                throw new UserNotFound()
                         }
 
                         return users[0]
                 }
                 catch (error){
-                        return UserNotFound;
+                        throw new UserNotFound();
                 }
-
         }
 
-        static async createUser(username:string, pass:string):Promise<JWT_PAYLOAD | Error>{
+        static async createUser(username:string, pass:string):Promise<JWT_PAYLOAD>{
                 const hashPass:string = Bun.password.hashSync(pass)
                 try{
                         await psql<UserData[]>`INSERT INTO Users (username,hashPass) VALUES(${username},${hashPass})`
@@ -46,21 +45,20 @@ class Data{
                                         userId:user.id
                                 }
                         }
-                        return UserNotCreated
+                        throw new UserNotCreated();
                 }
                 catch (error){
-                        return UserNotCreated;
+                        throw new UserNotCreated();
                 }
         }
 
-        static async verifyUser(username:string, pass:string):Promise<JWT_PAYLOAD | Error>{
+        static async verifyUser(username:string, pass:string):Promise<JWT_PAYLOAD>{
                 const users = await psql<UserData[]>`SELECT * FROM Users WHERE username = ${username}`;
                 if(users.length != 1){
-                        return UserFindingError;
+                        throw new UserFindingError();
                 }
 
                 const user = users[0]
-
                 if(Bun.password.verifySync(pass, (user?.hashpass==undefined?"":user?.hashpass))){
                         return {
                                 username:user?.username,
@@ -68,7 +66,7 @@ class Data{
                         } as JWT_PAYLOAD
                 }
                 else{
-                        return UserPassWrong;
+                        throw new UserPassWrong();
                 }
         }
 }

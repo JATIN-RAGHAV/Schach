@@ -1,6 +1,6 @@
 CREATE TABLE Users (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-        username VARCHAR,
+        username VARCHAR UNIQUE,
         hashPass VARCHAR
 );
 CREATE TABLE Friends (
