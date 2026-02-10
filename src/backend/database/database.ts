@@ -17,7 +17,8 @@ const psql = postgres(database_url?database_url:"",{
         password,
 });
 
-class Data{
+type Constructor<T = {}> = new (...args: any[]) => T;
+const Database = <Tbase extends Constructor>(Base:Tbase) => class extends Base{
 
         static async getUser(username:string):Promise<UserData>{
                 try{
@@ -71,4 +72,4 @@ class Data{
         }
 }
 
-export default Data;
+export default Database;

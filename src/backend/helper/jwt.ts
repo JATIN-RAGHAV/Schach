@@ -3,8 +3,15 @@ import { type JWT_PAYLOAD } from '../interfaces/jwt_payload';
 
 const {publicKey, privateKey} = await generateKeyPair("RS256")
 
+export const log = () => {
+        console.log(JSON.stringify(publicKey))
+        console.log()
+        console.log(JSON.stringify(privateKey))
+}
+
 export const verify = async (token: string):Promise<JWT_PAYLOAD>=>{
         const res  =  (await jwtVerify(token,publicKey)).payload.payload as JWT_PAYLOAD
+        console.log("Error in veifying")
         return res
 }
 

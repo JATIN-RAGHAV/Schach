@@ -25,3 +25,11 @@ export class UserFindingError extends Error{
                 this.name = this.constructor.name
         }
 }
+
+export class GameNotFound extends Error{
+        constructor(){
+                super("Game was asked for but it doens't exist")
+                this.name = this.constructor.name
+        }
+}
+

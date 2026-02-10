@@ -1,11 +1,11 @@
 import Elysia from "elysia";
-import Data from "../database/database";
+import Data from "../database/data";
 import { sign } from "../helper/jwt";
 import { userCreateZod } from "../interfaces/zod_types";
 
-export const access = new Elysia();
+export const access = new Elysia({prefix:"/user"});
 
-access.post('/user/create', async ({body}) => {
+access.post('/create', async ({body}) => {
         const res = userCreateZod.safeParse(body);
         if(!res.success){
                 return{
@@ -31,7 +31,7 @@ access.post('/user/create', async ({body}) => {
         }
 })
 
-access.post('/user/login',async({body})=>{
+access.post('/login',async({body})=>{
         const res = userCreateZod.safeParse(body)
         if(!res.success){
                 return{
