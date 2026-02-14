@@ -16,6 +16,8 @@ CREATE TABLE RapidGames (
         blackId INT,
         winnerId INT,
         gameLink VARCHAR,
+        gameTime INT, -- unit is minutes
+        incrementTime INT, -- unit is seconds
         time TIMESTAMP,
         FOREIGN KEY (whiteId) REFERENCES Users(id),
         FOREIGN KEY (blackId) REFERENCES Users(id),
@@ -28,6 +30,8 @@ CREATE TABLE BulletGames (
         blackId INT,
         winnerId INT,
         gameLink VARCHAR,
+        gameTime INT, -- unit is minutes
+        incrementTime INT, -- unit is seconds
         time TIMESTAMP,
         FOREIGN KEY (whiteId) REFERENCES Users(id),
         FOREIGN KEY (blackId) REFERENCES Users(id),
@@ -40,6 +44,8 @@ CREATE TABLE BlitzGames (
         blackId INT,
         winnerId INT,
         gameLink VARCHAR,
+        gameTime INT, -- unit is minutes
+        incrementTime INT, -- unit is seconds
         time TIMESTAMP,
         FOREIGN KEY (whiteId) REFERENCES Users(id),
         FOREIGN KEY (blackId) REFERENCES Users(id),

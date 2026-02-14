@@ -5,6 +5,6 @@ import { startGame } from "./startGame";
 let router = new Elysia();
 
 router.use(access)
-.use(startGame)
+        .use(startGame)
 
 export default router

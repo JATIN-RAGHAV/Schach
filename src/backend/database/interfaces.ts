@@ -1,10 +1,5 @@
-// CREATE TABLE Users (
-//         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-//         username VARCHAR,
-//         hashPass VARCHAR
-// );
-
 import { ElysiaWS } from "elysia/ws"
+import { color } from "../../common/interfaces/enums"
 
 export interface UserData {
         id:string,
@@ -12,8 +7,15 @@ export interface UserData {
         hashpass:string
 }
 
-export interface GameList{
+export interface userGameObject{
         userId:string,
         username:string,
         ws:ElysiaWS
 }
+
+export type gameQueueObject = Record<
+color,
+Record<
+string,
+userGameObject[]>
+>

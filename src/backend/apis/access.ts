@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import Data from "../database/data";
 import  JWT  from "../helper/jwt";
-import { userCreateZod } from "../interfaces/zod_types";
+import { userCreateZod } from "../../common/interfaces/userZodTypes";
 
 export const access = new Elysia({prefix:"/user"});
 
@@ -17,7 +17,8 @@ access.post('/create', async ({body}) => {
         try{
                 const {username,pass} = res.data;
                 const payload = await Data.createUser(username,pass);
-                const token = await JWT.sign(payload)
+                const token = await JWT.sign(payload);
+                console.log(``);
                 return {
                         error:false,
                         token:token

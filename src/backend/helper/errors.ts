@@ -33,3 +33,16 @@ export class GameNotFound extends Error{
         }
 }
 
+export class invalidTimeKey extends Error{
+        constructor(){
+                super("The time key provided can't be parsed back into time and increment.")
+                this.name = this.constructor.name
+        }
+}
+
+export class invalidGame extends Error{
+        constructor(){
+                super("Bro is asking for a game that doens't exist.")
+                this.name = this.constructor.name
+        }
+}

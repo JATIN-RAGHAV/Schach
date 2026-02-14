@@ -1,4 +1,4 @@
-import * as z from 'zod'
+import z from "zod";
 
 export const userCreateZod = z.object({
         username: z.string().min(3).max(32).regex(/^[a-zA-Z-_\d]+$/,"Only contains english characters and '-' and '_'."),

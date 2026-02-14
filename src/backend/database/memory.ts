@@ -1,69 +1,38 @@
-import { type GameList } from "./interfaces"
+import { type gameQueueObject, type userGameObject } from "./interfaces"
+import { color } from "../../common/interfaces/enums";
 import { GameNotFound } from "../helper/errors";
+import { getTimeKey } from "./helper";
 type Constructor<T = {}> = new (...args: any[]) => T;
 const Memory = <Tbase extends Constructor>(Base:Tbase) => class extends Base{
 
-        static RapidGamesList:GameList[]=[];
-        static BlitzGamesList:GameList[]=[];
-        static BulletGamesList:GameList[]=[];
+        static gameQueue: gameQueueObject={
+                [color.Black]:{},
+                [color.White]:{},
+                [color.Random]:{},
+        };
 
-        static isRapidGame() {
-                return this.RapidGamesList.length != 0;
+        static isGame(color:color, time:number,increment:number):boolean { // key -> time:increment
+                return  getTimeKey(time,increment) in this.gameQueue[color]
         }
 
-        static isBulletGame() {
-                return this.RapidGamesList.length != 0;
-        }
-
-        static isBlitzGame() {
-                return this.RapidGamesList.length != 0;
-        }
-
-
-        static addRapidGame(gl:GameList){
-                console.log(`New connection started with ${gl.userId}`)
-                this.RapidGamesList.push(gl)
-        }
-
-        static addBulletGame(gl:GameList){
-                console.log(`New connection started with ${gl.userId}`)
-                this.BulletGamesList.push(gl)
-        }
-
-        static addBlitzGame(gl:GameList){
-                console.log(`New connection started with ${gl.userId}`)
-                this.BlitzGamesList.push(gl)
-        }
-
-
-        static getRapidGame():GameList{
-                if(this.RapidGamesList.length > 0){
-                        const last = this.RapidGamesList.pop();
-                        if(last != undefined){
-                                return last
-                        }
+        static addGame(gameObject:userGameObject, color:color, time:number, increment:number):void{
+                const timeKey = getTimeKey(time,increment)
+                if(!(timeKey in this.gameQueue[color])){
+                        this.gameQueue[color][timeKey] = [];
                 }
-                throw GameNotFound
+                this.gameQueue[color][timeKey]?.push(gameObject);
         }
 
-        static getBulletGame():GameList{
-                if(this.BulletGamesList.length > 0){
-                        const last = this.BulletGamesList.pop();
-                        if(last != undefined){
-                                return last
-                        }
+        static getGame(color:color, time:number, increment:number){
+                const timeKey = getTimeKey(time,increment)
+                if(!this.isGame(color,time,increment)){
+                        throw GameNotFound
                 }
-                throw GameNotFound
+                return this.gameQueue[color][timeKey]?.pop();
         }
 
-        static getBlitzGame():GameList{
-                if(this.BlitzGamesList.length > 0){
-                        const last = this.BlitzGamesList.pop();
-                        if(last != undefined){
-                                return last
-                        }
-                }
-                throw GameNotFound
+        static print(){
+                console.log(this.gameQueue)
         }
 }
 
