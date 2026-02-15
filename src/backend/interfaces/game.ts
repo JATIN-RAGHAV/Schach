@@ -1,4 +1,4 @@
-import { createGameZod } from "../../common/interfaces/gameZodTypes";
+import { gameCreateZod } from "../../common/interfaces/gameZodTypes";
 import z from "zod";
 
-export type createGame = z.infer<typeof createGameZod>;
+export type gameCreate = z.infer<typeof gameCreateZod>;

@@ -7,15 +7,15 @@ export interface UserData {
         hashpass:string
 }
 
-export interface userGameObject{
-        userId:string,
+export interface gameObject{
+        userId:string
         username:string,
         ws:ElysiaWS
 }
 
-export type gameQueueObject = Record<
-color,
-Record<
-string,
-userGameObject[]>
->
+export type userQueue = Set<string>;
+
+export type gameObjectQueue = Record<color,
+Record<string,
+Map<string,
+gameObject>>>
