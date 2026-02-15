@@ -1,10 +1,9 @@
-import { generateKeyPair } from "jose";
+import { generateKeyPair } from 'jose';
 
-const {publicKey} =await generateKeyPair("RS256");
+type keyPair = Awaited<ReturnType<typeof generateKeyPair>>;
+export type keyType = keyPair['publicKey'];
 
-export type keyType = typeof publicKey;
-
-export interface keys{
-        publicKey : keyType,
-        privateKey : keyType
+export interface keys {
+    publicKey: keyType;
+    privateKey: keyType;
 }

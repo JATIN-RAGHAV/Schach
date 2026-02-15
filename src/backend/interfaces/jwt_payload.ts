@@ -1,4 +1,4 @@
-export interface JWT_PAYLOAD{
-        username:string,
-        userId:string
+export interface JWT_PAYLOAD {
+    username: string;
+    userId: string;
 }

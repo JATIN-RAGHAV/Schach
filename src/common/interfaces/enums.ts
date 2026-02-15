@@ -1,5 +1,5 @@
-export enum color{
-        Black,
-        White,
-        Random
-};
+export enum color {
+    Black,
+    White,
+    Random,
+}
