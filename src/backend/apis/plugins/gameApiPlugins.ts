@@ -12,7 +12,7 @@ export const gameCreatePlugin = authPlugin
         }
         let {color,time,increment} = (res.data as gameCreate);
         let colorEnum = color as colorType;
-        if(color >=3 && color<0){
+        if(color >=3 || color<0){
                 return status(400)
         }
 
