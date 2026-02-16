@@ -16,7 +16,7 @@ export const gameCreatePlugin = authPlugin.resolve(
             return status(400);
         }
 
-        if (Data.isUser(user.userId)) {
+        if (Data.isUserQueue(user.userId)) {
             return status(400);
         }
 

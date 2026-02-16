@@ -52,7 +52,6 @@ class JWT {
     static async sign(payload: JWT_PAYLOAD): Promise<string> {
         const jwt = await new SignJWT({ payload })
             .setProtectedHeader({ alg: 'RS256' })
-            .setExpirationTime('2h')
             .sign(this.privateKey);
         return jwt;
     }

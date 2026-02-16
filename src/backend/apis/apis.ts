@@ -1,9 +1,9 @@
 import Elysia from 'elysia';
 import { access } from './access';
-import { startGame } from './startGame';
+import { gameRun } from './gameStart';
 
 const router = new Elysia();
 
-router.use(access).use(startGame);
+router.use(access).use(gameRun);
 
 export default router;
