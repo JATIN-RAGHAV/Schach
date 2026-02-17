@@ -1,5 +1,5 @@
 import {
-    type gameObject,
+    type gameQueueObject,
     type gameObjectQueue,
     type userIdWebSocket,
     type userOppo,
@@ -26,14 +26,14 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
         static userOppo: userOppo = new Map();
         static userIdWebSocket: userIdWebSocket = new Map();
 
-        static isGame(color: color, time: number, increment: number): boolean {
+        static isGameQueue(color: color, time: number, increment: number): boolean {
             // key -> time:increment
             return getTimeKey(time, increment) in this.gameQueue[color];
         }
 
-        static addGame(
+        static addGameQueue(
             userId: string,
-            gameObject: gameObject,
+            gameQueueObject: gameQueueObject,
             color: color,
             time: number,
             increment: number,
@@ -43,26 +43,26 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
             }
             const timeKey = getTimeKey(time, increment);
             if (!(timeKey in this.gameQueue[color])) {
-                this.gameQueue[color][timeKey] = new Map<string, gameObject>();
+                this.gameQueue[color][timeKey] = new Map<string, gameQueueObject>();
             }
-            this.gameQueue[color][timeKey]?.set(userId, gameObject);
+            this.gameQueue[color][timeKey]?.set(userId, gameQueueObject);
             this.userQueue.add(userId);
             return true;
         }
 
-        static getGame(color: color, time: number, increment: number) {
+        static getGameQueue(color: color, time: number, increment: number) {
             const timeKey = getTimeKey(time, increment);
-            if (!this.isGame(color, time, increment)) {
+            if (!this.isGameQueue(color, time, increment)) {
                 throw GameNotFound;
             }
-            const gameObjectMap = this.gameQueue[color][timeKey];
-            if (gameObjectMap != undefined) {
-                let userId = gameObjectMap.keys().next().value;
+            const gameQueueObjectMap = this.gameQueue[color][timeKey];
+            if (gameQueueObjectMap != undefined) {
+                let userId = gameQueueObjectMap.keys().next().value;
                 userId = userId != undefined ? userId : 'shit';
-                const gameObject = gameObjectMap.get(userId);
+                const gameQueueObject = gameQueueObjectMap.get(userId);
                 this.userQueue.delete(userId);
                 this.removeGameQueue(userId, color, time, increment);
-                return gameObject;
+                return gameQueueObject;
             }
             throw GameNotFound;
         }
@@ -75,7 +75,7 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
         ) {
             const timeKey = getTimeKey(time, increment);
             this.userQueue.delete(userId);
-            if (!this.isGame(color, time, increment)) {
+            if (!this.isGameQueue(color, time, increment)) {
                 return;
             }
             if (this.gameQueue[color][timeKey]?.has(userId)) {

@@ -14,12 +14,18 @@ export interface UserData {
     username: string;
     hashpass: string;
 }
-export interface gameObject {
+export interface gameQueueObject {
     userId: string;
     username: string;
     ws: ElysiaWS;
 }
 export type gameObjectQueue = Record<
     color,
-    Record<string, Map<string, gameObject>>
+    Record<string, Map<string, gameQueueObject>>
 >;
+export interface gameObject{
+    board:null
+    moveNumber:number
+    whiteUserId:string
+    blackUserId:string
+}

@@ -1,6 +1,6 @@
 import { color } from '../../common/interfaces/enums';
 import Data from '../database/data';
-import type { gameObject } from '../database/interfaces';
+import type { gameQueueObject } from '../database/interfaces';
 
 export const getOpponentColor = (inColor: color): color[] => {
     const res: color[] = [];
@@ -27,13 +27,13 @@ export const getOpponent = (
     time: number,
     increment: number,
 ): {
-    oppo: gameObject;
+    oppo: gameQueueObject;
     color: color;
 } | null => {
     const oppColors: color[] = getOpponentColor(inColor);
     for (const c of oppColors) {
         try {
-            const oppo = Data.getGame(c, time, increment);
+            const oppo = Data.getGameQueue(c, time, increment);
             if (oppo != undefined) {
                 return { oppo, color: c };
             }

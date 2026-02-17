@@ -2,7 +2,7 @@ import Data from '../database/data';
 import { color as colorType } from '../../common/interfaces/enums';
 import { getOpponent } from '../helper/getOpponent';
 import { gameCreatePlugin } from './plugins/gameApiPlugins';
-import type { gameObject } from '../database/interfaces';
+import type { gameQueueObject } from '../database/interfaces';
 
 export const gameRun = gameCreatePlugin.ws('/game/run', {
     // Handle Connection starting
@@ -11,7 +11,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         // Get the current player Data
         const { username, userId, color, time, increment } = ws.data.user;
         const currentUserId = userId;
-        const currentPlayer: gameObject = {
+        const currentPlayer: gameQueueObject= {
             userId,
             username,
             ws,
@@ -75,7 +75,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             });
             return;
         }
-        Data.addGame(currentUserId, currentPlayer, color, time, increment);
+        Data.addGameQueue(currentUserId, currentPlayer, color, time, increment);
     },
 
     // Handle incoming moves
@@ -86,7 +86,8 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
 
     // Handle connection closing
     close(ws) {
-        const { username, userId, color, time, increment } = ws.data.user;
+        const { username, userId,  time, increment } = ws.data.user;
+        let {color} = ws.data.user;
         // If the user was in the queue
         if(Data.isUserQueue(userId)){
             Data.removeGameQueue(userId, color, time, increment);
@@ -104,13 +105,14 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                         ended:true,
                         winner:true
                     })
+                    color = Data.getUserColor(userId) || color
                     Data.removeUserIdSocket(oppoId);
+                    Data.removeUserIdSocket(userId)
+                    Data.removeUsersOppo(userId,oppoId)
                     oppoSocket.close();
                 }
-            Data.removeUserIdSocket(userId)
-            Data.removeUsersOppo(userId,oppoId)
             }
-            console.log(`${username} closed connection midgame as ${colorType[color]} and ${oppoId} has won the game`)
+                    console.log(`${username} closed connection midgame as ${colorType[color]} and ${oppoId} has won the game`)
         }
         ws.close();
     },
