@@ -1,6 +1,7 @@
 import { columnSize, rowSize } from "./interfaces/constants";
-import { type Board, type moveIndex, type Row } from "./interfaces/game";
+import { type Board, type gameObject, type moveIndex, type Row } from "./interfaces/game";
 import { color as colors , moveToSpecialFlag, Pieces,  piecesColorMap,  purePieces, purePiecesMap, specialFlags, specialMovepiece } from "./interfaces/enums";
+import { getAutomaticTypeDirectiveNames } from "typescript";
 
 
 // Initialize an empty board
@@ -140,6 +141,7 @@ export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,spec
     if(sourceSquare == Pieces.NN){
         return false;
     }
+
     // Is piece's color the right color?
     if(piecesColorMap.get(sourceSquare) != color){
         return false;
@@ -298,16 +300,14 @@ export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,spec
             return false;
         }
     }
-    
+
     // If everything ok return true
     return true;
 }
 
 export const findPieceCordinates = (board:Board, piece:Pieces) => {
-    let row=0;
-    let col=0;
-    for(;row<rowSize;row++){
-        for(;col<columnSize;col++){
+    for(let row=0;row<rowSize;row++){
+        for(let col=0;col<columnSize;col++){
             const cPiece = (board[row] as Row)[col] as Pieces;
             if(cPiece == piece){
                 return [row,col];
@@ -325,7 +325,8 @@ export const locationInBoard = (row:number, col:number) => {
 export const isKingInCheck = (board:Board, color:colors) => {
     const piece = color==colors.White ? Pieces.WK : Pieces.BK;
     // Find location of the king, treat this as never null since king will always be there
-    const [row,col]= findPieceCordinates(board,piece) as [number,number];
+
+    const [row,col] = findPieceCordinates(board,piece) as [number,number];
 
     // Check for pawns separately
     let pawnRow = row+1; // If the checking for White King
@@ -358,24 +359,44 @@ export const isKingInCheck = (board:Board, color:colors) => {
         }
     }
 
-    // Check for the rest of the pieces
-    for(let dRow of [-1,0,1]){
+    // Check for diagonally moving pieces
+    for(let dRow of [-1,1]){
         let cRow = row;
         let cCol = col;
-        for(let dCol of [-1,0,1]){
+        for(let dCol of [-1,1]){
             cRow += dRow;
             cCol += dCol;
-            while(locationInBoard(cRow,cCol)){
+            if(locationInBoard(cRow,cCol)){
                 const tarPiece = (board[cRow] as Row)[cCol] as Pieces;
                 const sameColor = piecesColorMap.get(tarPiece) == (color == colors.White ? colors.Black : colors.White);
-                const isPawn = purePiecesMap.get(tarPiece) == purePieces.P;
-                const isKnight = purePiecesMap.get(tarPiece) == purePieces.N;
-                if(sameColor && !isPawn && !isKnight){
+                const isQueen = purePiecesMap.get(tarPiece) == purePieces.Q;
+                const isBishop = purePiecesMap.get(tarPiece) == purePieces.B;
+                if(sameColor && (isQueen || isBishop)){
                     return true;
                 }
             }
         }
     }
+
+    // Check for straight moving pieces
+    for(let dRow of [-1,1,0]){
+        let cRow = row;
+        let cCol = col;
+        for(let dCol of (cRow == 0 ? [-1,1] : [0])){
+            cRow += dRow;
+            cCol += dCol;
+            if(locationInBoard(cRow,cCol)){
+                const tarPiece = (board[cRow] as Row)[cCol] as Pieces;
+                const sameColor = piecesColorMap.get(tarPiece) == (color == colors.White ? colors.Black : colors.White);
+                const isQueen = purePiecesMap.get(tarPiece) == purePieces.Q;
+                const isRook = purePiecesMap.get(tarPiece) == purePieces.R;
+                if(sameColor && (isQueen || isRook)){
+                    return true;
+                }
+            }
+        }
+    }
+
     return false;
 }
 
@@ -438,12 +459,76 @@ export const makeMove = (board:Board, move:string) => {
     const sourceRow = board[sRow] as Row;
     const targetRow = board[tRow] as Row;
     let sourceSquare = sourceRow[sCol] as Pieces;
-    let targetSquare = targetRow[tCol] as Pieces;
 
     // Make the move
-    targetSquare = sourceSquare;
-    sourceSquare = Pieces.NN;
+    targetRow[tCol] = sourceSquare;
+    sourceRow[sCol] = Pieces.NN;
 }
+
+// Update the game object 
+export const updateGameObject = (gameObject:gameObject,currentTime:number,move:string,color:colors,increment:number) =>{
+    let {board,movesTimes,startTime} = gameObject;
+    // update time
+    const lastTime = movesTimes.at(-1) as number;
+    const timeSinceGameStart = currentTime - startTime;
+    const timeTakeForCurrentMove = currentTime - lastTime;
+    movesTimes.push(timeSinceGameStart);
+    if(color == colors.White){
+        gameObject.whiteTimeLeft -= timeTakeForCurrentMove;
+        gameObject.whiteTimeLeft += increment; 
+    }
+    else{
+        gameObject.blackTimeLeft -= timeTakeForCurrentMove;
+        gameObject.blackTimeLeft += increment; 
+    }
+
+    // update moves
+    gameObject.moveNumber++;
+    gameObject.moves.push(move);
+    makeMove(board,move);
+
+    // update special flags
+    // Get the details about the move
+    const [sRow,sCol,tRow,tCol] = moveCharsToIndex(move) as moveIndex;
+    const sourceRow = board[sRow] as Row;
+    let sourceSquare = sourceRow[sCol] as Pieces;
+    
+    if(color == colors.White){
+        // Check for king move
+        if(sourceSquare == Pieces.WK){
+            gameObject.specialMoveFlags = gameObject.specialMoveFlags | specialFlags.WK;
+
+            // Check for castling
+            if(Math.abs(tCol - sCol) == 2){
+                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (tCol - sCol == 2 ? specialFlags.WHR : specialFlags.WAR)
+            }
+        }
+        // Check for rook moves
+        if(sourceSquare == Pieces.WR){
+            if(sRow == 0 && sCol in [0,7]){
+                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (sCol == 0 ? specialFlags.WAR : specialFlags.WHR);
+            }
+        }
+    }
+    else if(color == colors.Black){
+        // Check for king move
+        if(sourceSquare == Pieces.BK){
+            gameObject.specialMoveFlags = gameObject.specialMoveFlags | specialFlags.BK;
+
+            // Check for castling
+            if(Math.abs(tCol - sCol) == 2){
+                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (tCol - sCol == 2 ? specialFlags.BHR : specialFlags.BAR)
+            }
+        }
+        // Check for rook moves
+        if(sourceSquare == Pieces.BR){
+            if(sRow == 0 && sCol in [0,7]){
+                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (sCol == 0 ? specialFlags.BAR : specialFlags.BHR);
+            }
+        }
+    }
+}
+
 
 // Returns true if move is valid and false otherwise
 export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:number,lastMove:string):boolean=>{
@@ -458,14 +543,12 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
     // Check whether the move makes sense on it's own
     if(!isMoveOkWithoutContext(board,move,color,specialMoveFlags,lastMove)){
         printBoard(board)
-        console.log(`Move is not valid, the piece can't move like that`)
         return false;
     }
 
     // Check whether there are pieces in the middle or not and only check if the moved piece is not a knight
     if(purePiece != purePieces.N && arePieceInMiddle(board,move,color,specialMoveFlags,lastMove)){
         printBoard(board)
-        console.log(`Move is not valid, the piece can move like that, but now with the current board`)
         return false;
     }
 
@@ -483,10 +566,11 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
         // Fix the move
         targetRow[tCol] = targetSquare;
         sourceRow[sCol] = sourceSquare;
-        printBoard(board)
-        console.log(`Move is not valid, leads to check.`)
         return false;
     }
+    // Fix move
+    targetRow[tCol] = targetSquare;
+    sourceRow[sCol] = sourceSquare;
 
     // Check while castling if king goes through a check
     // Check if the move is castle
@@ -502,8 +586,6 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
             // Fix the move
             sourceRow[sCol] = sourceSquare;
             sourceRow[cCol] = Pieces.NN;
-            printBoard(board)
-            console.log(`Move is not valid, king passes through check.`)
             return false;
         }
         // Move the king by one more square
@@ -514,8 +596,6 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
             // Fix the move
             sourceRow[sCol] = sourceSquare;
             sourceRow[cCol] = Pieces.NN;
-            printBoard(board)
-            console.log(`Move is not valid, king ends up in check.`)
             return false;
         }
     }

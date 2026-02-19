@@ -1,11 +1,11 @@
 import Data from '../database/data';
-import { color as colorType, Pieces } from '../../common/interfaces/enums';
+import { color as colorType, Pieces, specialFlags } from '../../common/interfaces/enums';
 import { getOpponent } from '../helper/getOpponent';
 import { gameCreatePlugin } from './plugins/gameApiPlugins';
 import type { gameQueueObject } from '../database/interfaces';
-import { initBoard, moveCharsToIndex, printBoard } from '../../common/game';
+import { initBoard, isMoveOk, makeMove, moveCharsToIndex, printBoard, updateGameObject } from '../../common/game';
 import type { ElysiaWS } from 'elysia/ws';
-import { moveSent, type gameObject, type moveIndex, type Row } from '../../common/interfaces/game';
+import { moveSocketRequest, type gameObject, type moveIndex, type moveSocketResponse, type Row } from '../../common/interfaces/game';
 
 export const gameRun = gameCreatePlugin.ws('/game/run', {
     // Handle Connection starting
@@ -86,9 +86,12 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
     },
 
     // Handle incoming moves
-    message(ws, message) {
+    async message (ws, message) {
         // Get user data and check if the user is playing
-        const {userId,username,color,time,increment} = ws.data.user;
+        const currentTime = Date.now();
+        const {userId,username,increment} = ws.data.user;
+        const color = Data.getPlayerColor(userId);
+        console.log(`${username} wants to make a move`)
         if(!Data.isUserPlaying(userId)){
             ws.send({
                 error:true,
@@ -100,16 +103,22 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         }
 
         // Validate Move format
-        const res = moveSent.safeParse(message);
+        console.log('hi')
+        const res = moveSocketRequest.safeParse(message);
+        console.log(message)
+        console.log(res.error?.message)
         if(!res.success){
             ws.send({
                 error:true,
                 accepted:false,
-                message:"Send the move in the correct format."
+                message:res.error?.message
             })
             return;
         }
+        console.log("valid zod move")
+        const move = res.data;
 
+        console.log(move)
         // Get Opponent data
         const oppoUserId = Data.getUserOppo(userId)as string;
         const oppoSocket = Data.getUserIdSocket(oppoUserId) as ElysiaWS;
@@ -121,13 +130,54 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             [whiteUserId, blackUserId] = [blackUserId, whiteUserId];
         }
 
-
         // Get the gameObject and the inner parts
         const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
-        let {board,moveNumber,movesTimes,startTime,whiteTimeLeft,blackTimeLeft} = gameObject;
+        let {board,moveNumber,moves,movesTimes,startTime,specialMoveFlags,whiteTimeLeft,blackTimeLeft} = gameObject;
+
+        console.log(`Got game object`)
         
         // move number initially == 0, so even moves are white and odd are black
         const currentColor = (moveNumber%2)===1?colorType.Black:colorType.White;
+        
+        // Validate the move
+        const isPlayersMove = currentColor == color;
+        const isValidMove = isMoveOk(board,move,color,specialMoveFlags,(moves[moves.length-1]||""));
+        if(!isPlayersMove || !isValidMove){
+            const responseObject:moveSocketResponse = {
+                moveColor:color,
+                move:move,
+                winner:false,
+                error:true,
+                over:false,
+                message:"Play a valid move",
+            }
+            ws.send(responseObject)
+            console.log(`invalid move sent my player ${username}.`)
+            printBoard(board);
+            return;
+        }
+        console.log(`move was validated`)
+
+        // Update the game object
+        updateGameObject(gameObject,currentTime,move,color,increment);
+        console.log(`gaem object updated`)
+
+        // Inform the other player that a move is made
+        const responseObject:moveSocketResponse = {
+            moveColor:color,
+            move:move,
+            winner:false,
+            error:false,
+            over:false,
+            message:"Play a valid move",
+        }
+        oppoSocket.send(responseObject)
+        console.log(`other player informmed`)
+        // Inform the current player that the move was accepted
+        ws.send(responseObject)
+
+        console.log(`move made by ${username} move; ${move} `)
+        printBoard(board)
     },
 
     // Handle connection closing
@@ -147,10 +197,15 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                 const oppoSocket = Data.getUserIdSocket(oppoId);
                 if(oppoSocket){
                     // Tell them that they have won
-                    oppoSocket.send({
-                        ended:true,
-                        winner:true
-                    })
+                    const responseObject:moveSocketResponse = {
+                        moveColor:color,
+                        move:"",
+                        winner:true,
+                        error:false,
+                        over:true,
+                        message:"You won, the other person left."
+                    }
+                    oppoSocket.send(responseObject)
                     color = Data.getUserColor(userId) || color
                     Data.removeUserIdSocket(oppoId);
                     Data.removeUserIdSocket(userId)

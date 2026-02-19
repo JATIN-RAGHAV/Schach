@@ -1,4 +1,5 @@
 import { initBoard } from "../../common/game";
+import { color } from "../../common/interfaces/enums";
 import type { gameObject } from "../../common/interfaces/game";
 
 type Constructor<T extends object = object> =
@@ -7,7 +8,10 @@ new (...args: any[]) => T;
 const Game = <Tbase extends Constructor>(Base: Tbase) =>
     class extends Base {
         // Define the static variables
+        // To map username keys onto the game object
         static gamesList:Map<string,gameObject>=new Map<string,gameObject>();
+        // To map userId with their color
+        static playerColor:Map<string,color>=new Map<string,color>();
 
         // Get the key for a pair of users
         static getKey(whiteUserId:string, blackUserId:string){
@@ -23,8 +27,12 @@ const Game = <Tbase extends Constructor>(Base: Tbase) =>
         // Initalise a gameObject and add it to the gamesList
         static setGameObject(whiteUserId:string, blackUserId:string,time:number){
             const board = initBoard();
-            const startTime = new Date();
+            const startTime = Date.now();
             const key = this.getKey(whiteUserId,blackUserId);
+
+            // Set user colors
+            this.playerColor.set(blackUserId,color.Black);
+            this.playerColor.set(whiteUserId,color.White);
 
             //moveNumber, movesTimes, whiteTimeLeft, blackTimeLeft 
             this.gamesList.set(key,{
@@ -37,6 +45,11 @@ const Game = <Tbase extends Constructor>(Base: Tbase) =>
                 specialMoveFlags:0,
                 blackTimeLeft:time,
             })
+        }
+
+        // Get the player color give the userId
+        static getPlayerColor = (userId:string) => {
+            return this.playerColor.get(userId) as color;
         }
     };
 
