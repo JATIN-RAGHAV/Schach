@@ -1,8 +1,11 @@
 import Data from '../database/data';
-import { color as colorType } from '../../common/interfaces/enums';
+import { color as colorType, Pieces } from '../../common/interfaces/enums';
 import { getOpponent } from '../helper/getOpponent';
 import { gameCreatePlugin } from './plugins/gameApiPlugins';
 import type { gameQueueObject } from '../database/interfaces';
+import { initBoard, moveCharsToIndex, printBoard } from '../../common/game';
+import type { ElysiaWS } from 'elysia/ws';
+import { moveSent, type gameObject, type moveIndex, type Row } from '../../common/interfaces/game';
 
 export const gameRun = gameCreatePlugin.ws('/game/run', {
     // Handle Connection starting
@@ -55,16 +58,20 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                 }
             }
 
+            // remove the users from the game Queue
             Data.removeGameQueue(userId,color,time,increment);
             Data.removeGameQueue(opponentResponse.oppo.userId,color,time,increment);[]
             Data.setUserIdSocket(whiteUserId,whiteSocket,colorType.White)
             Data.setUserIdSocket(blackUserId,blackSocket,colorType.Black)
             Data.setUserOppo(whiteUserId,blackUserId)
+            // Add the game object to active games
+            Data.setGameObject(whiteUserId,blackUserId,time);
+
             console.log(
                 `Starting a game between ${whiteUsername}(white) and ${blackUsername}(black).`,
             );
-            const startTime = new Date();
-            console.log(startTime);
+            
+            // Tell the users that their games has started
             whiteSocket.send({
                 start: true,
                 color: colorType.White,
@@ -80,8 +87,47 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
 
     // Handle incoming moves
     message(ws, message) {
-        console.log(`move: ${message}`)
-        ws.send("move received")
+        // Get user data and check if the user is playing
+        const {userId,username,color,time,increment} = ws.data.user;
+        if(!Data.isUserPlaying(userId)){
+            ws.send({
+                error:true,
+                accepted:false,
+                message:"You arn't even playing bro."
+
+            })
+            return;
+        }
+
+        // Validate Move format
+        const res = moveSent.safeParse(message);
+        if(!res.success){
+            ws.send({
+                error:true,
+                accepted:false,
+                message:"Send the move in the correct format."
+            })
+            return;
+        }
+
+        // Get Opponent data
+        const oppoUserId = Data.getUserOppo(userId)as string;
+        const oppoSocket = Data.getUserIdSocket(oppoUserId) as ElysiaWS;
+
+        // Get white player id and black player id
+        let whiteUserId = userId;
+        let blackUserId = oppoUserId;
+        if(color == colorType.Black){
+            [whiteUserId, blackUserId] = [blackUserId, whiteUserId];
+        }
+
+
+        // Get the gameObject and the inner parts
+        const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
+        let {board,moveNumber,movesTimes,startTime,whiteTimeLeft,blackTimeLeft} = gameObject;
+        
+        // move number initially == 0, so even moves are white and odd are black
+        const currentColor = (moveNumber%2)===1?colorType.Black:colorType.White;
     },
 
     // Handle connection closing

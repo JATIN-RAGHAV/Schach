@@ -23,9 +23,3 @@ export type gameObjectQueue = Record<
     color,
     Record<string, Map<string, gameQueueObject>>
 >;
-export interface gameObject{
-    board:null
-    moveNumber:number
-    whiteUserId:string
-    blackUserId:string
-}
