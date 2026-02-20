@@ -26,7 +26,7 @@ export interface gameObject{
 
 // Moves is source -> target using chars only
 // eg-> from e2 to e4 => "ebed"
-export const moveSocketRequest = z.string().length(4).regex(/^[a-h]+$/);
+export const moveSocketRequest = z.string().length(4).regex(/^[a-hA-H][1-8][a-hA-H][1-8]$/);
 
 export interface moveSocketResponse{
     error:boolean,

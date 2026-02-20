@@ -103,10 +103,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         }
 
         // Validate Move format
-        console.log('hi')
         const res = moveSocketRequest.safeParse(message);
-        console.log(message)
-        console.log(res.error?.message)
         if(!res.success){
             ws.send({
                 error:true,
@@ -132,7 +129,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
 
         // Get the gameObject and the inner parts
         const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
-        let {board,moveNumber,moves,movesTimes,startTime,specialMoveFlags,whiteTimeLeft,blackTimeLeft} = gameObject;
+        let {board,moveNumber,moves,specialMoveFlags} = gameObject;
 
         console.log(`Got game object`)
         
@@ -157,6 +154,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             return;
         }
         console.log(`move was validated`)
+        printBoard(board)
 
         // Update the game object
         updateGameObject(gameObject,currentTime,move,color,increment);
