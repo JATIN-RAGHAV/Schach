@@ -1,16 +1,15 @@
 import Data from '../database/data';
-import { color as colorType, Pieces, specialFlags } from '../../common/interfaces/enums';
+import { color as colorType } from '../../common/interfaces/enums';
 import { getOpponent } from '../helper/getOpponent';
 import { gameCreatePlugin } from './plugins/gameApiPlugins';
 import type { gameQueueObject } from '../database/interfaces';
-import { initBoard, isMoveOk, makeMove, moveCharsToIndex, printBoard, updateGameObject } from '../../common/game';
+import { isMoveOk, printBoard, updateGameObject } from '../../common/game';
 import type { ElysiaWS } from 'elysia/ws';
 import { moveSocketRequest, type gameObject, type moveIndex, type moveSocketResponse, type Row } from '../../common/interfaces/game';
 
 export const gameRun = gameCreatePlugin.ws('/game/run', {
     // Handle Connection starting
     open(ws) {
-        console.log("hi")
         // Get the current player Data
         const { username, userId, color, time, increment } = ws.data.user;
         const currentUserId = userId;
@@ -129,7 +128,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
 
         // Get the gameObject and the inner parts
         const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
-        let {board,moveNumber,moves,specialMoveFlags} = gameObject;
+        let {board,moveNumber,specialMoveFlags} = gameObject;
 
         console.log(`Got game object`)
         
@@ -138,7 +137,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         
         // Validate the move
         const isPlayersMove = currentColor == color;
-        const isValidMove = isMoveOk(board,move,color,specialMoveFlags,(moves[moves.length-1]||""));
+        const isValidMove = isMoveOk(board,move,color,specialMoveFlags);
         if(!isPlayersMove || !isValidMove){
             const responseObject:moveSocketResponse = {
                 moveColor:color,

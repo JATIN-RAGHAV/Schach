@@ -1,6 +1,8 @@
 import { columnSize, rowSize } from "./interfaces/constants";
 import { type Board, type gameObject, type moveIndex, type Row } from "./interfaces/game";
-import { color as colors , moveToSpecialFlag, Pieces,  piecesColorMap,  purePieces, purePiecesMap, specialFlags, specialMovepiece } from "./interfaces/enums";
+import { color as colors , moveToSpecialFlag, pawnEnPassant, Pieces,  piecesColorMap,  purePieces, purePiecesMap, specialFlags, specialMovepiece } from "./interfaces/enums";
+import Moves from "./pieceMovement";
+import { string } from "zod";
 
 
 // Initialize an empty board
@@ -124,14 +126,14 @@ export const moveCharsToIndex = (move:string) => {
 
 // Converts a index based move back to the move defined by the protocol
 // Has to return in Column Major
-export const moveIndexToChars = ([sRow,sCol,tRow,tCol]:moveIndex) => {
+export const moveIndexToChars = ([sRow,sCol,tRow,tCol]:moveIndex):string => {
     let aCode = 'a'.charCodeAt(0);
     let zCode = '1'.charCodeAt(0);
-    let res = (sCol+aCode) + (sRow+zCode) + (tCol+aCode) + (tRow+zCode);
+    let res = String.fromCharCode(sCol+aCode) + String.fromCharCode(sRow+zCode) + String.fromCharCode(tCol+aCode) + String.fromCharCode(tRow+zCode);
     return res;
 }
 
-export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,specialMoveFlags:number,lastMove:string) => {
+export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,specialMoveFlags:number) => {
     // Get the details about the move
     const [sRow,sCol,tRow,tCol] = moveCharsToIndex(move) as moveIndex;
     const sourceRow = board[sRow] as Row;
@@ -291,11 +293,12 @@ export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,spec
             }
 
             // Check for En passant
-            if(color == colors.White && dy == 1 && sRow == 4 && isPawnFirstMove2(board,lastMove, colors.Black,tCol)){
-                possible = true;
-            }
-            else if(color == colors.Black && dy == -1 && sRow == 3 && isPawnFirstMove2(board,lastMove, colors.White,tCol)){
-                possible = true;
+            if(sRow in [2,rowSize-3]){
+                const flagLocation = pawnEnPassant.get([(sRow == 2 ? sRow-1 : sRow+1),tCol]) as specialFlags;
+                const isFlagOn = specialMoveFlags & (1 << flagLocation);
+                if(isFlagOn){
+                    possible = true;
+                }
             }
         }
 
@@ -430,20 +433,16 @@ export const arePieceInMiddle = (board:Board,move:string,color:colors) => {
     const [sRow,sCol,tRow,tCol] = moveCharsToIndex(move) as moveIndex;
     const targetRow = board[tRow] as Row;
     const targetSquare = targetRow[tCol] as Pieces;
-    console.log(sRow,sCol,tRow,tCol)
 
     // Knight always works
     const dx = tCol - sCol;
     const dy = tRow - sRow;
-    console.log(dx,dy)
     // Check for pieces in the middle
     const rowDir = (dy != 0 ? dy/(Math.abs(dy)) : 0 );
     const colDir = (dx != 0 ? dx/(Math.abs(dx)) : 0 );
     for(let cRow=sRow+rowDir,cCol=sCol+colDir; cRow!=tRow && cCol!=tCol ; cRow+=rowDir,cCol+=colDir){
         const cRowFull = board[cRow] as Row;
         const cPiece = cRowFull[cCol] as Pieces;
-        console.log(cRow,cCol)
-        console.log(Pieces[cPiece])
         if(cPiece != Pieces.NN){
             return true;
         }
@@ -553,7 +552,7 @@ export const updateGameObject = (gameObject:gameObject,currentTime:number,move:s
 
 
 // Returns true if move is valid and false otherwise
-export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:number,lastMove:string):boolean=>{
+export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:number):boolean=>{
     // Get the details about the move
     const [sRow,sCol,tRow,tCol] = moveCharsToIndex(move) as moveIndex;
     const sourceRow = board[sRow] as Row;
@@ -563,18 +562,14 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
     const purePiece = purePiecesMap.get(sourceSquare);
 
     // Check whether the move makes sense on it's own
-    if(!isMoveOkWithoutContext(board,move,color,specialMoveFlags,lastMove)){
-        printBoard(board)
+    if(!isMoveOkWithoutContext(board,move,color,specialMoveFlags)){
         return false;
     }
-    console.log('move ok without conetext')
 
     // Check whether there are pieces in the middle or not and only check if the moved piece is not a knight
     if(purePiece != purePieces.N && arePieceInMiddle(board,move,color)){
-        printBoard(board)
         return false;
     }
-    console.log('move ok with conetext')
 
     // 1-> if king in check before move
     //     => if making the move fixes the check -> ok
@@ -595,7 +590,6 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
     // Fix move
     targetRow[tCol] = targetSquare;
     sourceRow[sCol] = sourceSquare;
-    console.log('no check after the mvoe')
 
     // Check while castling if king goes through a check
     // Check if the move is castle
@@ -630,4 +624,70 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
 
     // If all is well then return then return true;
     return true;
+}
+
+// Returns a list of all the possible moves
+export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:number) => {
+    let possibleMoves:moveIndex[] = [];
+    for(let sRow=0;sRow<rowSize;sRow++){
+        for(let sCol=0;sCol<columnSize;sCol++){
+            const sourceRow = board[sRow] as Row;
+            const sourceSquare = sourceRow[sCol] as Pieces;
+            if(piecesColorMap.get(sourceSquare) == color){
+
+                // Check for pawn separately, it's got some moves
+                if(purePiecesMap.get(sourceSquare) == purePieces.P){
+                    const direction = (color == colors.White ? 1 : -1);
+
+                    // straight movement of the pawn
+                    // Move one step
+                    for(let dRow = 1;dRow<=2;dRow++){
+                        const tRow = sRow + (dRow*direction);
+                        const targetRow = board[tRow] as Row;
+                        const targetSquare = targetRow[sCol] as Pieces;
+                        if(targetSquare == Pieces.NN){
+                            const move = [sRow,sCol,tRow,sCol] as moveIndex;
+                            possibleMoves.push(move);
+                        }
+                    }
+
+                    // Capture by pawn
+                    const tRow = sRow + direction;
+                    for( let dCol of [-1,1]){
+                        const tCol = sCol + (direction*dCol);
+                        if(locationInBoard(tRow,tCol)){
+                            let targetRow = board[tRow] as Row;
+                            let targetSquare = targetRow[tCol] as Pieces;
+                            if(piecesColorMap.get(targetSquare) == (color == colors.White ? colors.Black : colors.White)){
+                                const move = [sRow,sCol,tRow,tCol] as moveIndex;
+                                possibleMoves.push(move);
+                            }
+                        }
+                    }
+                }
+                // Check for other pieces
+                else{
+                    for(let move of Moves.values()){
+                        for(let d = 0;d<move.depth;d++){
+                            for(let [dRow,dCol] of move.moves){
+                                const tRow = sRow + dRow;
+                                const tCol = sCol + dCol;
+                                if(locationInBoard(tRow,tCol)){
+                                    const targetRow = board[tRow] as Row;
+                                    const targetSquare = targetRow[tCol] as Pieces;
+                                    if(piecesColorMap.get(targetSquare) != color){
+                                        const moveString = moveIndexToChars([sRow,sCol,tRow,tCol]);
+                                        if(isMoveOk(board,moveString,color,specialMoveFlags)){
+                                            possibleMoves.push([sRow,sCol,tRow,tCol]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } 
+        }
+    }
+    return possibleMoves
 }
