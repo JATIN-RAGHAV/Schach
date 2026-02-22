@@ -1,10 +1,12 @@
 import { purePieces } from "./interfaces/enums";
 
-// This will map the pieces to the moves that they can make
-let Moves = new Map<purePieces,{
+export interface moveDetails{
     moves:[number,number][],
     depth:number
-}>();
+};
+
+// This will map the pieces to the moves that they can make
+let Moves = new Map<purePieces,moveDetails>();
 
 // Add moves for the king
 Moves.set(purePieces.K,{

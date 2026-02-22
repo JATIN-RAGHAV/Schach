@@ -1,9 +1,8 @@
 import { columnSize, rowSize } from "./interfaces/constants";
 import { type Board, type gameObject, type moveIndex, type Row } from "./interfaces/game";
-import { color as colors , moveToSpecialFlag, pawnEnPassant, Pieces,  piecesColorMap,  purePieces, purePiecesMap, specialFlags, specialMovepiece } from "./interfaces/enums";
-import Moves from "./pieceMovement";
-import { string } from "zod";
-
+import { color as colors , hasWon, pawnEnPassant, Pieces,  piecesColorMap,  purePieces, purePiecesMap, smallestEnPassantPawnBit, specialMoveFlagsEnums } from "./interfaces/enums";
+import Moves, { type moveDetails } from "./pieceMovement";
+import { Zobrist } from "./interfaces/Zobrist";
 
 // Initialize an empty board
 export const initBoard = () => {
@@ -133,9 +132,9 @@ export const moveIndexToChars = ([sRow,sCol,tRow,tCol]:moveIndex):string => {
     return res;
 }
 
-export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,specialMoveFlags:number) => {
+export const isMoveOkWithoutContext = (board:Board,move:moveIndex,color:colors,specialMoveFlags:number) => {
     // Get the details about the move
-    const [sRow,sCol,tRow,tCol] = moveCharsToIndex(move) as moveIndex;
+    const [sRow,sCol,tRow,tCol] = move;
     const sourceRow = board[sRow] as Row;
     const targetRow = board[tRow] as Row;
     const sourceSquare = sourceRow[sCol] as Pieces;
@@ -232,16 +231,15 @@ export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,spec
             }
 
             // Get flags for the rook and the kings and ensure that they have not moved
-            const rookFlag = moveToSpecialFlag.get({
-                color,
-                piece:(tCol-sCol<0? specialMovepiece.ARook : specialMovepiece.HRook)
-            }) as specialFlags;
-            const kingFlag = moveToSpecialFlag.get({
-                color,
-                piece:specialMovepiece.King
-            }) as specialFlags;
+            // If flags on then then the rook or king has moved
+            const ARookFlag = specialMoveFlags & (color == colors.White ? specialMoveFlagsEnums.WAR: specialMoveFlagsEnums.BAR);
+            const HRookFlag = specialMoveFlags & (color == colors.White ? specialMoveFlagsEnums.WHR: specialMoveFlagsEnums.BHR);
 
-            if((rookFlag & specialMoveFlags) || (kingFlag & specialMoveFlags)){
+            const direction = (tCol - sCol)/Math.abs(dx);
+            if(direction  > 0 && HRookFlag){
+                return false;
+            }
+            else if(dx < 0 && ARookFlag){
                 return false;
             }
         }
@@ -294,7 +292,7 @@ export const isMoveOkWithoutContext = (board:Board,move:string,color:colors,spec
 
             // Check for En passant
             if(sRow in [2,rowSize-3]){
-                const flagLocation = pawnEnPassant.get([(sRow == 2 ? sRow-1 : sRow+1),tCol]) as specialFlags;
+                const flagLocation = pawnEnPassant.get([(sRow == 2 ? sRow-1 : sRow+1),tCol]) as specialMoveFlagsEnums;
                 const isFlagOn = specialMoveFlags & (1 << flagLocation);
                 if(isFlagOn){
                     possible = true;
@@ -428,9 +426,9 @@ export const getPieceFromBoard = (board:Board, move:string) => {
 }
 
 // This function supposes that the move makes sense on it's own
-export const arePieceInMiddle = (board:Board,move:string,color:colors) => {
+export const arePieceInMiddle = (board:Board,move:moveIndex,color:colors) => {
     // Get the details about the move
-    const [sRow,sCol,tRow,tCol] = moveCharsToIndex(move) as moveIndex;
+    const [sRow,sCol,tRow,tCol] = move;
     const targetRow = board[tRow] as Row;
     const targetSquare = targetRow[tCol] as Pieces;
 
@@ -489,7 +487,8 @@ export const makeMove = (board:Board, move:string) => {
 // Update the game object 
 export const updateGameObject = (gameObject:gameObject,currentTime:number,move:string,color:colors,increment:number) =>{
     let {board,movesTimes,startTime} = gameObject;
-    // update time
+
+    // Update time
     const lastTime = movesTimes.at(-1) as number;
     const timeSinceGameStart = currentTime - startTime;
     const timeTakeForCurrentMove = currentTime - lastTime;
@@ -502,52 +501,21 @@ export const updateGameObject = (gameObject:gameObject,currentTime:number,move:s
         gameObject.blackTimeLeft -= timeTakeForCurrentMove;
         gameObject.blackTimeLeft += increment; 
     }
-
-    // update moves
+    // Update moves
     gameObject.moveNumber++;
     gameObject.moves.push(move);
     makeMove(board,move);
 
-    // update special flags
-    // Get the details about the move
-    const [sRow,sCol,tRow,tCol] = moveCharsToIndex(move) as moveIndex;
-    const sourceRow = board[sRow] as Row;
-    let sourceSquare = sourceRow[sCol] as Pieces;
+    // Update current Zobrist hash and also the count
+    // Zobrist function wants the old special Flags and the new ones also
+    const newFlag = updateFlags(board,gameObject.specialMoveFlags,moveCharsToIndex(move) as moveIndex,color);
+    const newHash = Zobrist.getNextHash(gameObject.currentZobristhash,moveCharsToIndex(move) as moveIndex,board,color,gameObject.specialMoveFlags,newFlag);
+    gameObject.currentZobristhash = newHash;
+    gameObject.zobristHash.set(newHash,(gameObject.zobristHash.get(newHash) ?? 0) + 1);
     
-    if(color == colors.White){
-        // Check for king move
-        if(sourceSquare == Pieces.WK){
-            gameObject.specialMoveFlags = gameObject.specialMoveFlags | specialFlags.WK;
+    // Update the flags
+    gameObject.specialMoveFlags = newFlag;
 
-            // Check for castling
-            if(Math.abs(tCol - sCol) == 2){
-                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (tCol - sCol == 2 ? specialFlags.WHR : specialFlags.WAR)
-            }
-        }
-        // Check for rook moves
-        if(sourceSquare == Pieces.WR){
-            if(sRow == 0 && sCol in [0,7]){
-                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (sCol == 0 ? specialFlags.WAR : specialFlags.WHR);
-            }
-        }
-    }
-    else if(color == colors.Black){
-        // Check for king move
-        if(sourceSquare == Pieces.BK){
-            gameObject.specialMoveFlags = gameObject.specialMoveFlags | specialFlags.BK;
-
-            // Check for castling
-            if(Math.abs(tCol - sCol) == 2){
-                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (tCol - sCol == 2 ? specialFlags.BHR : specialFlags.BAR)
-            }
-        }
-        // Check for rook moves
-        if(sourceSquare == Pieces.BR){
-            if(sRow == 0 && sCol in [0,7]){
-                gameObject.specialMoveFlags = gameObject.specialMoveFlags | (sCol == 0 ? specialFlags.BAR : specialFlags.BHR);
-            }
-        }
-    }
 }
 
 
@@ -562,12 +530,12 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
     const purePiece = purePiecesMap.get(sourceSquare);
 
     // Check whether the move makes sense on it's own
-    if(!isMoveOkWithoutContext(board,move,color,specialMoveFlags)){
+    if(!isMoveOkWithoutContext(board,[sRow,sCol,tRow,tCol],color,specialMoveFlags)){
         return false;
     }
 
     // Check whether there are pieces in the middle or not and only check if the moved piece is not a knight
-    if(purePiece != purePieces.N && arePieceInMiddle(board,move,color)){
+    if(purePiece != purePieces.N && arePieceInMiddle(board,[sRow,sCol,tRow,tCol],color)){
         return false;
     }
 
@@ -626,11 +594,14 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
     return true;
 }
 
-// Returns a list of all the possible moves
+// Returns a list of all the possible moves for the pieces of the given color
 export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:number) => {
+    // Initialise a list of possible moves
     let possibleMoves:moveIndex[] = [];
+    // Go through all the square and find the ones that are of the given color
     for(let sRow=0;sRow<rowSize;sRow++){
         for(let sCol=0;sCol<columnSize;sCol++){
+            // Get the details about the square
             const sourceRow = board[sRow] as Row;
             const sourceSquare = sourceRow[sCol] as Pieces;
             if(piecesColorMap.get(sourceSquare) == color){
@@ -638,10 +609,11 @@ export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:
                 // Check for pawn separately, it's got some moves
                 if(purePiecesMap.get(sourceSquare) == purePieces.P){
                     const direction = (color == colors.White ? 1 : -1);
+                    const initialRow = color == colors.White ? 1 : rowSize-2;
 
                     // straight movement of the pawn
                     // Move one step
-                    for(let dRow = 1;dRow<=2;dRow++){
+                    for(let dRow = 1;dRow<=(sRow==initialRow ? 2 : 1);dRow++){
                         const tRow = sRow + (dRow*direction);
                         const targetRow = board[tRow] as Row;
                         const targetSquare = targetRow[sCol] as Pieces;
@@ -665,23 +637,35 @@ export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:
                         }
                     }
                 }
+
                 // Check for other pieces
                 else{
-                    for(let move of Moves.values()){
-                        for(let d = 0;d<move.depth;d++){
-                            for(let [dRow,dCol] of move.moves){
-                                const tRow = sRow + dRow;
-                                const tCol = sCol + dCol;
-                                if(locationInBoard(tRow,tCol)){
-                                    const targetRow = board[tRow] as Row;
-                                    const targetSquare = targetRow[tCol] as Pieces;
-                                    if(piecesColorMap.get(targetSquare) != color){
-                                        const moveString = moveIndexToChars([sRow,sCol,tRow,tCol]);
-                                        if(isMoveOk(board,moveString,color,specialMoveFlags)){
-                                            possibleMoves.push([sRow,sCol,tRow,tCol]);
-                                        }
-                                    }
+                    // Get the direction that this piece can move in
+                    // Every piece other than a pawn has a direction defined
+                    const moveDetails = Moves.get(purePiecesMap.get(sourceSquare) as purePieces) as moveDetails;
+                    for(let move of moveDetails.moves){
+                        const [dRow, dCol] = move;
+                        let cRow = sRow + dRow;
+                        let cCol = sCol + dCol;
+                        // Go through the depth
+                        for(let d = 0;d<moveDetails.depth;d++){
+                            if(locationInBoard(cRow,cCol)){
+                                const currentRow = board[cRow] as Row;
+                                const currentSquare = currentRow[cCol] as Pieces;
+                                const moveString = moveIndexToChars([sRow,sCol,cRow,cCol]);
+                                const isColorSame = piecesColorMap.get(currentSquare) == color;
+                                const isMoveLegal = isMoveOk(board,moveString,color,specialMoveFlags);
+                                if(!isColorSame && isMoveLegal){
+                                    possibleMoves.push([sRow,sCol,cRow,cCol]);
                                 }
+                                else{
+                                    // If move not ok then moving in the same direction doesn't make sense
+                                    break;
+                                }
+                            }
+                            else{
+                                // If the move is out of the board then break the loop
+                                break;
                             }
                         }
                     }
@@ -690,4 +674,124 @@ export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:
         }
     }
     return possibleMoves
+}
+
+// Return true if there is a checkmate, the king of the given color is in checkmate
+export const isCheckMate = (board:Board,color:colors,specialMoveFlags:number) => {
+    // Get all the possible moves
+    const possibleMoves = generatePossibleMoves(board,color,specialMoveFlags);
+    const isKingUnderCheck = isKingInCheck(board,color);
+    if(isKingUnderCheck && possibleMoves.length == 0){
+        return true;
+    }
+    return false;
+}
+
+// Return true if there is a stalemate, the pieces of the given color can't move
+export const isStateMate = (board:Board,color:colors,specialMoveFlags:number) => {
+    // Get all the possible moves
+    const possibleMoves = generatePossibleMoves(board,color,specialMoveFlags);
+    const isKingUnderCheck = isKingInCheck(board,color);
+    if(!isKingUnderCheck && possibleMoves.length == 0){
+        return true;
+    }
+    return false;
+}
+
+// Returns true if the current board has appeared 3 times in total
+export const isThreeFoldRepetition = (gameObject:gameObject):boolean => {
+    let res = false;
+    if(gameObject.zobristHash.get(gameObject.currentZobristhash) == 3){
+        res = true;
+    }
+    return res;
+}
+
+// Checks if the game is ended, takes the color of the player who made the last move
+// The winner makes the last move, return Yes, No or Draw
+// Only checks for checkmate and stalemate and move repetition
+export const isGameEnded = (gameObject:gameObject,color:colors) => {
+    const {board,specialMoveFlags} = gameObject;
+    let playerHasWon = hasWon.No;
+    const oppoColor = (color == colors.White ? colors.Black : colors.White);
+
+    // Check for checkmate for the opponent
+    if(isCheckMate(board,oppoColor,specialMoveFlags)){
+        playerHasWon = hasWon.Yes;
+    }
+
+    // Check for stalemate for the opponent
+    if(isStateMate(board,oppoColor,specialMoveFlags)){
+        playerHasWon = hasWon.Draw;
+    }
+    
+    // Check for move repetition
+    if(isThreeFoldRepetition(gameObject)){
+        playerHasWon = hasWon.Draw;
+    }
+    return playerHasWon;
+}
+
+// return the updated flags
+export const updateFlags = (board:Board,specialMoveFlags:specialMoveFlagsEnums,move:moveIndex,color:colors) => {
+    // Update special flags
+    // Get the details about the move
+    const [sRow,sCol,tRow] = move;
+    const sourceRow = board[sRow] as Row;
+    let sourceSquare = sourceRow[sCol] as Pieces;
+
+    // Turn off all the en passant flags
+    specialMoveFlags &= smallestEnPassantPawnBit-1;
+
+    let noPawnMove = true;
+    // Check for King moves
+    // If the flag is one then the piece has moved and can't castle
+    if(purePieces.K == purePiecesMap.get(sourceSquare)){
+        if(color == colors.White){
+            specialMoveFlags |= specialMoveFlagsEnums.WAR | specialMoveFlagsEnums.WHR; 
+        }
+        else{
+            specialMoveFlags |= specialMoveFlagsEnums.BAR | specialMoveFlagsEnums.BHR; 
+        }
+    }
+    // Check for rook moves
+    else if(purePieces.R == purePiecesMap.get(sourceSquare)){
+        // Check if the rook moved from initial position
+        if(sCol == 0){
+            specialMoveFlags |= (color == colors.White ? specialMoveFlagsEnums.WAR : specialMoveFlagsEnums.BAR);
+        }
+        else if(sCol == columnSize-1){
+            specialMoveFlags |= (color == colors.White ? specialMoveFlagsEnums.WHR : specialMoveFlagsEnums.BHR);
+        }
+    }
+    // Check for pawn Movements, If pawn moved by 2 squares then update that flag to be on
+    else if(purePieces.P == purePiecesMap.get(sourceSquare)){
+        if(Math.abs(tRow - sCol) == 2){
+            noPawnMove = false;
+            specialMoveFlags |= pawnEnPassant.get([sRow,sCol]) as number;
+        }
+    }
+    if(noPawnMove){
+        specialMoveFlags &= ~(pawnEnPassant.get([sRow,sCol]) as number);
+    }
+    return specialMoveFlags;
+}
+
+export const getInitialGameObject = (time:number):gameObject => {
+    // Get Intial board
+    const board = initBoard();
+    const startTime = Date.now();
+
+    return{
+        board,
+        startTime,
+        moves:new Array<string>(),
+        moveNumber:0,
+        movesTimes:[0],
+        whiteTimeLeft:time,
+        zobristHash:new Map<bigint,number>(),
+        currentZobristhash:Zobrist.getInitialBoardHash(),
+        specialMoveFlags:0,
+        blackTimeLeft:time,
+    }
 }

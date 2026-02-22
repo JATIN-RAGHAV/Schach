@@ -1,6 +1,7 @@
-import { initBoard } from "../../common/game";
+import { getInitialGameObject } from "../../common/game";
 import { color } from "../../common/interfaces/enums";
 import type { gameObject } from "../../common/interfaces/game";
+import Data from "./data";
 
 type Constructor<T extends object = object> =
 // eslint-disable-next-line
@@ -26,25 +27,14 @@ const Game = <Tbase extends Constructor>(Base: Tbase) =>
 
         // Initalise a gameObject and add it to the gamesList
         static setGameObject(whiteUserId:string, blackUserId:string,time:number){
-            const board = initBoard();
-            const startTime = Date.now();
-            const key = this.getKey(whiteUserId,blackUserId);
+            const key = Data.getKey(whiteUserId,blackUserId);
 
             // Set user colors
             this.playerColor.set(blackUserId,color.Black);
             this.playerColor.set(whiteUserId,color.White);
 
             //moveNumber, movesTimes, whiteTimeLeft, blackTimeLeft 
-            this.gamesList.set(key,{
-                board,
-                startTime,
-                moves:new Array<string>(),
-                moveNumber:0,
-                movesTimes:[0],
-                whiteTimeLeft:time,
-                specialMoveFlags:0,
-                blackTimeLeft:time,
-            })
+            this.gamesList.set(key,getInitialGameObject(time));
         }
 
         // Get the player color give the userId

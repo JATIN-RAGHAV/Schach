@@ -57,11 +57,13 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                 }
             }
 
-            // remove the users from the game Queue
+            // Remove the users from the game Queue
             Data.removeGameQueue(userId,color,time,increment);
             Data.removeGameQueue(opponentResponse.oppo.userId,color,time,increment);[]
+            // Map userIds to their sockets to get when someone plays a move
             Data.setUserIdSocket(whiteUserId,whiteSocket,colorType.White)
             Data.setUserIdSocket(blackUserId,blackSocket,colorType.Black)
+            // Set the users as opponents
             Data.setUserOppo(whiteUserId,blackUserId)
             // Add the game object to active games
             Data.setGameObject(whiteUserId,blackUserId,time);
@@ -172,6 +174,8 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         console.log(`other player informmed`)
         // Inform the current player that the move was accepted
         ws.send(responseObject)
+
+        // Check if the game has ended
 
         console.log(`move made by ${username} move; ${move} `)
         printBoard(board)

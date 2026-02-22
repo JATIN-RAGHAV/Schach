@@ -18,50 +18,43 @@ export enum purePieces{
 };
 
 // Flags which indicate special moves
-export enum specialFlags{
+export enum specialMoveFlagsEnums{
     WAR=(1<<1),
     WHR=(1<<2),
-    WK=(1<<3),
-    WP0=(1<<4),
-    WP1=(1<<5),
-    WP2=(1<<6),
-    WP3=(1<<7),
-    WP4=(1<<8),
-    WP5=(1<<9),
-    WP6=(1<<10),
-    WP7=(1<<11),
-    BP0=(1<<12),
-    BP1=(1<<13),
-    BP2=(1<<14),
-    BP3=(1<<15),
-    BP4=(1<<16),
-    BP5=(1<<17),
-    BP6=(1<<18),
-    BP7=(1<<19),
-    BAR=(1<<20),
-    BHR=(1<<21),
-    BK=(1<<22),
+    BAR=(1<<3),
+    BHR=(1<<4),
+    WP0=(1<<5),
+    WP1=(1<<6),
+    WP2=(1<<7),
+    WP3=(1<<8),
+    WP4=(1<<9),
+    WP5=(1<<10),
+    WP6=(1<<11),
+    WP7=(1<<12),
+    BP0=(1<<13),
+    BP1=(1<<14),
+    BP2=(1<<15),
+    BP3=(1<<16),
+    BP4=(1<<17),
+    BP5=(1<<18),
+    BP6=(1<<19),
+    BP7=(1<<20),
 }
+
+export const smallestEnPassantPawnBit = specialMoveFlagsEnums.WP0;
 
 export enum specialMovepiece{
-    King,
-    ARook,
-    HRook
+    WARook,
+    WHRook,
+    BARook,
+    BHRook
 }
 
-
-export interface specialMovesKey {
-    color:color,
-    piece:specialMovepiece
+export enum hasWon{
+    Yes,
+    No,
+    Draw
 }
-
-export const moveToSpecialFlag = new Map<specialMovesKey,specialFlags>();
-moveToSpecialFlag.set({color:color.White,piece:specialMovepiece.King},specialFlags.WK);
-moveToSpecialFlag.set({color:color.White,piece:specialMovepiece.ARook},specialFlags.WAR);
-moveToSpecialFlag.set({color:color.White,piece:specialMovepiece.King},specialFlags.WHR);
-moveToSpecialFlag.set({color:color.Black,piece:specialMovepiece.King},specialFlags.BK);
-moveToSpecialFlag.set({color:color.Black,piece:specialMovepiece.ARook},specialFlags.BAR);
-moveToSpecialFlag.set({color:color.Black,piece:specialMovepiece.King},specialFlags.BHR);
 
 export const piecesColorMap = new Map<Pieces,color>();
 piecesColorMap.set(Pieces.WR,color.White);
@@ -95,22 +88,22 @@ purePiecesMap.set(Pieces.NN,purePieces.NN)
 
 // Maps origin cordinates of a pawn to their special flags
 // If special flag on then the pawn at that cordinate moved by 2 squares in the last move
-export const pawnEnPassant = new Map<[number,number],specialFlags>();
+export const pawnEnPassant = new Map<[number,number],specialMoveFlagsEnums>();
 // Add the white pawns
-pawnEnPassant.set([1,0],specialFlags.WP0);
-pawnEnPassant.set([1,1],specialFlags.WP1);
-pawnEnPassant.set([1,2],specialFlags.WP2);
-pawnEnPassant.set([1,3],specialFlags.WP3);
-pawnEnPassant.set([1,4],specialFlags.WP4);
-pawnEnPassant.set([1,5],specialFlags.WP5);
-pawnEnPassant.set([1,6],specialFlags.WP6);
-pawnEnPassant.set([1,7],specialFlags.WP7);
+pawnEnPassant.set([1,0],specialMoveFlagsEnums.WP0);
+pawnEnPassant.set([1,1],specialMoveFlagsEnums.WP1);
+pawnEnPassant.set([1,2],specialMoveFlagsEnums.WP2);
+pawnEnPassant.set([1,3],specialMoveFlagsEnums.WP3);
+pawnEnPassant.set([1,4],specialMoveFlagsEnums.WP4);
+pawnEnPassant.set([1,5],specialMoveFlagsEnums.WP5);
+pawnEnPassant.set([1,6],specialMoveFlagsEnums.WP6);
+pawnEnPassant.set([1,7],specialMoveFlagsEnums.WP7);
 // Add the black pawns
-pawnEnPassant.set([rowSize-2,0],specialFlags.BP0);
-pawnEnPassant.set([rowSize-2,1],specialFlags.BP1);
-pawnEnPassant.set([rowSize-2,2],specialFlags.BP2);
-pawnEnPassant.set([rowSize-2,3],specialFlags.BP3);
-pawnEnPassant.set([rowSize-2,4],specialFlags.BP4);
-pawnEnPassant.set([rowSize-2,5],specialFlags.BP5);
-pawnEnPassant.set([rowSize-2,6],specialFlags.BP6);
-pawnEnPassant.set([rowSize-2,7],specialFlags.BP7);
+pawnEnPassant.set([rowSize-2,0],specialMoveFlagsEnums.BP0);
+pawnEnPassant.set([rowSize-2,1],specialMoveFlagsEnums.BP1);
+pawnEnPassant.set([rowSize-2,2],specialMoveFlagsEnums.BP2);
+pawnEnPassant.set([rowSize-2,3],specialMoveFlagsEnums.BP3);
+pawnEnPassant.set([rowSize-2,4],specialMoveFlagsEnums.BP4);
+pawnEnPassant.set([rowSize-2,5],specialMoveFlagsEnums.BP5);
+pawnEnPassant.set([rowSize-2,6],specialMoveFlagsEnums.BP6);
+pawnEnPassant.set([rowSize-2,7],specialMoveFlagsEnums.BP7);

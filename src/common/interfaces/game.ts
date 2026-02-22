@@ -18,8 +18,11 @@ export interface gameObject{
     startTime:number, // time since unix epoch
     // Time from the start when the move was played
     movesTimes:number[],
-    // If a special piece has moved onece it's flag is 1
+    // 4 flags for the castling rights and 16 for en passant
     specialMoveFlags:number,
+    // Zobrist hash
+    zobristHash:Map<bigint,number>,
+    currentZobristhash:bigint,
     whiteTimeLeft:number,
     blackTimeLeft:number,
 }
