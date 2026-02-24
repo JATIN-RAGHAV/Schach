@@ -1,8 +1,9 @@
 import { columnSize, rowSize } from "./interfaces/constants";
-import { type Board, type gameObject, type moveIndex, type Row } from "./interfaces/game";
-import { color as colors , hasWon, pawnEnPassant, Pieces,  piecesColorMap,  purePieces, purePiecesMap, smallestEnPassantPawnBit, specialMoveFlagsEnums } from "./interfaces/enums";
+import { gameOverReasons, type Board, type gameObject, type moveIndex, type Row } from "./interfaces/game";
+import { color as colors , pawnEnPassant, Pieces,  piecesColorMap,  purePieces, purePiecesMap, smallestEnPassantPawnBit, specialMoveFlagsEnums, type gameState } from "./interfaces/enums";
 import Moves, { type moveDetails } from "./pieceMovement";
 import { Zobrist } from "./interfaces/Zobrist";
+import { defaultIncrement } from "./constats";
 
 // Initialize an empty board
 export const initBoard = () => {
@@ -477,30 +478,29 @@ export const makeMove = (board:Board, move:string) => {
     const isMoving2Squares = Math.abs(tCol - sCol) == 2;
     if(isKing && isMoving2Squares){
         const direction = (tCol - sCol)/Math.abs(tCol - sCol);
-        if(direction > 0){
-            sourceRow[sCol + direction] = sourceRow[7];
-            sourceRow[7] = Pieces.NN;
-        }
+        sourceRow[sCol + direction] = sourceRow[7];
+        sourceRow[(direction > 0 ? 7 : 0)] = Pieces.NN;
     }
 }
 
 // Update the game object 
-export const updateGameObject = (gameObject:gameObject,currentTime:number,move:string,color:colors,increment:number) =>{
+export const updateGameObject = (gameObject:gameObject,moveTime:number,move:string,color:colors,increment:number) =>{
     let {board,movesTimes,startTime} = gameObject;
 
     // Update time
     const lastTime = movesTimes.at(-1) as number;
-    const timeSinceGameStart = currentTime - startTime;
-    const timeTakeForCurrentMove = currentTime - lastTime;
+    const timeSinceGameStart = moveTime - startTime;
+    const timeTakeForCurrentMove = timeSinceGameStart - lastTime;
     movesTimes.push(timeSinceGameStart);
     if(color == colors.White){
-        gameObject.whiteTimeLeft -= timeTakeForCurrentMove;
-        gameObject.whiteTimeLeft += increment; 
+        gameObject.whiteTimeLeft = Math.max(0,gameObject.whiteTimeLeft - timeTakeForCurrentMove);
+        gameObject.whiteTimeLeft += increment + defaultIncrement;
     }
     else{
-        gameObject.blackTimeLeft -= timeTakeForCurrentMove;
-        gameObject.blackTimeLeft += increment; 
+        gameObject.blackTimeLeft = Math.max(0,gameObject.blackTimeLeft - timeTakeForCurrentMove);
+        gameObject.blackTimeLeft += increment + defaultIncrement;
     }
+
     // Update moves
     gameObject.moveNumber++;
     gameObject.moves.push(move);
@@ -515,7 +515,6 @@ export const updateGameObject = (gameObject:gameObject,currentTime:number,move:s
     
     // Update the flags
     gameObject.specialMoveFlags = newFlag;
-
 }
 
 
@@ -612,18 +611,22 @@ export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:
                     const initialRow = color == colors.White ? 1 : rowSize-2;
 
                     // straight movement of the pawn
-                    // Move one step
                     for(let dRow = 1;dRow<=(sRow==initialRow ? 2 : 1);dRow++){
                         const tRow = sRow + (dRow*direction);
                         const targetRow = board[tRow] as Row;
                         const targetSquare = targetRow[sCol] as Pieces;
                         if(targetSquare == Pieces.NN){
-                            const move = [sRow,sCol,tRow,sCol] as moveIndex;
-                            possibleMoves.push(move);
+                            const moveString = moveIndexToChars([sRow,sCol,tRow,sCol]);
+                            const isMoveLegal = isMoveOk(board,moveString,color,specialMoveFlags);
+                            // If move ok then add to the possible moves
+                            if(isMoveLegal){
+                                const move = [sRow,sCol,tRow,sCol] as moveIndex;
+                                possibleMoves.push(move);
+                            }
                         }
                     }
 
-                    // Capture by pawn
+                    // Capture by pawn and en-passant
                     const tRow = sRow + direction;
                     for( let dCol of [-1,1]){
                         const tCol = sCol + (direction*dCol);
@@ -707,29 +710,77 @@ export const isThreeFoldRepetition = (gameObject:gameObject):boolean => {
     return res;
 }
 
+// Returns true if board has at max a bishop or knight for the given color ( king not included )
+const isInsufficientForColor = (board:Board, color:colors) => {
+    // Increase count only for bishop, knight or king
+    let count = 0;
+    for(let  i = 0;i<rowSize;i++){
+        for(let j = 0;j<columnSize;j++){
+            const row = board[i] as Row;
+            const piece = row[j] as Pieces;
+            if(piecesColorMap.get(piece) == color){
+                const purePiece = purePiecesMap.get(piece) as purePieces;
+                if(purePiece == purePieces.B || purePiece == purePieces.N || purePiece == purePieces.K){
+                    count++;
+                }
+            }
+        }
+    }
+    return (count <= 2);
+}
+
+// Check for Insufficient Material
+const isInsufficientMaterial = (board:Board) => {
+    if(isInsufficientForColor(board,colors.White) && isInsufficientForColor(board,colors.Black)){
+        return true;
+    }
+    return false;
+}
+
 // Checks if the game is ended, takes the color of the player who made the last move
 // The winner makes the last move, return Yes, No or Draw
 // Only checks for checkmate and stalemate and move repetition
-export const isGameEnded = (gameObject:gameObject,color:colors) => {
-    const {board,specialMoveFlags} = gameObject;
-    let playerHasWon = hasWon.No;
-    const oppoColor = (color == colors.White ? colors.Black : colors.White);
+export const isGameEnded = (gameObject:gameObject,color:colors):gameState => {
+    const {board,specialMoveFlags,whiteTimeLeft,blackTimeLeft} = gameObject;
+    let resGameState:gameState = {
+        over:false,
+        gameEndReason:gameOverReasons.notOver
+    }
+    const possibleMoves = generatePossibleMoves(board,color,specialMoveFlags);
+    const isKingUnderCheck = isKingInCheck(board,color);
 
-    // Check for checkmate for the opponent
-    if(isCheckMate(board,oppoColor,specialMoveFlags)){
-        playerHasWon = hasWon.Yes;
+    if(possibleMoves.length == 0){
+        // Check for checkmate for the opponent
+        if(isKingUnderCheck){
+            resGameState.over = true;
+            resGameState.gameEndReason = gameOverReasons.checkmate;
+        }
+        // Check for stalemate for the opponent
+        else{
+            resGameState.over = true;
+            resGameState.gameEndReason = gameOverReasons.stalemate;
+        }
     }
 
-    // Check for stalemate for the opponent
-    if(isStateMate(board,oppoColor,specialMoveFlags)){
-        playerHasWon = hasWon.Draw;
-    }
-    
     // Check for move repetition
     if(isThreeFoldRepetition(gameObject)){
-        playerHasWon = hasWon.Draw;
+        resGameState.over = true;
+        resGameState.gameEndReason = gameOverReasons.threefoldRepetition;
     }
-    return playerHasWon;
+
+    // Check for time
+    if(color == colors.White ? whiteTimeLeft <= 0 : blackTimeLeft <= 0){
+        resGameState.over = true;
+        resGameState.gameEndReason = gameOverReasons.timeover;
+    }
+
+    // Check for Insufficient Material
+    if(isInsufficientMaterial(board)){
+        resGameState.over = true;
+        resGameState.gameEndReason = gameOverReasons.insufficientMaterial;
+    }
+
+    return resGameState;
 }
 
 // return the updated flags

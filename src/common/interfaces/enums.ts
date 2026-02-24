@@ -1,4 +1,5 @@
 import { rowSize } from "./constants";
+import type { gameOverReasons } from "./game";
 
 export enum color {
     Black,
@@ -10,6 +11,13 @@ export enum Pieces{
     WR,WN,WB,WK,WQ,WP,
     BR,BN,BB,BK,BQ,BP,
     NN
+}
+
+// Game Types
+export enum gameTypes{
+    Rapid,
+    Blitz,
+    Bullet
 }
 
 // Pieces without colors
@@ -50,10 +58,10 @@ export enum specialMovepiece{
     BHRook
 }
 
-export enum hasWon{
-    Yes,
-    No,
-    Draw
+// State of the game,returned by isGameEnded
+export interface gameState{
+    over:boolean; // If true then then game is over
+    gameEndReason:gameOverReasons;
 }
 
 export const piecesColorMap = new Map<Pieces,color>();

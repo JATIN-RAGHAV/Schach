@@ -13,7 +13,7 @@ interface pieceSquare{
 
 export class Zobrist {
     // Map the pieces and moves to a random number
-    private static pieceSquareHashes= new Map<pieceSquare,bigint >();
+    private static pieceSquareHashes= new Map<string,bigint >();
     private static chanceHahses = new Map<colors, bigint>();
     private static castleHashes = new Map<specialMoveFlagsEnums, bigint>();
 
@@ -22,6 +22,11 @@ export class Zobrist {
         const low = BigInt(Math.floor(Math.random() * (1<<31)));
         const high = BigInt(Math.floor(Math.random() * (1<<31)));
         return (high << 32n) | low;
+    }
+
+    // Convert piece and square to a string
+    private static pieceSquareToString = (pieceSquare:pieceSquare) => {
+        return `${pieceSquare.piece}-${pieceSquare.square[0]}${pieceSquare.square[1]}`;
     }
 
     // initialise the hashes
@@ -33,7 +38,7 @@ export class Zobrist {
                 // Get the numberical values from the enum and add them to the map
                 const pieceValues = (Object.values(Pieces).filter(value=> typeof value == 'number'));
                 for(let piece of pieceValues){
-                    this.pieceSquareHashes.set({piece,square:[cRow,cCol]},Zobrist.getRandomNumber());
+                    this.pieceSquareHashes.set(this.pieceSquareToString({piece,square:[cRow,cCol]}),Zobrist.getRandomNumber());
                 }
             }
         }
@@ -52,7 +57,7 @@ export class Zobrist {
 
     // Getter functions for pieces and falgs and chance
     private static getPieceSquareHash = (pieceSquare:pieceSquare) => {
-        return this.pieceSquareHashes.get(pieceSquare) as bigint;
+        return this.pieceSquareHashes.get(this.pieceSquareToString(pieceSquare)) as bigint;
     }
     private static getChanceHash = (color:colors) => {
         return this.chanceHahses.get(color) as bigint;

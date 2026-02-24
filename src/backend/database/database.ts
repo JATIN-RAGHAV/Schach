@@ -7,6 +7,8 @@ import {
 } from '../helper/errors';
 import type { JWT_PAYLOAD } from '../interfaces/jwt_payload';
 import type { UserData } from './interfaces';
+import type { gameObject, gameOverReasons } from '../../common/interfaces/game';
+import { gameTypes } from '../../common/interfaces/enums';
 
 const database_url = Bun.env.DATABASE_URL;
 const host = Bun.env.HOST;
@@ -23,14 +25,14 @@ const psql = postgres(database_url ? database_url : '', {
 });
 
 type Constructor<T extends object = object> =
-    // eslint-disable-next-line
-    new (...args: any[]) => T;
+// eslint-disable-next-line
+new (...args: any[]) => T;
 const Database = <Tbase extends Constructor>(Base: Tbase) =>
     class extends Base {
         static async getUser(username: string): Promise<UserData> {
             try {
                 const users = await psql<
-                    UserData[]
+                UserData[]
                 >`SELECT * FROM Users WHERE username = ${username}`;
                 if (users[0] == undefined) {
                     throw new UserNotFound();
@@ -50,7 +52,7 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
             try {
                 await psql<
                     UserData[]
-                >`INSERT INTO Users (username,hashPass) VALUES(${username},${hashPass})`;
+                    >`INSERT INTO Users (username,hashPass) VALUES(${username},${hashPass})`;
 
                 const user = await this.getUser(username);
                 if (!(user instanceof Error)) {
@@ -70,7 +72,7 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
             pass: string,
         ): Promise<JWT_PAYLOAD> {
             const users = await psql<
-                UserData[]
+            UserData[]
             >`SELECT * FROM Users WHERE username = ${username}`;
             if (users.length != 1) {
                 throw new UserFindingError();
@@ -89,6 +91,23 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
                 } as JWT_PAYLOAD;
             } else {
                 throw new UserPassWrong();
+            }
+        }
+
+        static async storeGameDatabase(gameObject:gameObject,winnerId:string,whiteUserId:string,blackUserId:string,gameOverReason:gameOverReasons,incrementTime:number,gameTime:number,gameType:gameTypes){ 
+            const {moves} = gameObject;
+            let tableName = "RapidGame"
+            if(gameType == gameTypes.Blitz){
+                tableName = "BlitzGames"
+            }
+            else if(gameType == gameTypes.Bullet){
+                tableName = "BulletGames"
+            }
+            try {await psql`INSERT INTO ${tableName} (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${moves},${whiteUserId},${blackUserId},${winnerId},"",${gameOverReason},${gameObject.startTime},${gameTime},${incrementTime})`;
+            }
+            catch(e){
+                console.log("Couldn't save game on the database")
+                console.log(e);
             }
         }
     };
