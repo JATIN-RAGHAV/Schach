@@ -126,103 +126,113 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         let blackUserId = oppoUserId;
         if(color == colorType.Black){
             [whiteUserId, blackUserId] = [blackUserId, whiteUserId];
-    }
+        }
 
-    // Get the gameObject and the inner parts
-    const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
-    let {board,moveNumber,specialMoveFlags} = gameObject;
-console.log(`Got game object`)
+        // Get the gameObject and the inner parts
+        const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
+        let {board,moveNumber,specialMoveFlags} = gameObject;
+        console.log(`Got game object`)
 
-// move number initially == 0, so even moves are white and odd are black
-const currentColor = (moveNumber%2)===1?colorType.Black:colorType.White;
+        // move number initially == 0, so even moves are white and odd are black
+        const currentColor = (moveNumber%2)===1?colorType.Black:colorType.White;
 
-// Validate the move
-const isPlayersMove = currentColor == color;
-const isValidMove = isMoveOk(board,move,color,specialMoveFlags);
-if(!isPlayersMove || !isValidMove){
-    const responseObject:moveSocketResponse = {
-        move:move,
-        winner:false,
-        error:true,
-        whyOver:gameOverReasons.notOver,
-        over:false,
-        message:"Play a valid move",
-        whiteTimeLeft:gameObject.whiteTimeLeft,
-        blackTimeLeft:gameObject.blackTimeLeft
-    }
-    ws.send(responseObject)
-    console.log(`invalid move sent my player ${username}.`)
-    return;
-}
-console.log(`move was validated`)
-
-// Update the game object
-updateGameObject(gameObject,moveTime,move,color,increment);
-console.log(`game object updated`)
-printBoard(board)
-
-// Check if the game has ended or not
-const gameState = isGameEnded(gameObject,color);
-const {oppoPlayerResponse,currentPlayerResponse} = getResponsePostMove(gameState,gameObject,move);
-oppoSocket.send(oppoPlayerResponse)
-ws.send(currentPlayerResponse)
-
-// log
-console.log(`move made by ${username} move; ${move} `)
-printBoard(board)
-
-// End game or not
-if(gameState.over){
-    console.log(`Game over`)
-    // Remove the game from active games
-    Data.endGame(whiteUserId,blackUserId);
-    // Store the game in the database
-    Data.storeGame(gameObject,userId,whiteUserId,blackUserId,gameState.gameEndReason,increment,time);
-    // Close websockets
-    ws.close();
-    oppoSocket.close();
-}
-    },
-
-// Handle connection closing
-close(ws) {
-    const { username, userId,  time, increment } = ws.data.user;
-    let {color} = ws.data.user;
-    // If the user was in the queue
-    if(Data.isUserQueue(userId)){
-        Data.removeGameQueue(userId, color, time, increment);
-        console.log(`${username} has closed it's connection from the Queue`);
-    }
-
-    // If the user was in a game
-    if(Data.isUserPlaying(userId)){
-        const oppoId = Data.getUserOppo(userId)
-        // If the other player left
-        if(oppoId){
-            const oppoSocket = Data.getUserIdSocket(oppoId) as ElysiaWS;
+        // Validate the move
+        const isPlayersMove = currentColor == color;
+        const isValidMove = isMoveOk(board,move,color,specialMoveFlags);
+        if(!isPlayersMove || !isValidMove){
             const responseObject:moveSocketResponse = {
-                move:"",
-                winner:true,
-                error:false,
-                over:true,
-                whyOver:gameOverReasons.otherAbandoned,
-                message:"You won, the other person left.",
-                whiteTimeLeft:0,
-                blackTimeLeft:0
+                move:move,
+                winner:false,
+                error:true,
+                whyOver:gameOverReasons.notOver,
+                over:false,
+                message:"Play a valid move",
+                whiteTimeLeft:gameObject.whiteTimeLeft,
+                blackTimeLeft:gameObject.blackTimeLeft
             }
-            // Tell them that they have won
-            oppoSocket.send(responseObject)
-            const color = Data.getPlayerColor(userId);
-            if(color == colorType.White){
-                Data.endGame(userId,oppoId)
-            }
-            else{
-                Data.endGame(oppoId,userId)
-            }
+            ws.send(responseObject)
+            console.log(`invalid move sent my player ${username}. move${move}`)
+            return;
+        }
+        console.log(`move was validated`)
+
+        // Update the game object
+        updateGameObject(gameObject,moveTime,move,color,increment);
+        console.log(`game object updated`)
+
+        // Check if the game has ended or not
+        const gameState = isGameEnded(gameObject,color);
+        const {oppoPlayerResponse,currentPlayerResponse} = getResponsePostMove(gameState,gameObject,move);
+        oppoSocket.send(oppoPlayerResponse)
+        ws.send(currentPlayerResponse)
+
+        // log
+        console.log(`move made by ${username} move; ${move} `)
+        printBoard(board)
+
+        // End game or not
+        if(gameState.over){
+            console.log(`Game over`)
+            // Remove the game from active games
+            Data.endGame(whiteUserId,blackUserId);
+            // Store the game in the database
+            Data.storeGame(gameObject,userId,whiteUserId,blackUserId,gameState.gameEndReason,increment,time);
+            // Close websockets
+            ws.close();
             oppoSocket.close();
         }
-        console.log(`${username} closed connection midgame as ${colorType[color]} and ${oppoId} has won the game`)
-    }
-    ws.close();
-},
+    },
+
+    // Handle connection closing
+    close(ws) {
+        const { username, userId,  time, increment } = ws.data.user;
+        let {color} = ws.data.user;
+        // If the user was in the queue
+        if(Data.isUserQueue(userId)){
+            Data.removeGameQueue(userId, color, time, increment);
+            console.log(`${username} has closed it's connection from the Queue`);
+        }
+
+        // If the user was in a game
+        if(Data.isUserPlaying(userId)){
+            const oppoId = Data.getUserOppo(userId)
+            // If the other player left
+            if(oppoId){
+            console.log(`Opponent left`)
+                const oppoSocket = Data.getUserIdSocket(oppoId) as ElysiaWS;
+                const responseObject:moveSocketResponse = {
+                    move:"",
+                    winner:true,
+                    error:false,
+                    over:true,
+                    whyOver:gameOverReasons.otherAbandoned,
+                    message:"You won, the other person left.",
+                    whiteTimeLeft:0,
+                    blackTimeLeft:0
+                }
+                // Tell them that they have won
+                oppoSocket.send(responseObject)
+                // Prepare to store and end game
+                // Get game Object before hand and remove the game Object from active games
+                //  Remove from active games -> close oppo connection -> store in database
+                const color = Data.getPlayerColor(userId);
+                let whiteUserId = userId;
+                let blackUserId = oppoId;
+                if(color == colorType.Black){
+                    console.log("swapping");
+                    [whiteUserId, blackUserId] = [blackUserId, whiteUserId];
+                }
+                const gameObject = Data.getGameObject(whiteUserId,blackUserId);
+                // Remove game from active games
+                Data.endGame(whiteUserId,blackUserId);
+                oppoSocket.close();
+                if(gameObject){
+                    console.log("saving game")
+                    Data.storeGame(gameObject,oppoId,whiteUserId,blackUserId,gameOverReasons.otherAbandoned,increment,time)
+                }
+            }
+            console.log(`${username} closed connection midgame as ${colorType[color]} and ${oppoId} has won the game`)
+        }
+        ws.close();
+    },
 });

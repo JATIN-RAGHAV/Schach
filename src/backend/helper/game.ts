@@ -20,7 +20,7 @@ export const getResponsePostMove = (gameState:gameState,gameObject:gameObject,mo
         currentPlayerResponse.whyOver = gameState.gameEndReason;
         oppoPlayerResponse.over = true;
         oppoPlayerResponse.whyOver = gameState.gameEndReason;
-        if(gameState.gameEndReason in [gameOverReasons.checkmate,gameOverReasons.timeover,gameOverReasons.otherResigned,gameOverReasons.otherAbandoned]){
+        if([gameOverReasons.checkmate,gameOverReasons.timeover,gameOverReasons.otherResigned,gameOverReasons.otherAbandoned].includes(gameState.gameEndReason)){
             currentPlayerResponse.winner = true;
             currentPlayerResponse.message = "You won";
             oppoPlayerResponse.winner = false;

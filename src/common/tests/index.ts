@@ -1,3 +1,6 @@
-import { isGettingPossibleMoves } from "./moveLogic";
+import { Zobrist } from "../interfaces/Zobrist";
+import { canMoveEnPassant } from "./enpassant";
 
-isGettingPossibleMoves();
+Zobrist.init();
+
+canMoveEnPassant();

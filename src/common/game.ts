@@ -1,6 +1,6 @@
 import { columnSize, rowSize } from "./interfaces/constants";
 import { gameOverReasons, type Board, type gameObject, type moveIndex, type Row } from "./interfaces/game";
-import { color as colors , pawnEnPassant, Pieces,  piecesColorMap,  purePieces, purePiecesMap, smallestEnPassantPawnBit, specialMoveFlagsEnums, type gameState } from "./interfaces/enums";
+import { color as colors , pawnEnPassant, Pieces,  piecesColorMap,  pieceToEmoji,  purePieces, purePiecesMap, smallestEnPassantPawnBit, specialMoveFlagsEnums, type gameState } from "./interfaces/enums";
 import Moves, { type moveDetails } from "./pieceMovement";
 import { Zobrist } from "./interfaces/Zobrist";
 import { defaultIncrement } from "./constats";
@@ -95,15 +95,22 @@ export const isPawnFirstMove2 = (board:Board,move:string,color:colors,col:number
 
 export const printBoard = (board:Board) => {
     for(let i = rowSize-1 ;i>=0; i--){
+        Bun.write(Bun.stdout,i+1+" ");
         for(let j = 0; j<columnSize; j++){
             const row = board[i];
             if(row != undefined){
                 const piece = row[j];
-                Bun.write(Bun.stdout,Pieces[piece!=undefined?piece:0]+' ');
+                Bun.write(Bun.stdout,pieceToEmoji.get(piece as Pieces)+' ');
             }
         }
-            Bun.write(Bun.stdout,'\n')
+        Bun.write(Bun.stdout,'\n')
     }
+    Bun.write(Bun.stdout,"  ");
+    for(let i of "abcdefgh"){
+        Bun.write(Bun.stdout,i+" ");
+    }
+    console.log()
+    console.log()
 }
 
 // Converts move to index; moves is like sourcetarget eg -> e2e4 ( which means e2 to e4 )
@@ -292,9 +299,9 @@ export const isMoveOkWithoutContext = (board:Board,move:moveIndex,color:colors,s
             }
 
             // Check for En passant
-            if(sRow in [2,rowSize-3]){
-                const flagLocation = pawnEnPassant.get([(sRow == 2 ? sRow-1 : sRow+1),tCol]) as specialMoveFlagsEnums;
-                const isFlagOn = specialMoveFlags & (1 << flagLocation);
+            if(sRow == 3 || sRow == rowSize-4){ // To do en passant the pawn must be on these rows only
+                const flagLocation = pawnEnPassant.get((sRow == 3 ? 1 : rowSize-2)+""+tCol) as specialMoveFlagsEnums;
+                const isFlagOn = specialMoveFlags & flagLocation;
                 if(isFlagOn){
                     possible = true;
                 }
@@ -330,12 +337,11 @@ export const locationInBoard = (row:number, col:number) => {
 export const isKingInCheck = (board:Board, color:colors) => {
     const piece = color==colors.White ? Pieces.WK : Pieces.BK;
     // Find location of the king, treat this as never null since king will always be there
-
     const [row,col] = findPieceCordinates(board,piece) as [number,number];
 
     // Check for pawns separately
     let pawnRow = row+1; // If the checking for White King
-    if(color == colors.Black){
+    if(color == colors.Black){ // Change the row for Black King
         pawnRow = row-1;
     }
     // Check for the top left and right pawn
@@ -358,6 +364,7 @@ export const isKingInCheck = (board:Board, color:colors) => {
                 if(locationInBoard(nRow, nCol)){
                     const tarPiece = (board[nRow] as Row)[nCol] as Pieces;
                     if(tarPiece == (color == colors.White ? Pieces.BN : Pieces.WN)){
+                        return true;
                     }
                 }
             }
@@ -366,35 +373,38 @@ export const isKingInCheck = (board:Board, color:colors) => {
 
     // Check for diagonally moving pieces
     for(let dRow of [-1,1]){
-        let cRow = row;
-        let cCol = col;
         for(let dCol of [-1,1]){
-            cRow += dRow;
-            cCol += dCol;
-            if(locationInBoard(cRow,cCol)){
+            // Get the direction
+            let cRow = row + dRow;
+            let cCol = col + dCol;
+            // Keep moving until the end of the board or a piece is encountered
+            while(locationInBoard(cRow,cCol)){
                 const tarPiece = (board[cRow] as Row)[cCol] as Pieces;
                 const oppoColor = piecesColorMap.get(tarPiece) == (color == colors.White ? colors.Black : colors.White);
                 const isQueen = purePiecesMap.get(tarPiece) == purePieces.Q;
                 const isBishop = purePiecesMap.get(tarPiece) == purePieces.B;
                 const notEmpty = tarPiece != Pieces.NN;
+                // console.log(pieceToEmoji.get(tarPiece),oppoColor,isQueen,isBishop,notEmpty,dRow,dCol,cRow,cCol)
                 if(oppoColor && (isQueen || isBishop)){
                     return true;
                 }
                 else if(notEmpty){
                     break;
                 }
+                cRow += dRow;
+                cCol += dCol;
             }
         }
     }
 
     // Check for straight moving pieces
     for(let dRow of [-1,1,0]){
-        let cRow = row;
-        let cCol = col;
-        for(let dCol of (cRow == 0 ? [-1,1] : [0])){
-            cRow += dRow;
-            cCol += dCol;
-            if(locationInBoard(cRow,cCol)){
+        for(let dCol of (dRow == 0 ? [-1,1] : [0])){
+            // Get the direction
+            let cRow = row + dRow;
+            let cCol = col + dCol;
+            // Keep moving until the end of the board or a piece is encountered
+            while(locationInBoard(cRow,cCol)){
                 const tarPiece = (board[cRow] as Row)[cCol] as Pieces;
                 const oppoColor = piecesColorMap.get(tarPiece) == (color == colors.White ? colors.Black : colors.White);
                 const isQueen = purePiecesMap.get(tarPiece) == purePieces.Q;
@@ -403,9 +413,11 @@ export const isKingInCheck = (board:Board, color:colors) => {
                 if(oppoColor && (isQueen || isRook)){
                     return true;
                 }
-                if(notEmpty){
+                else if(notEmpty){
                     break;
                 }
+                cRow += dRow;
+                cCol += dCol;
             }
         }
     }
@@ -469,6 +481,7 @@ export const makeMove = (board:Board, move:string) => {
     const sourceRow = board[sRow] as Row;
     const targetRow = board[tRow] as Row;
     let sourceSquare = sourceRow[sCol] as Pieces;
+    const isTargetEmpty = targetRow[tCol] == Pieces.NN;
 
     // Make the move
     targetRow[tCol] = sourceSquare;
@@ -480,6 +493,14 @@ export const makeMove = (board:Board, move:string) => {
         const direction = (tCol - sCol)/Math.abs(tCol - sCol);
         sourceRow[sCol + direction] = sourceRow[7];
         sourceRow[(direction > 0 ? 7 : 0)] = Pieces.NN;
+    }
+    // Check for en passant
+    const isPawn = purePiecesMap.get(sourceSquare) == purePieces.P;
+    const isMovingDiagonally = Math.abs(tCol - sCol) == 1;
+    console.log(isPawn,isTargetEmpty,isMovingDiagonally);
+    if(isPawn && isTargetEmpty && isMovingDiagonally){
+        // Make the caputred piece square empty
+        sourceRow[tCol] = Pieces.NN;
     }
 }
 
@@ -501,11 +522,7 @@ export const updateGameObject = (gameObject:gameObject,moveTime:number,move:stri
         gameObject.blackTimeLeft += increment + defaultIncrement;
     }
 
-    // Update moves
-    gameObject.moveNumber++;
-    gameObject.moves.push(move);
-    makeMove(board,move);
-
+    // Update the flags before updating the board, since the flags require the original board
     // Update current Zobrist hash and also the count
     // Zobrist function wants the old special Flags and the new ones also
     const newFlag = updateFlags(board,gameObject.specialMoveFlags,moveCharsToIndex(move) as moveIndex,color);
@@ -515,6 +532,11 @@ export const updateGameObject = (gameObject:gameObject,moveTime:number,move:stri
     
     // Update the flags
     gameObject.specialMoveFlags = newFlag;
+
+    // Update moves
+    gameObject.moveNumber++;
+    gameObject.moves.push(move);
+    makeMove(board,move);
 }
 
 
@@ -670,6 +692,8 @@ export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:
                                 // If the move is out of the board then break the loop
                                 break;
                             }
+                            cRow += dRow;
+                            cCol += dCol;
                         }
                     }
                 }
@@ -738,16 +762,16 @@ const isInsufficientMaterial = (board:Board) => {
 }
 
 // Checks if the game is ended, takes the color of the player who made the last move
-// The winner makes the last move, return Yes, No or Draw
-// Only checks for checkmate and stalemate and move repetition
+// The winner makes the last move, returns the game state which can be used to make a response
 export const isGameEnded = (gameObject:gameObject,color:colors):gameState => {
     const {board,specialMoveFlags,whiteTimeLeft,blackTimeLeft} = gameObject;
+    const oppoColor = color == colors.White ? colors.Black : colors.White;
     let resGameState:gameState = {
         over:false,
         gameEndReason:gameOverReasons.notOver
     }
-    const possibleMoves = generatePossibleMoves(board,color,specialMoveFlags);
-    const isKingUnderCheck = isKingInCheck(board,color);
+    const possibleMoves = generatePossibleMoves(board,oppoColor,specialMoveFlags);
+    const isKingUnderCheck = isKingInCheck(board,oppoColor);
 
     if(possibleMoves.length == 0){
         // Check for checkmate for the opponent
@@ -794,7 +818,6 @@ export const updateFlags = (board:Board,specialMoveFlags:specialMoveFlagsEnums,m
     // Turn off all the en passant flags
     specialMoveFlags &= smallestEnPassantPawnBit-1;
 
-    let noPawnMove = true;
     // Check for King moves
     // If the flag is one then the piece has moved and can't castle
     if(purePieces.K == purePiecesMap.get(sourceSquare)){
@@ -817,14 +840,11 @@ export const updateFlags = (board:Board,specialMoveFlags:specialMoveFlagsEnums,m
     }
     // Check for pawn Movements, If pawn moved by 2 squares then update that flag to be on
     else if(purePieces.P == purePiecesMap.get(sourceSquare)){
-        if(Math.abs(tRow - sCol) == 2){
-            noPawnMove = false;
-            specialMoveFlags |= pawnEnPassant.get([sRow,sCol]) as number;
+        if(Math.abs(tRow - sRow) == 2){
+            specialMoveFlags |= pawnEnPassant.get(sRow+""+sCol) as number;
         }
     }
-    if(noPawnMove){
-        specialMoveFlags &= ~(pawnEnPassant.get([sRow,sCol]) as number);
-    }
+
     return specialMoveFlags;
 }
 
@@ -840,9 +860,9 @@ export const getInitialGameObject = (time:number):gameObject => {
         moveNumber:0,
         movesTimes:[0],
         whiteTimeLeft:time,
+        blackTimeLeft:time,
         zobristHash:new Map<bigint,number>(),
         currentZobristhash:Zobrist.getInitialBoardHash(),
         specialMoveFlags:0,
-        blackTimeLeft:time,
     }
 }

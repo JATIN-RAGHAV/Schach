@@ -1,4 +1,4 @@
-import { generatePossibleMoves, initBoard, moveIndexToChars } from "../game";
+import { generatePossibleMoves, initBoard, isKingInCheck, isMoveOk, makeMove, moveIndexToChars, printBoard } from "../game";
 import { color } from "../interfaces/enums";
 import type { Board, moveIndex } from "../interfaces/game";
 
@@ -18,4 +18,30 @@ export const isGettingPossibleMoves = () => {
         Bun.write(Bun.stdout,i+":"+moveIndexToChars([sRow,sCol,tRow,tCol])+' ');
     }
     console.log()
+}
+
+// Check whether white can get foot's mated
+export const foolProof = () => {
+    // Get initial board
+    let board:Board= initBoard();
+    // Get's into fool's mate position
+    // let res = generatePossibleMoves(board,color.White,0);
+    // res.forEach(m => console.log(moveIndexToChars(m)))
+    makeMove(board,'f2f3');
+    printBoard(board)
+    // res = generatePossibleMoves(board,color.Black,0);
+    // res.forEach(m => console.log(moveIndexToChars(m)))
+    makeMove(board,'e7e5');
+    printBoard(board)
+    // res = generatePossibleMoves(board,color.White,0);
+    // res.forEach(m => console.log(moveIndexToChars(m)))
+    makeMove(board,'g2g4');
+    printBoard(board)
+    // res = generatePossibleMoves(board,color.Black,0);
+    // res.forEach(m => console.log(moveIndexToChars(m)))
+    makeMove(board,'d8h4');
+    printBoard(board)
+    // res = generatePossibleMoves(board,color.White,0);
+    // res.forEach(m => console.log(moveIndexToChars(m)))
+    console.log(isKingInCheck(board,color.White))
 }

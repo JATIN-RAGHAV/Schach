@@ -96,14 +96,20 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
 
         static async storeGameDatabase(gameObject:gameObject,winnerId:string,whiteUserId:string,blackUserId:string,gameOverReason:gameOverReasons,incrementTime:number,gameTime:number,gameType:gameTypes){ 
             const {moves} = gameObject;
-            let tableName = "RapidGame"
+            let movesString = moves.join("");
+            if(movesString.length == 0){
+                movesString = "NULL"
+            }
+            let tableName = "RapidGames"
             if(gameType == gameTypes.Blitz){
                 tableName = "BlitzGames"
             }
             else if(gameType == gameTypes.Bullet){
                 tableName = "BulletGames"
             }
-            try {await psql`INSERT INTO ${tableName} (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${moves},${whiteUserId},${blackUserId},${winnerId},"",${gameOverReason},${gameObject.startTime},${gameTime},${incrementTime})`;
+            console.log(`INSERT INTO ${tableName} (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${movesString},${whiteUserId},${blackUserId},${winnerId},"",${gameOverReason},${gameObject.startTime},${gameTime},${incrementTime})`)
+            try {
+                psql`INSERT INTO ${tableName} (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${movesString},${whiteUserId},${blackUserId},${winnerId},"https://walrus.codes",${gameOverReason},${gameObject.startTime},${gameTime},${incrementTime})`;
             }
             catch(e){
                 console.log("Couldn't save game on the database")

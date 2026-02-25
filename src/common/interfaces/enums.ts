@@ -27,7 +27,7 @@ export enum purePieces{
 
 // Flags which indicate special moves
 export enum specialMoveFlagsEnums{
-    WAR=(1<<1),
+    WAR=(1<<1), // 10
     WHR=(1<<2),
     BAR=(1<<3),
     BHR=(1<<4),
@@ -96,22 +96,39 @@ purePiecesMap.set(Pieces.NN,purePieces.NN)
 
 // Maps origin cordinates of a pawn to their special flags
 // If special flag on then the pawn at that cordinate moved by 2 squares in the last move
-export const pawnEnPassant = new Map<[number,number],specialMoveFlagsEnums>();
+export const pawnEnPassant = new Map<string,specialMoveFlagsEnums>();
 // Add the white pawns
-pawnEnPassant.set([1,0],specialMoveFlagsEnums.WP0);
-pawnEnPassant.set([1,1],specialMoveFlagsEnums.WP1);
-pawnEnPassant.set([1,2],specialMoveFlagsEnums.WP2);
-pawnEnPassant.set([1,3],specialMoveFlagsEnums.WP3);
-pawnEnPassant.set([1,4],specialMoveFlagsEnums.WP4);
-pawnEnPassant.set([1,5],specialMoveFlagsEnums.WP5);
-pawnEnPassant.set([1,6],specialMoveFlagsEnums.WP6);
-pawnEnPassant.set([1,7],specialMoveFlagsEnums.WP7);
+// Keys => row + col, as a string, for eg: [1,0] => 10
+pawnEnPassant.set("10",specialMoveFlagsEnums.WP0);
+pawnEnPassant.set("11",specialMoveFlagsEnums.WP1);
+pawnEnPassant.set("12",specialMoveFlagsEnums.WP2);
+pawnEnPassant.set("13",specialMoveFlagsEnums.WP3);
+pawnEnPassant.set("14",specialMoveFlagsEnums.WP4);
+pawnEnPassant.set("15",specialMoveFlagsEnums.WP5);
+pawnEnPassant.set("16",specialMoveFlagsEnums.WP6);
+pawnEnPassant.set("17",specialMoveFlagsEnums.WP7);
 // Add the black pawns
-pawnEnPassant.set([rowSize-2,0],specialMoveFlagsEnums.BP0);
-pawnEnPassant.set([rowSize-2,1],specialMoveFlagsEnums.BP1);
-pawnEnPassant.set([rowSize-2,2],specialMoveFlagsEnums.BP2);
-pawnEnPassant.set([rowSize-2,3],specialMoveFlagsEnums.BP3);
-pawnEnPassant.set([rowSize-2,4],specialMoveFlagsEnums.BP4);
-pawnEnPassant.set([rowSize-2,5],specialMoveFlagsEnums.BP5);
-pawnEnPassant.set([rowSize-2,6],specialMoveFlagsEnums.BP6);
-pawnEnPassant.set([rowSize-2,7],specialMoveFlagsEnums.BP7);
+pawnEnPassant.set("60",specialMoveFlagsEnums.BP0);
+pawnEnPassant.set("61",specialMoveFlagsEnums.BP1);
+pawnEnPassant.set("62",specialMoveFlagsEnums.BP2);
+pawnEnPassant.set("63",specialMoveFlagsEnums.BP3);
+pawnEnPassant.set("64",specialMoveFlagsEnums.BP4);
+pawnEnPassant.set("65",specialMoveFlagsEnums.BP5);
+pawnEnPassant.set("66",specialMoveFlagsEnums.BP6);
+pawnEnPassant.set("67",specialMoveFlagsEnums.BP7);
+
+// Pieces to emoji for printing on terminal
+export const pieceToEmoji = new Map<Pieces,string>();
+pieceToEmoji.set(Pieces.WR,"♜");
+pieceToEmoji.set(Pieces.WN,"♞");
+pieceToEmoji.set(Pieces.WB,"♝");
+pieceToEmoji.set(Pieces.WQ,"♛");
+pieceToEmoji.set(Pieces.WK,"♚");
+pieceToEmoji.set(Pieces.WP,"♟");
+pieceToEmoji.set(Pieces.BR,"♖");
+pieceToEmoji.set(Pieces.BN,"♘");
+pieceToEmoji.set(Pieces.BB,"♗");
+pieceToEmoji.set(Pieces.BQ,"♕");
+pieceToEmoji.set(Pieces.BK,"♔");
+pieceToEmoji.set(Pieces.BP,"♙");
+pieceToEmoji.set(Pieces.NN," ");
