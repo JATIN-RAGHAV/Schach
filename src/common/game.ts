@@ -514,11 +514,11 @@ export const updateGameObject = (gameObject:gameObject,moveTime:number,move:stri
     movesTimes.push(timeSinceGameStart);
     if(color == colors.White){
         gameObject.whiteTimeLeft = Math.max(0,gameObject.whiteTimeLeft - timeTakeForCurrentMove);
-        gameObject.whiteTimeLeft += increment + defaultIncrement;
+        gameObject.whiteTimeLeft += increment;
     }
     else{
         gameObject.blackTimeLeft = Math.max(0,gameObject.blackTimeLeft - timeTakeForCurrentMove);
-        gameObject.blackTimeLeft += increment + defaultIncrement;
+        gameObject.blackTimeLeft += increment;
     }
 
     // Update the flags before updating the board, since the flags require the original board

@@ -74,14 +74,14 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             );
 
             // Tell the users that their games has started
-            whiteSocket.send({
+            whiteSocket.send(JSON.stringify({
                 start: true,
                 color: colorType.White,
-            });
-            blackSocket.send({
+            }));
+            blackSocket.send(JSON.stringify({
                 start: true,
                 color: colorType.Black,
-            });
+            }));
             return;
         }
         Data.addGameQueue(currentUserId, currentPlayer, color, time, increment);

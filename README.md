@@ -1,15 +1,20 @@
 # schach
 
+This is a chess project I am building.
+
 To install dependencies:
 
 ```bash
 bun install
 ```
 
-To run:
+To run backend:
 
 ```bash
-bun run index.ts
+bun run back
 ```
 
-This project was created using `bun init` in bun v1.3.3. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+To run back
+```bash
+bun run test
+```

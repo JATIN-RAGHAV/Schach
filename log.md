@@ -9,11 +9,10 @@
 - - Make Move function was not checking for en passant
 - [x] Game not saving on Database
 - - Because the table name was also going in as a placeholder in the query, which is wrong.
-- [ ] Test Time Management
-- [ ] We getting possible moves which are not possible
+- [x] We getting possible moves which are not possible
+- - There was no valid move check for pawn moves when generating possible moves.
 
 ### Random Fixes
 - En passant was turning out to be invalid, because, the rows were set to [2,5] instead of [3,4] and sRow in [3,4] was being used instead of [3,4].includes(sRow) and getFlags had an object as a key, so changed that to a string, and getFlag returns the flag value, but it was being used to left shif and get the flag.
 
-
-
+## Date: 2026-02-26
