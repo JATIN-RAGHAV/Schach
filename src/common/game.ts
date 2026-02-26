@@ -497,7 +497,6 @@ export const makeMove = (board:Board, move:string) => {
     // Check for en passant
     const isPawn = purePiecesMap.get(sourceSquare) == purePieces.P;
     const isMovingDiagonally = Math.abs(tCol - sCol) == 1;
-    console.log(isPawn,isTargetEmpty,isMovingDiagonally);
     if(isPawn && isTargetEmpty && isMovingDiagonally){
         // Make the caputred piece square empty
         sourceRow[tCol] = Pieces.NN;
@@ -655,9 +654,15 @@ export const generatePossibleMoves = (board:Board,color:colors,specialMoveFlags:
                         if(locationInBoard(tRow,tCol)){
                             let targetRow = board[tRow] as Row;
                             let targetSquare = targetRow[tCol] as Pieces;
-                            if(piecesColorMap.get(targetSquare) == (color == colors.White ? colors.Black : colors.White)){
-                                const move = [sRow,sCol,tRow,tCol] as moveIndex;
-                                possibleMoves.push(move);
+                            const isColorSame = piecesColorMap.get(targetSquare) == color;
+                            if(!isColorSame){
+                                // Only call isMoveOk if we can't verify here
+                                const moveString = moveIndexToChars([sRow,sCol,tRow,sCol]);
+                                const isMoveLegal = isMoveOk(board,moveString,color,specialMoveFlags);
+                                if(isMoveLegal){
+                                    const move = [sRow,sCol,tRow,tCol] as moveIndex;
+                                    possibleMoves.push(move);
+                                }
                             }
                         }
                     }

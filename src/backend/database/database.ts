@@ -10,6 +10,7 @@ import type { UserData } from './interfaces';
 import type { gameObject, gameOverReasons } from '../../common/interfaces/game';
 import { gameTypes } from '../../common/interfaces/enums';
 
+const defaultGameLink = "https://github.com/jatin-raghav/Schach/";
 const database_url = Bun.env.DATABASE_URL;
 const host = Bun.env.HOST;
 const port: number = +(Bun.env.PORT ? Bun.env.PORT : 5432);
@@ -100,16 +101,16 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
             if(movesString.length == 0){
                 movesString = "NULL"
             }
-            let tableName = "RapidGames"
-            if(gameType == gameTypes.Blitz){
-                tableName = "BlitzGames"
-            }
-            else if(gameType == gameTypes.Bullet){
-                tableName = "BulletGames"
-            }
-            console.log(`INSERT INTO ${tableName} (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${movesString},${whiteUserId},${blackUserId},${winnerId},"",${gameOverReason},${gameObject.startTime},${gameTime},${incrementTime})`)
             try {
-                psql`INSERT INTO ${tableName} (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${movesString},${whiteUserId},${blackUserId},${winnerId},"https://walrus.codes",${gameOverReason},${gameObject.startTime},${gameTime},${incrementTime})`;
+                if(gameType == gameTypes.Rapid){
+                    await psql`INSERT INTO RapidGames (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${movesString},${whiteUserId},${blackUserId},${winnerId},${defaultGameLink},${gameOverReason},${gameTime},${incrementTime})`;
+                }
+                if(gameType == gameTypes.Blitz){
+                    await psql`INSERT INTO BlitzGames (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${movesString},${whiteUserId},${blackUserId},${winnerId},${defaultGameLink},${gameOverReason},${gameTime},${incrementTime})`;
+                }
+                else if(gameType == gameTypes.Bullet){
+                    await psql`INSERT INTO BulletGames (moves,whiteId,blackId,winnerId,gameLink,winReason,gameTime,incrementTime) VALUES(${movesString},${whiteUserId},${blackUserId},${winnerId},${defaultGameLink},${gameOverReason},${gameTime},${incrementTime})`;
+                }
             }
             catch(e){
                 console.log("Couldn't save game on the database")

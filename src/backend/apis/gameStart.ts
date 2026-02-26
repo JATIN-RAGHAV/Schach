@@ -223,6 +223,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                     [whiteUserId, blackUserId] = [blackUserId, whiteUserId];
                 }
                 const gameObject = Data.getGameObject(whiteUserId,blackUserId);
+                console.log(gameObject)
                 // Remove game from active games
                 Data.endGame(whiteUserId,blackUserId);
                 oppoSocket.close();
