@@ -166,7 +166,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
 
         // End game or not
         if(gameState.over){
-            console.log(`Game over`)
+            console.log(`Game over Reason: ${gameOverReasons[gameState.gameEndReason]}`)
             // Remove the game from active games
             Data.endGame(whiteUserId,blackUserId);
             // Store the game in the database

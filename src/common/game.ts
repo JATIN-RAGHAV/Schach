@@ -252,7 +252,7 @@ export const isMoveOkWithoutContext = (board:Board,move:moveIndex,color:colors,s
             }
         }
         else{
-            if(dx != 1 || dy != 1){
+            if(dx > 1 || dy > 1){
                 return false;
             }
         }
@@ -514,11 +514,11 @@ export const updateGameObject = (gameObject:gameObject,moveTime:number,move:stri
     movesTimes.push(timeSinceGameStart);
     if(color == colors.White){
         gameObject.whiteTimeLeft = Math.max(0,gameObject.whiteTimeLeft - timeTakeForCurrentMove);
-        gameObject.whiteTimeLeft += increment;
+        gameObject.whiteTimeLeft += increment + defaultIncrement;
     }
     else{
         gameObject.blackTimeLeft = Math.max(0,gameObject.blackTimeLeft - timeTakeForCurrentMove);
-        gameObject.blackTimeLeft += increment;
+        gameObject.blackTimeLeft += increment + defaultIncrement;
     }
 
     // Update the flags before updating the board, since the flags require the original board

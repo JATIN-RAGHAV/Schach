@@ -19,7 +19,8 @@ const testGame2 = [
     'd3e4','e5e4',
     'f1e1','e4f5',
     'd1d4','a8d8',
-    'd4g7','f5f2'
+    'd4g7','f5f2',
+    'g1h1','f2e1'
 ]
 
-runGame(testGame2,1000)
+runGame(testGame2,10)

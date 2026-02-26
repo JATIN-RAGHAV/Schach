@@ -60,7 +60,9 @@ export const runGame = (game:string[],delay:number) => {
                 await new Promise(resolve => setTimeout(resolve,delay));
                 Gintoki.send(game[moveNumber++] as string);
                 gintoki = false;
-                printMoveResponse(parsed,moveNumber,'Kakashi')
+            }
+            else{
+                printMoveResponse(parsed,moveNumber,'Gintoki')
             }
         }
     }
@@ -81,7 +83,9 @@ export const runGame = (game:string[],delay:number) => {
                 await new Promise(resolve => setTimeout(resolve,delay));
                 Kakashi.send(game[moveNumber++] as string);
                 gintoki = true;
-                printMoveResponse(parsed,moveNumber,'Gintoki')
+            }
+            else{
+                printMoveResponse(parsed,moveNumber,'Kakashi')
             }
         }
     }
