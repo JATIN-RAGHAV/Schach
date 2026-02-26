@@ -1,4 +1,5 @@
 import { color as colors } from "../interfaces/enums";
+import { type moveSocketResponse ,gameOverReasons} from "../interfaces/game";
 
 export const runGame = (game:string[],delay:number) => {
     const Gintoki = new WebSocket('ws://localhost:2222/game/run',{
@@ -36,12 +37,13 @@ export const runGame = (game:string[],delay:number) => {
         start:boolean,
         color:colors
     }
+
     let moveNumber = 0;
     let gintoki = true; // gintoki is white, kakashi is black
 
     Gintoki.onmessage = async(m) => {
-        const parsed = JSON.parse(m.data);
         if(firstGintoki){
+            const parsed = JSON.parse(m.data) as start;
             if(parsed.color == colors.Black){
                 gintoki = false;
             }
@@ -53,19 +55,19 @@ export const runGame = (game:string[],delay:number) => {
             firstGintoki = false;
         }
         else{
+            const parsed = JSON.parse(m.data) as moveSocketResponse;
             if(gintoki && moveNumber < game.length){
                 await new Promise(resolve => setTimeout(resolve,delay));
                 Gintoki.send(game[moveNumber++] as string);
-                console.log('Gintoki ',moveNumber+1)
-                console.log(parsed)
                 gintoki = false;
+                printMoveResponse(parsed,moveNumber,'Kakashi')
             }
         }
     }
 
     Kakashi.onmessage = async(m) => {
-        const parsed = JSON.parse(m.data);
         if(firstKakashi){
+            const parsed = JSON.parse(m.data) as start;
             if(parsed.color == colors.White){
                 await new Promise(resolve => setTimeout(resolve,delay));
                 Kakashi.send(game[moveNumber++] as string);
@@ -74,14 +76,34 @@ export const runGame = (game:string[],delay:number) => {
             firstKakashi = false;
         }
         else{
+            const parsed = JSON.parse(m.data) as moveSocketResponse;
             if(!gintoki && moveNumber < game.length){
                 await new Promise(resolve => setTimeout(resolve,delay));
                 Kakashi.send(game[moveNumber++] as string);
                 gintoki = true;
-                console.log('kakashi ',moveNumber+1)
-                console.log(parsed)
+                printMoveResponse(parsed,moveNumber,'Gintoki')
             }
         }
     }
 }
 
+// error:boolean,
+// message:string,
+// over:boolean,
+// whyOver:gameOverReasons
+// winner:boolean,// The winner gets true and the un-winner gets false
+// move:string,
+// whiteTimeLeft:number,
+// blackTimeLeft:number,
+const printMoveResponse = (response:moveSocketResponse,moveNumber:number,player:string) => {
+    console.log(`Move made by: ${player}`);
+    console.log(`Move Number: ${Math.ceil((moveNumber+1)/2)}`);
+    console.log(`Message: ${response.message}`);
+    console.log(`over : ${response.over}`);
+    console.log(`move : ${response.move}`);
+    console.log(`whiteTimeLeft : ${response.whiteTimeLeft}`);
+    console.log(`blackTimeLeft : ${response.blackTimeLeft}`);
+    console.log(`Why Over: ${gameOverReasons[response.whyOver]}`);
+    console.log()
+    console.log()
+}

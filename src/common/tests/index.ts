@@ -1,4 +1,4 @@
-import { runGame } from "./timeLogic";
+import { runGame } from "./testGame";
 
 const testGame2 = [
     'd2d4','d7d5',

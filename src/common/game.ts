@@ -752,6 +752,10 @@ const isInsufficientForColor = (board:Board, color:colors) => {
                 if(purePiece == purePieces.B || purePiece == purePieces.N || purePiece == purePieces.K){
                     count++;
                 }
+                // If some other piece is there then return false
+                else if(purePiece != purePieces.NN){
+                    return false;
+                }
             }
         }
     }

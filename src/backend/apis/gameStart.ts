@@ -93,7 +93,6 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         const moveTime = Date.now();
         const {userId,username,increment,time} = ws.data.user;
         const color = Data.getPlayerColor(userId);
-        console.log(`${username} wants to make a move`)
         if(!Data.isUserPlaying(userId)){
             ws.send({
                 error:true,
@@ -114,7 +113,6 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             })
             return;
         }
-        console.log("valid zod move")
         const move = res.data;
 
         // Get Opponent data
@@ -131,7 +129,6 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         // Get the gameObject and the inner parts
         const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
         let {board,moveNumber,specialMoveFlags} = gameObject;
-        console.log(`Got game object`)
 
         // move number initially == 0, so even moves are white and odd are black
         const currentColor = (moveNumber%2)===1?colorType.Black:colorType.White;
@@ -151,14 +148,11 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                 blackTimeLeft:gameObject.blackTimeLeft
             }
             ws.send(responseObject)
-            console.log(`invalid move sent my player ${username}. move${move}`)
             return;
         }
-        console.log(`move was validated`)
 
         // Update the game object
         updateGameObject(gameObject,moveTime,move,color,increment);
-        console.log(`game object updated`)
 
         // Check if the game has ended or not
         const gameState = isGameEnded(gameObject,color);
@@ -219,11 +213,9 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                 let whiteUserId = userId;
                 let blackUserId = oppoId;
                 if(color == colorType.Black){
-                    console.log("swapping");
                     [whiteUserId, blackUserId] = [blackUserId, whiteUserId];
                 }
                 const gameObject = Data.getGameObject(whiteUserId,blackUserId);
-                console.log(gameObject)
                 // Remove game from active games
                 Data.endGame(whiteUserId,blackUserId);
                 oppoSocket.close();
