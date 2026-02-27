@@ -1,5 +1,5 @@
 import './App.css'
-import {Initial} from '../components/index.tsx'
+import Initial from './components'
 
 function App() {
 
