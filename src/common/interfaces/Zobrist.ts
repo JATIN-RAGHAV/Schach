@@ -3,7 +3,7 @@ import { rowSize } from "./constants";
 import type { Board, moveIndex, Row } from "./game";
 
 interface pieceSquare{
-    piece:number;
+    piece:Pieces;
     square:[number,number]
 }
 // One number for each piece at each square
@@ -36,8 +36,7 @@ export class Zobrist {
             for(let cCol=0;cCol<rowSize;cCol++){
                 // Go through each piece
                 // Get the numberical values from the enum and add them to the map
-                const pieceValues = (Object.values(Pieces).filter(value=> typeof value == 'number'));
-                for(let piece of pieceValues){
+                for(let piece of Object.values(Pieces)){
                     this.pieceSquareHashes.set(this.pieceSquareToString({piece,square:[cRow,cCol]}),Zobrist.getRandomNumber());
                 }
             }

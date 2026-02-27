@@ -1,11 +1,11 @@
 import { color as colors } from "../interfaces/enums";
-import { type moveSocketResponse ,gameOverReasons} from "../interfaces/game";
+import { type moveSocketResponse ,gameOverReasons, moveSocketRequest} from "../interfaces/game";
 
 export const runGame = (game:string[],delay:number) => {
     const Gintoki = new WebSocket('ws://localhost:2222/game/run',{
         headers:{
-            authorization:'Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoiR2ludG9raSIsInVzZXJJZCI6Mn19.M24wC5V4AOInsUzhXUyLcIA0doniDb4fsSvlWVjcp8avF4gOxfVz-Bl7waL0EzktQMhBIyVWsexfI15LWxka-SpW7eTbiQvU9EPxhG3UEhqamR0c8PV_ZWPv3K_PpHjwI08tBvB3fu78Ei_hSjQ_KEZcvSHraqN804wl1OozJiIfsxUs1AhbeEIYi3UNIZG842rjj3ZzXyhKjeWYBcMK_rU8EVsy4dQ1zohXb7PIjchfLd9n8b6cgAtLVUPyfaUe5iZHEDSHfqLxMFvQWsLKI79nuD8jn9RNjP5aYWE8LgJg9b9QFFNrIaSxzsBkFyjzE2HNorwHlFi_aqznLj-7uQ',
-            color:2,
+            authorization:'Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoiR2ludG9raSIsInVzZXJJZCI6MX19.m9Wh0RnKsmVv6O0bc3vOdk1Zmoq_nZkspHNCfxmS0sAkp4l9YqXvK7VYme-RDw35zvlx0-CWnlVG69R1pRakyFq_fp-bELNTTUPrIsm6QeXF1T77mJKEyXc0NMO4aJ4-_zgk8842YyIYKp2cpoAyrsvqyCusv10rc0lFkRKDh-WHN08UTlu32uXSJidpD8OR_ofswNu1IE0W4NREMG_AAlxlQNiA1aFxDQS-YhaRtU8oiBzOYH3x0qIfCPvO3dANifYOxJq8j58xtOfAgKf7WltvrG200FGbEee-EPrBr3SKhmsl6iGPuK0CKXOomwpjMkO1tqDxvkSweU4GznWyVA',
+            color:colors.Random,
             time:600000,
             increment:0,
         }
@@ -13,8 +13,8 @@ export const runGame = (game:string[],delay:number) => {
 
     const Kakashi = new WebSocket('ws://localhost:2222/game/run',{
         headers:{
-            authorization:'Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoia2FrYXNoaSIsInVzZXJJZCI6MX19.XkXzYRFfWtfpmo0wf8LYHW64NsfEiTyxZZfgQVgBg63VscBxeIM8y43NOIwoa_yYSsbuQVpMPIPjxuC32MgNYP7lumV0CdPPfaFDQrig1KwddXGsXnQsUZb6RVUUMO8DJ6gmXh67XcRk3JL2nz9mN4-nElhCkzgx5XLRahUk3bX4QyRxPJlK36kdJzxKAv-xJzSyvRKWPm4j8t2NA6SSpVWTyyg7Wg9CUU0czfsrKgoc3kIqG22nLeoFx8DF9cKjmKr8_lwPOpHxxZKShFOP6zKgYEZmAlo4KJJs2NOr3LYcRQR2oMPPn1Rp-giad1MLrdVO3Vd3GnUWoiY-6ygXbQ',
-            color:0,
+            authorization:'Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoia2FrYXNoaSIsInVzZXJJZCI6Mn19.RDI209wxErqHGqDiWihILzBwisEAOpb2c4nIsc6_-sy6Zr-Fnb56elc-Ssq4pRAJCM-JRDjseaLOqoSuDA5r2sZzmgYSHcd3QQCSQ-WNImUfSlEPvaZAG-5VikJq6EisDxTH7AAkqAR01tGHUpqLcxEUuakHE7edIjkGwHEEXkem1LssxaxVh9CS5Idr_WIPLce0p9wXWIuLR3fZZqOU_3krdpH2BM8LanfXhuuhJgMfr-STcuxKF3lyein52yc9MokTaTlJzmJe9_u9CUqoLt1_V9fB34A4kMhQXbazyFTV7xVBuvozpl58p28QIv5n3Uo97ixv23jyanTX0gmeTA',
+            color:colors.Random,
             time:600000,
             increment:0,
         }
@@ -49,7 +49,11 @@ export const runGame = (game:string[],delay:number) => {
             }
             else{
                 await new Promise(resolve => setTimeout(resolve,delay));
-                Gintoki.send(game[moveNumber++] as string);
+                const request:moveSocketRequest= {
+                    move:game[moveNumber++] as string,
+                    isMessage:false,
+                }
+                Gintoki.send(JSON.stringify(request));
                 gintoki = false;
             }
             firstGintoki = false;
@@ -58,7 +62,11 @@ export const runGame = (game:string[],delay:number) => {
             const parsed = JSON.parse(m.data) as moveSocketResponse;
             if(gintoki && moveNumber < game.length){
                 await new Promise(resolve => setTimeout(resolve,delay));
-                Gintoki.send(game[moveNumber++] as string);
+                const request:moveSocketRequest= {
+                    move:game[moveNumber++] as string,
+                    isMessage:false,
+                }
+                Gintoki.send(JSON.stringify(request));
                 gintoki = false;
             }
             else{
@@ -72,7 +80,11 @@ export const runGame = (game:string[],delay:number) => {
             const parsed = JSON.parse(m.data) as start;
             if(parsed.color == colors.White){
                 await new Promise(resolve => setTimeout(resolve,delay));
-                Kakashi.send(game[moveNumber++] as string);
+                const request:moveSocketRequest= {
+                    move:game[moveNumber++] as string,
+                    isMessage:false,
+                }
+                Kakashi.send(JSON.stringify(request));
                 gintoki = true;
             }
             firstKakashi = false;
@@ -81,7 +93,11 @@ export const runGame = (game:string[],delay:number) => {
             const parsed = JSON.parse(m.data) as moveSocketResponse;
             if(!gintoki && moveNumber < game.length){
                 await new Promise(resolve => setTimeout(resolve,delay));
-                Kakashi.send(game[moveNumber++] as string);
+                const request:moveSocketRequest= {
+                    move:game[moveNumber++] as string,
+                    isMessage:false,
+                }
+                Kakashi.send(JSON.stringify(request));
                 gintoki = true;
             }
             else{

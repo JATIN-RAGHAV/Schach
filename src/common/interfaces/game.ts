@@ -25,18 +25,23 @@ export interface gameObject{
     blackTimeLeft:number,// In minliseconds
 }
 
+export enum offers{
+    resign = 'resign',
+    draw = 'draw'
+};
+
 // Moves is source -> target using chars only
 // eg-> from e2 to e4 => "ebed"
 export const moveSocketRequest = z.object({
     move:z.string().length(4).regex(/^[a-hA-H][1-8][a-hA-H][1-8]$/),
-    promotion:z.enum([purePieces[purePieces.Q]]),
- // 1. Move -> string eg."e2e4"
- // 2. Pawn Promotion? -> enum
- // 3. Resign and draw Offers? -> enum
- // 4. Message? -> string
- // 5. IsMessage -> bool
-})
-;
+    promotion:z.enum([purePieces.Q,purePieces.K,purePieces.R,purePieces.B]).optional(),
+    offers: z.enum([offers.resign,offers.draw]).optional(),
+    message: z.string().max(100).optional(),
+    isMessage:z.boolean(),
+});
+
+// Export the move socket reqeust as in interface
+export type moveSocketRequest = z.infer<typeof moveSocketRequest>;
 
 // Reasons why a game could end
 export enum gameOverReasons{

@@ -88,7 +88,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
     },
 
     // Handle incoming moves
-    async message (ws, message) {
+    async message (ws, message:moveSocketRequest) {
         // Get user data and check if the user is playing
         const moveTime = Date.now();
         const {userId,username,increment,time} = ws.data.user;
@@ -113,7 +113,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             })
             return;
         }
-        const move = res.data;
+        const {move}= res.data;
 
         // Get Opponent data
         const oppoUserId = Data.getUserOppo(userId)as string;

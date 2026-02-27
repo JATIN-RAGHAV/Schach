@@ -1,6 +1,5 @@
 import { gameCreateZod } from '../../../common/interfaces/gameZodTypes';
 import { type gameCreate } from '../../interfaces/game';
-import { color as colorType } from '../../../common/interfaces/enums';
 import authPlugin from './authPlugin';
 import Data from '../../database/data';
 
@@ -11,10 +10,6 @@ export const gameCreatePlugin = authPlugin.resolve(
             return status(400);
         }
         const { color, time, increment } = res.data as gameCreate;
-        const colorEnum = color as colorType;
-        if (color >= 3 || color < 0) {
-            return status(400);
-        }
 
         if (Data.isUserQueue(user.userId)) {
             return status(400);
@@ -22,7 +17,7 @@ export const gameCreatePlugin = authPlugin.resolve(
 
         return {
             user: {
-                color: colorEnum,
+                color,
                 time,
                 increment,
 
