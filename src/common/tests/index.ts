@@ -28,4 +28,4 @@ const foolsMate = [
     'g2g4','d8h4',
 ]
 
-runGame(foolsMate,2000)
+runGame(testGame2,1500)
