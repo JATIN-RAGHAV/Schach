@@ -252,7 +252,9 @@ export const isMoveOkWithoutContext = (board:Board,move:moveIndex,color:colors,s
             }
         }
         else{
-            if(dx > 1 || dy > 1){
+            // If king moves more than 1 square then wrong,
+            // And king must move at least 1 square
+            if((dx > 1 || dy > 1) || ((dx+dy) < 1)){
                 return false;
             }
         }
