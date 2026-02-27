@@ -1,6 +1,6 @@
 import z from "zod";
 import { rowSize ,columnSize } from "./constants";
-import { Pieces } from "./enums";
+import { Pieces, purePieces } from "./enums";
 
 type FixedLengthArray<T, N extends number, R extends T[] = []> =
   R['length'] extends N
@@ -27,18 +27,27 @@ export interface gameObject{
 
 // Moves is source -> target using chars only
 // eg-> from e2 to e4 => "ebed"
-export const moveSocketRequest = z.string().length(4).regex(/^[a-hA-H][1-8][a-hA-H][1-8]$/);
+export const moveSocketRequest = z.object({
+    move:z.string().length(4).regex(/^[a-hA-H][1-8][a-hA-H][1-8]$/),
+    promotion:z.enum([purePieces[purePieces.Q]]),
+ // 1. Move -> string eg."e2e4"
+ // 2. Pawn Promotion? -> enum
+ // 3. Resign and draw Offers? -> enum
+ // 4. Message? -> string
+ // 5. IsMessage -> bool
+})
+;
 
 // Reasons why a game could end
 export enum gameOverReasons{
-    checkmate,
-    stalemate,
-    threefoldRepetition,
-    insufficientMaterial,
-    timeover,
-    otherResigned,
-    otherAbandoned,
-    notOver
+    checkmate = 'checkmate',
+    stalemate = 'stalemate',
+    threefoldRepetition = 'threefoldRepetition',
+    insufficientMaterial = 'insufficientMaterial',
+    timeover = 'timeover',
+    otherResigned = 'otherResigned',
+    otherAbandoned = 'otherAbandoned',
+    notOver = 'notOver'
 }
 
 // Interface of what is sent by the server socket to the frontend

@@ -16,3 +16,17 @@
 - En passant was turning out to be invalid, because, the rows were set to [2,5] instead of [3,4] and sRow in [3,4] was being used instead of [3,4].includes(sRow) and getFlags had an object as a key, so changed that to a string, and getFlag returns the flag value, but it was being used to left shif and get the flag.
 
 ## Date: 2026-02-26
+
+- Fixed backend bugs and added a test to test out a whole game till the end by connecting to the server using websockets.
+
+## Date: 2026-02-27
+
+- [ ] Set up websocket protocol.
+- - The frontend needs to send more data to the backend other then simply the moves.
+ 1. Move -> string eg."e2e4"
+ 2. Pawn Promotion? -> enum
+ 3. Resign and draw Offers? -> enum
+ 4. Message? -> string
+ 5. IsMessage -> bool
+
+- [ ] Intialize frontend architecture.

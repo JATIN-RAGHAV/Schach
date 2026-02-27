@@ -1,28 +1,27 @@
-import { rowSize } from "./constants";
 import type { gameOverReasons } from "./game";
 
 export enum color {
-    Black,
-    White,
-    Random,
+    Black = 'Black',
+    White = 'White',
+    Random = 'Random'
 }
 
 export enum Pieces{
-    WR,WN,WB,WK,WQ,WP,
-    BR,BN,BB,BK,BQ,BP,
-    NN
+    WR = 'WR',WN = 'WN',WB = 'WB',WQ = 'WQ',WK = 'WK',WP = 'WP',
+    BR = 'BR',BN = 'BN',BB = 'BB',BQ = 'BQ',BK = 'BK',BP = 'BP',
+    NN = 'NN'
 }
 
 // Game Types
 export enum gameTypes{
-    Rapid,
-    Blitz,
-    Bullet
+    Rapid = 'Rapid',
+    Blitz = 'Blitz',
+    Bullet = 'Bullet'
 }
 
 // Pieces without colors
 export enum purePieces{
-    R,N,B,K,Q,P,NN
+    R = 'R',N = 'N',B = 'B',K = 'K',Q = 'Q',P = 'P',NN = 'NN'
 };
 
 // Flags which indicate special moves
@@ -52,10 +51,10 @@ export enum specialMoveFlagsEnums{
 export const smallestEnPassantPawnBit = specialMoveFlagsEnums.WP0;
 
 export enum specialMovepiece{
-    WARook,
-    WHRook,
-    BARook,
-    BHRook
+    WARook = 'WARook',
+    WHRook = 'WHRook',
+    BARook = 'BARook',
+    BHRook = 'BHRook',
 }
 
 // State of the game,returned by isGameEnded

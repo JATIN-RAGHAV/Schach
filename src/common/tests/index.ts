@@ -23,4 +23,9 @@ const testGame2 = [
     'g1h1','f2e1'
 ]
 
-runGame(testGame2,10)
+const foolsMate = [
+    'f2f3','e7e5',
+    'g2g4','d8h4',
+]
+
+runGame(foolsMate,2000)
