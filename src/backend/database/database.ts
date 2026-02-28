@@ -47,9 +47,9 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
 
         static async createUser(
             username: string,
-            pass: string,
+            password: string,
         ): Promise<JWT_PAYLOAD> {
-            const hashPass: string = Bun.password.hashSync(pass);
+            const hashPass: string = Bun.password.hashSync(password);
             try {
                 await psql<
                     UserData[]
@@ -70,7 +70,7 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
 
         static async verifyUser(
             username: string,
-            pass: string,
+            password: string,
         ): Promise<JWT_PAYLOAD> {
             const users = await psql<
             UserData[]
@@ -82,7 +82,7 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
             const user = users[0];
             if (
                 Bun.password.verifySync(
-                    pass,
+                    password,
                     user?.hashpass == undefined ? '' : user?.hashpass,
                 )
             ) {

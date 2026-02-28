@@ -14,7 +14,7 @@ access.post('/create', async ({ body }) => {
         };
     }
     try {
-        const { username, pass } = res.data;
+        const { username, password: pass } = res.data;
         const payload = await Data.createUser(username, pass);
         const token = await JWT.sign(payload);
         console.log(``);
@@ -39,7 +39,7 @@ access.post('/login', async ({ body }) => {
         };
     }
     try {
-        const { username, pass } = res.data;
+        const { username, password: pass } = res.data;
         const payload = await Data.verifyUser(username, pass);
         const token = await JWT.sign(payload);
         return {
