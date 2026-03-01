@@ -1,11 +1,13 @@
 import './App.css'
-import Initial from './components'
+import { Globe } from "@/components/ui/globe"
+import { ThemeButton } from './components/ui/themeButton'
 
 function App() {
 
     return (
         <>
-            <Initial/>
+            <Globe />
+            <ThemeButton/>
         </>
     )
 }
