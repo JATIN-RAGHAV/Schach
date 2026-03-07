@@ -1,3 +1,17 @@
+# Things to get better at:
+- Common
+- - File Structure
+- - Testing
+- - Clean Code
+
+- Backend
+- - User Input Validation
+- - Logic flow
+
+- Frontend
+- - State Management
+- - CSS
+- - Tailwind
 
 # DEVELOPMENT
 
@@ -21,7 +35,7 @@
 
 ## Date: 2026-02-27
 
-- [ ] Set up websocket protocol.
+- [x] Set up websocket protocol.
 - - The frontend needs to send more data to the backend other then simply the moves.
  1. Move -> string eg."e2e4"
  2. Pawn Promotion? -> enum
@@ -29,4 +43,39 @@
  4. Message? -> string
  5. IsMessage -> bool
 
-- [ ] Intialize frontend architecture.
+- [x] Intialize frontend architecture.
+
+## Date: 2026-02-28
+
+- [x] Change auth from header to cookie.
+- - Can't add cookies because there is no way to add cookie to the https request which is sent to stablish a websocket connection for the tests. And thus tests wont' work for a websocket connetion, which is a bad thing.
+- [x] Figure out how to use frontend component libraries and be smart about frontend.
+- - Used Shadcn UI, which is a component library built on top of Radix UI and Tailwind CSS, and it is also open source, so we can customize it as we want.
+
+## Date: 2026-03-01
+
+- [x] Added an self made svg.
+- [x] Dark Theme / Use CSS variables to change the theme / Use HSLA format
+- [x] Compelte Login / Signup.
+- [ ] Add Mikhail Tal Depth Map.
+
+## Date: 2026-03-07
+
+### Logs
+
+The game start page takes the time, color and increment and calls a startGame function which returns a websocket and error indicator, if error then socket is null and we stay at the page.
+But if no error and we reroute to a loding page which just loads till the server says that it's ok to start a game.
+And then we start the game.
+- Components
+
+- - Board
+- - - Input
+- - - Board
+- - - WS Object
+
+- - - Functionality
+- - - Renders the board and the pieces
+- - - Allows the player to make a move
+- - - Validates the move
+- - - Sends the move to the backend using websockets
+

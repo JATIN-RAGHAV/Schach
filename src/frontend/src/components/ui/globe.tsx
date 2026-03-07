@@ -92,7 +92,8 @@ export function Globe({
   }, [rs, config])
 
   return (
-    <div
+    <abbr
+            title="Globe"
       className={cn(
         "absolute inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]",
         className
@@ -114,6 +115,6 @@ export function Globe({
           e.touches[0] && updateMovement(e.touches[0].clientX)
         }
       />
-    </div>
+    </abbr>
   )
 }

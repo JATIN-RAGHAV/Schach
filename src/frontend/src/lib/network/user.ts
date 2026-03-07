@@ -1,34 +1,69 @@
 import axios from "axios";
 import { userCreateZod } from "@/../../common/interfaces/userZodTypes";
+import {type userCreatedResponse } from "@/../../common/interfaces/responses";
 
 // Get the base url to make the request
 const baseUrl = import.meta.env.VITE_BASE_API_URL
 
 // Takes in the username and password and returns the jwt token
-export const createUser = async (username: string, password: string) => {
+// If userCreated successfully then return true else return false
+export const createUser = async (username: string, password: string):Promise<boolean> => {
     const route = baseUrl + "/user/create";
+
+    // Verify the payload before sending it to the server
     const payload = userCreateZod.safeParse({
         username,
         password
     })
 
     if(!payload.success){
-        return {
-            error:payload.error,
-        };
+        return false;
     }
 
-    const res = await axios.post(route, 
-        { username, password }
-    )
-    return res;
+    // Send the request to the server
+    try{
+        const res = await axios.post(route, 
+            { username, password }
+        )    
+        res.data as userCreatedResponse;
+        if(res.data.error){
+            return false;
+        }
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("username", username);
+        return true;
+    }
+    catch(err){
+        return false;
+    }
 };
 
 // Takes in the username and password and returns the jwt token
-export const loginUser = async (username: string, password: string) => {
+// If logged in successfully then returns true else returns false
+export const loginUser = async (username: string, password: string):Promise<boolean> => {
     const route = baseUrl + "/user/login";
-    const res = await axios.post(route, 
-        { username, password }
-    )
-    return res;
+
+    // Verify the payload before sending it to the server
+    const payload = userCreateZod.safeParse({
+        username,
+        password
+    })
+
+    if(!payload.success){
+        return false;
+    }
+
+    // Send the request to the server
+    try{
+        const res = await axios.post(route, 
+            { username, password }
+        )    
+        res.data as userCreatedResponse;
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("username", username);
+        return true;
+    }
+    catch(err){
+        return false;
+    }
 }

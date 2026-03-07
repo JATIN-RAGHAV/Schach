@@ -8,13 +8,13 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
-import { loginUser } from "@/lib/network/user";
+import { createUser } from "@/lib/network/user";
 import { Input } from "@/components/ui/input"
-import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useState } from "react";
 
 
-export function LoginForm({
+export function SignupForm({
     className,
     ...props
 }: React.ComponentProps<"form">) {
@@ -31,9 +31,9 @@ export function LoginForm({
         <form className={cn("flex flex-col gap-6", className)} {...props}>
             <FieldGroup>
                 <div className="flex flex-col items-center gap-1 text-center">
-                    <h1 className="text-2xl font-bold">Login to your account</h1>
+                    <h1 className="text-2xl font-bold">Create your new account</h1>
                     <p className="text-muted-foreground text-sm text-balance">
-                        Enter your email below to login to your account
+                        Enter your email below to create an account
                     </p>
                 </div>
                 <Field>
@@ -73,7 +73,7 @@ export function LoginForm({
                     <Button type="submit"
                     onClick={async (e) => {
                         e.preventDefault();
-                        const res = await loginUser(form.getValues().username, form.getValues().password);
+                        const res = await createUser(form.getValues().username, form.getValues().password);
                         if(res){
                             navigate("/play");
                         }
@@ -81,9 +81,9 @@ export function LoginForm({
                             setError("An error occurred while creating your account. Please try again.");
                         }
                     }}
-                    >Login</Button>
+                    >Create</Button>
+                    <span className="color-error">{error}</span>
                     </Field>
-                    {error}
                     {
                         // <FieldSeparator className="*:data-[slot=field-separator-content]:bg-muted dark:*:data-[slot=field-separator-content]:bg-card">
                         //     Or continue with

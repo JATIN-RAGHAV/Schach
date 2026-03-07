@@ -8,6 +8,7 @@ function App() {
         <>
             <Globe />
             <ThemeButton/>
+            <div className='caret-blue-950'/>
         </>
     )
 }

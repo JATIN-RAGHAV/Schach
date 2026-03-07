@@ -11,7 +11,7 @@ Body:
 ```typescript
 {
     username: String,
-    pass: String 
+    password: String 
 }
 ```
 
@@ -34,7 +34,7 @@ Body:
 ```typescript
 {
     username: String,
-    pass: String
+    password: String
 }
 
 ```
