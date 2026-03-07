@@ -4,8 +4,8 @@ import authPlugin from './authPlugin';
 import Data from '../../database/data';
 
 export const gameCreatePlugin = authPlugin.resolve(
-    ({ headers, user, status }) => {
-        const res = gameCreateZod.safeParse(headers);
+    ({ query, user, status }) => {
+        const res = gameCreateZod.safeParse(query);
         if (!res.success) {
             return status(400);
         }
