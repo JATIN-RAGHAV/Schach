@@ -8,7 +8,7 @@ const baseUrl = import.meta.env.VITE_BASE_API_URL
 // Takes in the username and password and returns the jwt token
 // If userCreated successfully then return true else return false
 export const createUser = async (username: string, password: string):Promise<boolean> => {
-    const route = baseUrl + "/user/create";
+    const route = "https://" + baseUrl + "/user/create";
 
     // Verify the payload before sending it to the server
     const payload = userCreateZod.safeParse({

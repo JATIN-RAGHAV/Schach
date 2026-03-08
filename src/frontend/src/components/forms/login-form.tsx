@@ -75,7 +75,7 @@ export function LoginForm({
                         e.preventDefault();
                         const res = await loginUser(form.getValues().username, form.getValues().password);
                         if(res){
-                            navigate("/play");
+                            navigate("/start");
                         }
                         else{
                             setError("An error occurred while creating your account. Please try again.");
