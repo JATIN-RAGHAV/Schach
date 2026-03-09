@@ -81,6 +81,26 @@ And then we start the game.
 - - - Validates the move
 - - - Sends the move to the backend using websockets
 
-## Date: 2026-03-07
+## Date: 2026-03-08
 
 - Board just display the board object ( which is simply a 2d array of pieces enum ) and there is a map between the piece enum and the piece svg, so we can render the pieces on the board.
+
+
+## Date: 2026-03-09
+- Board has to display the current board.
+- Allows user to make a move. ( user can pick up a piece by left click hold and move it around. and put the piece down by releasing left click. then the move is validated and if correct then two things happen)
+- - Move is shown on the board.
+- - Move is sent to the backend.
+
+- On mouse down
+- - The piece clicked should have the same color.
+- - Put that piece at mouse location.
+- - Hide the piece from the source location.
+
+- On mouse Up
+- - If piece was being dragged.
+- - the current mouse position in inside the board.
+- - get the target square and validate the move.
+- - If legit move -> update the board. Tell the backend.
+- - If not legit move -> put piece back on the original square.
+- - remove dragged state and remove piece from cursor.
