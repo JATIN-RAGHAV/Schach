@@ -66,6 +66,8 @@
 The game start page takes the time, color and increment and calls a startGame function which returns a websocket and error indicator, if error then socket is null and we stay at the page.
 But if no error and we reroute to a loding page which just loads till the server says that it's ok to start a game.
 And then we start the game.
+
+- - Changed auth from header to query params, because there is no way to add headers from the frontned when stablishing a websocket connection, and thus we can't add the token to the header, but we can add it to the query params, and then we can get it from the query params in the backend and validate it.
 - Components
 
 - - Board
@@ -79,3 +81,6 @@ And then we start the game.
 - - - Validates the move
 - - - Sends the move to the backend using websockets
 
+## Date: 2026-03-07
+
+- Board just display the board object ( which is simply a 2d array of pieces enum ) and there is a map between the piece enum and the piece svg, so we can render the pieces on the board.

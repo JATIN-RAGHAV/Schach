@@ -2,23 +2,13 @@ import { color as colors } from "../interfaces/enums";
 import { type moveSocketResponse ,gameOverReasons, moveSocketRequest} from "../interfaces/game";
 
 export const runGame = (game:string[],delay:number) => {
-    const Gintoki = new WebSocket('ws://localhost:2222/game/run',{
-        headers:{
-            authorization:'Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoiR2ludG9raSIsInVzZXJJZCI6MX19.m9Wh0RnKsmVv6O0bc3vOdk1Zmoq_nZkspHNCfxmS0sAkp4l9YqXvK7VYme-RDw35zvlx0-CWnlVG69R1pRakyFq_fp-bELNTTUPrIsm6QeXF1T77mJKEyXc0NMO4aJ4-_zgk8842YyIYKp2cpoAyrsvqyCusv10rc0lFkRKDh-WHN08UTlu32uXSJidpD8OR_ofswNu1IE0W4NREMG_AAlxlQNiA1aFxDQS-YhaRtU8oiBzOYH3x0qIfCPvO3dANifYOxJq8j58xtOfAgKf7WltvrG200FGbEee-EPrBr3SKhmsl6iGPuK0CKXOomwpjMkO1tqDxvkSweU4GznWyVA',
-            color:colors.Random,
-            time:600000,
-            increment:0,
-        }
+    console.log("Starting Game")
+    const Gintoki = new WebSocket(`ws://localhost:2222/game/run?authorization=Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoiR2ludG9raSIsInVzZXJJZCI6MX19.m9Wh0RnKsmVv6O0bc3vOdk1Zmoq_nZkspHNCfxmS0sAkp4l9YqXvK7VYme-RDw35zvlx0-CWnlVG69R1pRakyFq_fp-bELNTTUPrIsm6QeXF1T77mJKEyXc0NMO4aJ4-_zgk8842YyIYKp2cpoAyrsvqyCusv10rc0lFkRKDh-WHN08UTlu32uXSJidpD8OR_ofswNu1IE0W4NREMG_AAlxlQNiA1aFxDQS-YhaRtU8oiBzOYH3x0qIfCPvO3dANifYOxJq8j58xtOfAgKf7WltvrG200FGbEee-EPrBr3SKhmsl6iGPuK0CKXOomwpjMkO1tqDxvkSweU4GznWyVA&color=${colors.Random}&time=600000&increment=0`,{
     });
 
-    const Kakashi = new WebSocket('ws://localhost:2222/game/run',{
-        headers:{
-            authorization:'Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoia2FrYXNoaSIsInVzZXJJZCI6Mn19.RDI209wxErqHGqDiWihILzBwisEAOpb2c4nIsc6_-sy6Zr-Fnb56elc-Ssq4pRAJCM-JRDjseaLOqoSuDA5r2sZzmgYSHcd3QQCSQ-WNImUfSlEPvaZAG-5VikJq6EisDxTH7AAkqAR01tGHUpqLcxEUuakHE7edIjkGwHEEXkem1LssxaxVh9CS5Idr_WIPLce0p9wXWIuLR3fZZqOU_3krdpH2BM8LanfXhuuhJgMfr-STcuxKF3lyein52yc9MokTaTlJzmJe9_u9CUqoLt1_V9fB34A4kMhQXbazyFTV7xVBuvozpl58p28QIv5n3Uo97ixv23jyanTX0gmeTA',
-            color:colors.Random,
-            time:600000,
-            increment:0,
-        }
-    })
+    const Kakashi = new WebSocket(`ws://localhost:2222/game/run?authorization=Bearer eyJhbGciOiJSUzI1NiJ9.eyJwYXlsb2FkIjp7InVzZXJuYW1lIjoia2FrYXNoaSIsInVzZXJJZCI6Mn19.RDI209wxErqHGqDiWihILzBwisEAOpb2c4nIsc6_-sy6Zr-Fnb56elc-Ssq4pRAJCM-JRDjseaLOqoSuDA5r2sZzmgYSHcd3QQCSQ-WNImUfSlEPvaZAG-5VikJq6EisDxTH7AAkqAR01tGHUpqLcxEUuakHE7edIjkGwHEEXkem1LssxaxVh9CS5Idr_WIPLce0p9wXWIuLR3fZZqOU_3krdpH2BM8LanfXhuuhJgMfr-STcuxKF3lyein52yc9MokTaTlJzmJe9_u9CUqoLt1_V9fB34A4kMhQXbazyFTV7xVBuvozpl58p28QIv5n3Uo97ixv23jyanTX0gmeTA&color=${colors.Random}&time=600000&increment=0`,{
+    });
+
     let start = 0;
     Gintoki.onopen = () => {
         console.log("connection made by gintoki")

@@ -1,0 +1,19 @@
+import { PieceComponents } from "@/assets/pieces";
+import { type Board as BoardType } from "../../../../common/interfaces/game";
+
+export const Board = (board:BoardType) => {
+    return <>
+    {
+        board.map((row) => {
+            return (<div className="board-row">
+            {row.map((cell) => {
+                const Piece = PieceComponents[cell];
+                return <span className="board-cell">
+                <Piece size={45}/>
+                </span>
+            })}
+            </div>)
+        }
+    }
+    </>
+}

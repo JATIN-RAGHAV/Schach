@@ -4,11 +4,9 @@ import { type JWT_PAYLOAD } from '../../interfaces/jwt_payload';
 
 const authPlugin = errorPlugin.resolve(async ({ query }) => {
     // Verify query exists
-    console.log('authenticating')
     if (query == undefined) {
         throw new Error('query is absent.');
     }
-    console.log('no query')
 
     // Get the token
     const splitted = query['authorization']?.split(" ");

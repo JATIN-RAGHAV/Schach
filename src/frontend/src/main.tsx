@@ -20,7 +20,7 @@ export const useGame = create<gameStartState>((set) => ({
     setGameType:(gameType:gameTypes) => set({gameType}),
     setColor:(color:color) => set({color}),
     setGameIncrement:(gameIncrement:number) => set({gameIncrement}),
-    setSocket:(socket:WebSocket) => set({socket})
+    setSocket:(socket:WebSocket) => set({socket}),
 }))
 
     createRoot(document.getElementById('root')!).render(
