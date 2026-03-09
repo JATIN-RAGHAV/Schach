@@ -16,6 +16,11 @@
 
         // Best practices
         "strict": true,
+        "noEmplicitAny":true,
+        "strictNullChecks": true,
+        "noImplicitAny": true,
+        "verbatimModuleSyntax": true,
+        "moduleDetection": "force",
         "skipLibCheck": true,
         "noFallthroughCasesInSwitch": true,
         "noUncheckedIndexedAccess": true,
