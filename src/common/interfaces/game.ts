@@ -59,12 +59,12 @@ export enum gameOverReasons{
 export interface moveSocketResponse{
     error:boolean,
     message:string,
-    over:boolean,
-    whyOver:gameOverReasons
-    winner:boolean,// The winner gets true and the un-winner gets false
-    move:string,
-    whiteTimeLeft:number,
-    blackTimeLeft:number,
+    over?:boolean,
+    whyOver?:gameOverReasons
+    winner?:boolean,// The winner gets true and the un-winner gets false
+    move?:string,
+    whiteTimeLeft?:number,
+    blackTimeLeft?:number,
 }
 
 // [SourceRow,SourceCol,TargetRow,TargetCol]

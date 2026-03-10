@@ -74,14 +74,14 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             );
 
             // Tell the users that their games has started
-            whiteSocket.send(JSON.stringify({
+            whiteSocket.send({
                 start: true,
                 color: colorType.White,
-            }));
-            blackSocket.send(JSON.stringify({
+            });
+            blackSocket.send({
                 start: true,
                 color: colorType.Black,
-            }));
+            });
             return;
         }
         Data.addGameQueue(currentUserId, currentPlayer, color, time, increment);
@@ -94,23 +94,22 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         const {userId,username,increment,time} = ws.data.user;
         const color = Data.getPlayerColor(userId);
         if(!Data.isUserPlaying(userId)){
-            ws.send({
+            const res:moveSocketResponse = {
                 error:true,
-                accepted:false,
-                message:"You arn't even playing bro."
-
-            })
+                message:"Game has not started yet",
+            }
+            ws.send(res)
             return;
         }
 
         // Validate Move format
         const res = moveSocketRequest.safeParse(message);
         if(!res.success){
-            ws.send({
+            const res:moveSocketResponse = {
                 error:true,
-                accepted:false,
-                message:res.error?.message
-            })
+                message:"Invalid Move format",
+            }
+            ws.send(res)
             return;
         }
         const {move}= res.data;
@@ -138,14 +137,8 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         const isValidMove = isMoveOk(board,move,color,specialMoveFlags);
         if(!isPlayersMove || !isValidMove){
             const responseObject:moveSocketResponse = {
-                move:move,
-                winner:false,
                 error:true,
-                whyOver:gameOverReasons.notOver,
-                over:false,
-                message:"Play a valid move",
-                whiteTimeLeft:gameObject.whiteTimeLeft,
-                blackTimeLeft:gameObject.blackTimeLeft
+                message:"Invalid move",
             }
             ws.send(responseObject)
             return;
@@ -195,14 +188,11 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             console.log(`Opponent left`)
                 const oppoSocket = Data.getUserIdSocket(oppoId) as ElysiaWS;
                 const responseObject:moveSocketResponse = {
-                    move:"",
                     winner:true,
                     error:false,
                     over:true,
                     whyOver:gameOverReasons.otherAbandoned,
                     message:"You won, the other person left.",
-                    whiteTimeLeft:0,
-                    blackTimeLeft:0
                 }
                 // Tell them that they have won
                 oppoSocket.send(responseObject)
