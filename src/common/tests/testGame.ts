@@ -1,5 +1,5 @@
 import { color as colors } from "../interfaces/enums";
-import { type moveSocketResponse ,gameOverReasons, moveSocketRequest} from "../interfaces/game";
+import { type moveSocketResponse ,gameOverReasons, moveSocketRequestZod, type startGameResponse} from "../interfaces/game";
 
 export const runGame = (game:string[],delay:number) => {
     console.log("Starting Game")
@@ -23,23 +23,19 @@ export const runGame = (game:string[],delay:number) => {
 
     let firstGintoki = true;
     let firstKakashi = true;
-    interface start{
-        start:boolean,
-        color:colors
-    }
 
     let moveNumber = 0;
     let gintoki = true; // gintoki is white, kakashi is black
 
     Gintoki.onmessage = async(m) => {
         if(firstGintoki){
-            const parsed = JSON.parse(m.data) as start;
+            const parsed = JSON.parse(m.data) as startGameResponse;
             if(parsed.color == colors.Black){
                 gintoki = false;
             }
             else{
                 await new Promise(resolve => setTimeout(resolve,delay));
-                const request:moveSocketRequest= {
+                const request:moveSocketRequestZod= {
                     move:game[moveNumber++] as string,
                     isMessage:false,
                 }
@@ -52,7 +48,7 @@ export const runGame = (game:string[],delay:number) => {
             const parsed = JSON.parse(m.data) as moveSocketResponse;
             if(gintoki && moveNumber < game.length){
                 await new Promise(resolve => setTimeout(resolve,delay));
-                const request:moveSocketRequest= {
+                const request:moveSocketRequestZod= {
                     move:game[moveNumber++] as string,
                     isMessage:false,
                 }
@@ -67,10 +63,10 @@ export const runGame = (game:string[],delay:number) => {
 
     Kakashi.onmessage = async(m) => {
         if(firstKakashi){
-            const parsed = JSON.parse(m.data) as start;
+            const parsed = JSON.parse(m.data) as startGameResponse;
             if(parsed.color == colors.White){
                 await new Promise(resolve => setTimeout(resolve,delay));
-                const request:moveSocketRequest= {
+                const request:moveSocketRequestZod= {
                     move:game[moveNumber++] as string,
                     isMessage:false,
                 }
@@ -83,7 +79,7 @@ export const runGame = (game:string[],delay:number) => {
             const parsed = JSON.parse(m.data) as moveSocketResponse;
             if(!gintoki && moveNumber < game.length){
                 await new Promise(resolve => setTimeout(resolve,delay));
-                const request:moveSocketRequest= {
+                const request:moveSocketRequestZod= {
                     move:game[moveNumber++] as string,
                     isMessage:false,
                 }

@@ -1,6 +1,6 @@
 import z from "zod";
 import { rowSize ,columnSize } from "./constants";
-import { Pieces, purePieces } from "./enums";
+import { color, Pieces, purePieces } from "./enums";
 
 type FixedLengthArray<T, N extends number, R extends T[] = []> =
   R['length'] extends N
@@ -32,16 +32,14 @@ export enum offers{
 
 // Moves is source -> target using chars only
 // eg-> from e2 to e4 => "ebed"
-export const moveSocketRequest = z.object({
+export const moveSocketRequestZod = z.object({
     move:z.string().length(4).regex(/^[a-hA-H][1-8][a-hA-H][1-8]$/),
     promotion:z.enum([purePieces.Q,purePieces.K,purePieces.R,purePieces.B]).optional(),
     offers: z.enum([offers.resign,offers.draw]).optional(),
     message: z.string().max(100).optional(),
     isMessage:z.boolean(),
 });
-
-// Export the move socket reqeust as in interface
-export type moveSocketRequest = z.infer<typeof moveSocketRequest>;
+export type moveSocketRequest = z.infer<typeof moveSocketRequestZod>;
 
 // Reasons why a game could end
 export enum gameOverReasons{
@@ -65,6 +63,12 @@ export interface moveSocketResponse{
     move?:string,
     whiteTimeLeft?:number,
     blackTimeLeft?:number,
+}
+
+// Start Game Response
+export interface startGameResponse {
+    start:boolean,
+    color:color
 }
 
 // [SourceRow,SourceCol,TargetRow,TargetCol]
