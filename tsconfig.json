@@ -4,14 +4,12 @@
         "lib": ["ESNext"],
         "target": "ESNext",
         "module": "Preserve",
-        "moduleDetection": "force",
         "jsx": "react-jsx",
         "allowJs": true,
 
         // Bundler mode
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
-        "verbatimModuleSyntax": true,
         "noEmit": true,
 
         // Best practices
@@ -19,7 +17,6 @@
         "noEmplicitAny":true,
         "strictNullChecks": true,
         "noImplicitAny": true,
-        "verbatimModuleSyntax": true,
         "moduleDetection": "force",
         "skipLibCheck": true,
         "noFallthroughCasesInSwitch": true,

@@ -4,8 +4,9 @@ import { useEffect, useRef } from "react";
 import { squareIndexToKey, squareKeyToIndex } from "@/lib/utils";
 import {type color as colors, Pieces, piecesColorMap } from "../../../../common/interfaces/enums";
 import { MousePieceDraggalbe } from "./mousePieceDraggable";
+import { isMoveOk, moveIndexToChars } from "../../../../common/game";
 
-export const Board = ({board,color,setBoard}:{board:BoardType,color:colors,setBoard:React.Dispatch<React.SetStateAction<BoardType>>}) => {
+export const Board = ({board,color,setBoard,makeMove,pieceMovedRef}:{board:BoardType,color:colors,setBoard:React.Dispatch<React.SetStateAction<BoardType>>,makeMove:(move:string)=>void,pieceMovedRef:React.RefObject<Pieces>}) => {
 
     // A reference to the whole board, to get cordiantes to the board
     const boardRef = useRef<HTMLDivElement>(null);
@@ -13,26 +14,40 @@ export const Board = ({board,color,setBoard}:{board:BoardType,color:colors,setBo
     const pieceComponentRef = useRef<React.FC<{size: number;}>>(null);
     // We must use reference here because when we define the mouseUpHandler function we need the latest value of the square which was clicked
     const squareRef = useRef<string>(null);
-    const pieceRef = useRef<Pieces>(null);
 
     useEffect(() => {
 
-        // Function to handle mouse being clicked
-        const handleMouseDown = (ev:MouseEvent) => {
-            if(ev.button == 0){
-                // Get the mouse cordinates and also relative cordinates
+        // Function to get the square being clicked and [-1,-1] if outside
+        const getSquareBeingClicked = (ev:MouseEvent) => {
                 const mouseX = ev.clientX;
                 const mouseY = ev.clientY;
+                let row = -1;
+                let col = -1;
                 if (boardRef.current) {
                     const rect = boardRef.current.getBoundingClientRect();
                     const boardX = rect.left;
                     const boardY = rect.top;
                     const relativeX = mouseX - boardX;
                     const relativeY = mouseY - boardY;
-                    
-                    // Get info about the piece at the cliecked square
-                    const row = Math.floor(relativeY/cellSize);
-                    const col = Math.floor(relativeX/cellSize);
+                    row = Math.floor(relativeY/cellSize);
+                    col = Math.floor(relativeX/cellSize);
+                    if(row > 7 || row < 0 || col > 7 || col < 0){
+                        row = -1;
+                        col = -1;
+                    }
+                }
+                return [row,col];
+        }
+
+        // Get the square begin clicked
+
+        // Function to handle mouse being clicked
+        const handleMouseDown = (ev:MouseEvent) => {
+            if(ev.button == 0){
+                // Get the square being clicked
+                const [row,col] = getSquareBeingClicked(ev);
+                // If the square innside the board
+                if(row != -1){
                     const piece = board[row][col];
                     const notEmpty = piece != Pieces.NN;
                     const sameColor = piecesColorMap.get(piece) == color;
@@ -43,10 +58,12 @@ export const Board = ({board,color,setBoard}:{board:BoardType,color:colors,setBo
                         const newSquare = squareIndexToKey(row,col);
                         squareRef.current = newSquare;
                         // Also hide the piece on the clicked square
-                        let newBoard =  structuredClone(board);
-                        pieceRef.current = piece;
-                        newBoard[row][col] = Pieces.NN;
-                        setBoard(newBoard);
+                        setBoard(board => {
+                            let newBoard =  structuredClone(board);
+                            pieceMovedRef.current = piece;
+                            newBoard[row][col] = Pieces.NN;
+                            return newBoard;
+                        });
                     }
                 }
             }
@@ -54,17 +71,30 @@ export const Board = ({board,color,setBoard}:{board:BoardType,color:colors,setBo
 
         // Handle what happens when mouse click is unclicked
         const handleMouseUp = (ev:MouseEvent) => {
+            // If we were dragging a piece or not
             if(squareRef.current != null){
-                const [row,col] = squareKeyToIndex(squareRef.current);
+                // Get the source and targe squares
+                const [sourceRow,sourceCol] = squareKeyToIndex(squareRef.current);
+                const [targetRow,targetCol] = getSquareBeingClicked(ev);
+                if(targetRow != -1){
+                    const moveString = moveIndexToChars([sourceRow,sourceCol,targetRow,targetCol]);
+                    const isValidMove = isMoveOk(board,moveString,color,0);
+                    // If valid move then make the move
+                    if(isValidMove){
+                        makeMove(moveString);
+                    }
+                }
+
+                // Clean up
+                setBoard(board => {
+                    let newBoard = structuredClone(board);
+                    if(pieceMovedRef.current != null){
+                        newBoard[sourceRow][sourceCol] = pieceMovedRef.current;
+                    }
+                    return newBoard;
+                })
                 squareRef.current = null;
                 pieceComponentRef.current = null;
-                let newBoard = structuredClone(board);
-                if(pieceRef.current != null){
-                    newBoard[row][col] = pieceRef.current;
-                    setBoard(newBoard)
-                }
-                pieceRef.current = null;
-                console.log(ev)
             }
         }
 

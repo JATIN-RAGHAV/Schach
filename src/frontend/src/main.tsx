@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import '@/index.css'
@@ -11,12 +10,14 @@ import { Play } from './pages/play/game'
 import {create} from 'zustand'
 import { type gameStartState } from './lib/interfaces/customHooks'
 import type { color, gameTypes } from '../../common/interfaces/enums'
+import { gameState } from './pages/play/lib'
 
 export const useGame = create<gameStartState>((set) => ({
     gameType:null,
     color:null,
     gameIncrement:null,
     socket:null,
+    gameState:gameState.waiting,
     setGameType:(gameType:gameTypes) => set({gameType}),
     setColor:(color:color) => set({color}),
     setGameIncrement:(gameIncrement:number) => set({gameIncrement}),
@@ -25,7 +26,7 @@ export const useGame = create<gameStartState>((set) => ({
 
     createRoot(document.getElementById('root')!).render(
 
-        <StrictMode>
+        <>
         <BrowserRouter>
         <Routes>
         <Route path='/' element={<App />}/>
@@ -36,5 +37,5 @@ export const useGame = create<gameStartState>((set) => ({
         </Routes>
         </BrowserRouter>
         <ThemeButton/>
-        </StrictMode>,
+        </>
     )
