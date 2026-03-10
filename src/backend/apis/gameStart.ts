@@ -5,12 +5,12 @@ import { gameCreatePlugin } from './plugins/gameApiPlugins';
 import type { gameQueueObject } from '../database/interfaces';
 import { isGameEnded, isMoveOk, printBoard, updateGameObject } from '../../common/game';
 import type { ElysiaWS } from 'elysia/ws';
-import { gameOverReasons, moveSocketRequest, type gameObject,  type moveSocketResponse } from '../../common/interfaces/game';
+import { gameOverReasons, moveSocketRequestZod, type gameObject,  type moveSocketResponse } from '../../common/interfaces/game';
 import { getResponsePostMove } from '../helper/game';
 
 export const gameRun = gameCreatePlugin.ws('/game/run', {
     // Handle Connection starting
-    open(ws) {
+    async open(ws) {
         // Get the current player Data
         const { username, userId, color, time, increment } = ws.data.user;
         const currentUserId = userId;
@@ -58,6 +58,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                 }
             }
 
+            await new Promise(res => setTimeout(res, 1000));
             // Remove the users from the game Queue
             Data.removeGameQueue(userId,color,time,increment);
             Data.removeGameQueue(opponentResponse.oppo.userId,color,time,increment);[]
@@ -88,7 +89,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
     },
 
     // Handle incoming moves
-    async message (ws, message:moveSocketRequest) {
+    async message (ws, message:moveSocketResponse) {
         // Get user data and check if the user is playing
         const moveTime = Date.now();
         const {userId,username,increment,time} = ws.data.user;
@@ -103,7 +104,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
         }
 
         // Validate Move format
-        const res = moveSocketRequest.safeParse(message);
+        const res = moveSocketRequestZod.safeParse(message);
         if(!res.success){
             const res:moveSocketResponse = {
                 error:true,
