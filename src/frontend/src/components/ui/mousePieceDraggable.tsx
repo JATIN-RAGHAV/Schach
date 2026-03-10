@@ -26,13 +26,7 @@ export const MousePieceDraggalbe = ({Piece,size}:{Piece:React.FC<{size: number;}
         
     })
 
-
-    if(Piece != null){
-        return <span ref={pieceRef} className={`fixed top-0 left-0 translate-x-[-50%] translate-y-[-50%]`} >
-        <Piece size={size} />
-        </span>
-    }
-    else{
-        return <></>
-    }
+    return <span ref={pieceRef} className={`fixed top-0 left-0 translate-x-[-50%] translate-y-[-50%]`} >
+    {Piece != null && <Piece size={size} />}
+    </span>
 }

@@ -1,22 +1,26 @@
 import { PieceComponents } from "@/assets/pieces";
 import { type Board as BoardType } from "../../../../common/interfaces/game";
-import { useEffect, useRef, useState } from "react";
-import { squareIndexToKey } from "@/lib/utils";
+import { useEffect, useRef } from "react";
+import { squareIndexToKey, squareKeyToIndex } from "@/lib/utils";
 import {type color as colors, Pieces, piecesColorMap } from "../../../../common/interfaces/enums";
 import { MousePieceDraggalbe } from "./mousePieceDraggable";
 
-export const Board = ({board,color}:{board:BoardType,color:colors}) => {
+export const Board = ({board,color,setBoard}:{board:BoardType,color:colors,setBoard:React.Dispatch<React.SetStateAction<BoardType>>}) => {
 
+    // A reference to the whole board, to get cordiantes to the board
     const boardRef = useRef<HTMLDivElement>(null);
-    const [square,setSquare] = useState<string|null>(null);
+    // The piece that is currently dragged under the cursor
     const pieceComponentRef = useRef<React.FC<{size: number;}>>(null);
+    // We must use reference here because when we define the mouseUpHandler function we need the latest value of the square which was clicked
     const squareRef = useRef<string>(null);
+    const pieceRef = useRef<Pieces>(null);
 
     useEffect(() => {
 
         // Function to handle mouse being clicked
         const handleMouseDown = (ev:MouseEvent) => {
             if(ev.button == 0){
+                // Get the mouse cordinates and also relative cordinates
                 const mouseX = ev.clientX;
                 const mouseY = ev.clientY;
                 if (boardRef.current) {
@@ -25,16 +29,24 @@ export const Board = ({board,color}:{board:BoardType,color:colors}) => {
                     const boardY = rect.top;
                     const relativeX = mouseX - boardX;
                     const relativeY = mouseY - boardY;
+                    
+                    // Get info about the piece at the cliecked square
                     const row = Math.floor(relativeY/cellSize);
                     const col = Math.floor(relativeX/cellSize);
                     const piece = board[row][col];
                     const notEmpty = piece != Pieces.NN;
                     const sameColor = piecesColorMap.get(piece) == color;
+                    // If correct then enable draggable piece and hide piece on the clicked square
                     if(notEmpty && sameColor){
+                        // Set the draggable piece
                         pieceComponentRef.current = PieceComponents[piece];
                         const newSquare = squareIndexToKey(row,col);
-                        setSquare(newSquare);
                         squareRef.current = newSquare;
+                        // Also hide the piece on the clicked square
+                        let newBoard =  structuredClone(board);
+                        pieceRef.current = piece;
+                        newBoard[row][col] = Pieces.NN;
+                        setBoard(newBoard);
                     }
                 }
             }
@@ -43,9 +55,15 @@ export const Board = ({board,color}:{board:BoardType,color:colors}) => {
         // Handle what happens when mouse click is unclicked
         const handleMouseUp = (ev:MouseEvent) => {
             if(squareRef.current != null){
-                setSquare(null);
+                const [row,col] = squareKeyToIndex(squareRef.current);
                 squareRef.current = null;
                 pieceComponentRef.current = null;
+                let newBoard = structuredClone(board);
+                if(pieceRef.current != null){
+                    newBoard[row][col] = pieceRef.current;
+                    setBoard(newBoard)
+                }
+                pieceRef.current = null;
                 console.log(ev)
             }
         }
@@ -82,7 +100,7 @@ export const Board = ({board,color}:{board:BoardType,color:colors}) => {
             {
                 row.map((cell,colI) => {
                     const Piece = PieceComponents[cell];
-                    return <span key={squareIndexToKey(rowI,colI)} id={squareIndexToKey(rowI,colI)} className={` w-${cellSize}px h-${cellSize}px flex items-center justify-center ${((rowI + colI) % 2 === 0) ? 'bg-boardDark' : 'bg-boardLight'} ${square!=null ? "hover:bg-amber-50":""}`}>
+                    return <span key={squareIndexToKey(rowI,colI)} id={squareIndexToKey(rowI,colI)} className={` w-${cellSize}px h-${cellSize}px flex items-center justify-center ${((rowI + colI) % 2 === 0) ? 'bg-boardDark' : 'bg-boardLight'} ${squareRef.current!=null ? "hover:bg-amber-50":""}`}>
                     <Piece size={cellSize}/>
                     </span>
                 })
