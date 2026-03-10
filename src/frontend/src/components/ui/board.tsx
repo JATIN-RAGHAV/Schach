@@ -42,8 +42,7 @@ export const Board = ({board,color}:{board:BoardType,color:colors}) => {
 
         // Handle what happens when mouse click is unclicked
         const handleMouseUp = (ev:MouseEvent) => {
-            const isPieceDragged = squareRef.current != null;
-            if(isPieceDragged){
+            if(squareRef.current != null){
                 setSquare(null);
                 squareRef.current = null;
                 pieceComponentRef.current = null;
@@ -52,19 +51,18 @@ export const Board = ({board,color}:{board:BoardType,color:colors}) => {
         }
 
         // Add even listener to mouse Being clicked
-        const boardElement = document.getElementById("board")
-        if(boardElement){
-            boardElement.addEventListener('mousedown', handleMouseDown);
-            boardElement.addEventListener('mouseup', handleMouseUp);
+        if(boardRef.current){
+            boardRef.current.addEventListener('mousedown', handleMouseDown);
         }
+        document.addEventListener('mouseup', handleMouseUp);
 
 
         // Clean up the event listener when the component unmounts
         return () => {
-            if(boardElement){
-                boardElement.removeEventListener('mousedown',handleMouseDown);
-                boardElement.removeEventListener('mouseup', handleMouseUp);
+            if(boardRef.current){
+                boardRef.current.removeEventListener('mousedown',handleMouseDown);
             }
+            document.removeEventListener('mouseup', handleMouseUp);
         };
     }, []); // Empty dependency array means this runs once on mount
 
@@ -77,8 +75,8 @@ export const Board = ({board,color}:{board:BoardType,color:colors}) => {
         cellSize = (windowWidth*0.50)/8;
     }
     return <div className="w-full flex items-center justify-center">
-    <MousePieceDraggalbe Piece={pieceComponentRef.current} />
-    <div id="board" ref={boardRef} className={`w-[${cellSize * 8}px] h-[${cellSize*8}px] flex border rounded-xl overflow-clip flex-col items-center justify-center`}>{
+    <MousePieceDraggalbe Piece={pieceComponentRef.current} size={cellSize} />
+    <div ref={boardRef} className={`w-[${cellSize * 8}px] h-[${cellSize*8}px] flex border rounded-xl overflow-clip flex-col items-center justify-center`}>{
         board.map((row,rowI) => {
             return <div key={`${rowI}`} className={`w-full h-${cellSize}px flex flex-row items-center justify-center`}>
             {

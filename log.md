@@ -93,14 +93,17 @@ And then we start the game.
 - - Move is sent to the backend.
 
 - On mouse down
+- - For this the event listner can be put on the board since, the piece can only be picked up from the board.
 - - The piece clicked should have the same color.
 - - Put that piece at mouse location.
 - - Hide the piece from the source location.
 
 - On mouse Up
+- - The event listener has to be put on the document because, the piece might be droppod off the board. Also the draggable piece comes under the cursor and since it's z index is higher we can't actually click the board or any other element.
 - - If piece was being dragged.
 - - the current mouse position in inside the board.
 - - get the target square and validate the move.
 - - If legit move -> update the board. Tell the backend.
 - - If not legit move -> put piece back on the original square.
 - - remove dragged state and remove piece from cursor.
+
