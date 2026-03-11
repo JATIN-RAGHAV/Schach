@@ -107,3 +107,6 @@ And then we start the game.
 - - If not legit move -> put piece back on the original square.
 - - remove dragged state and remove piece from cursor.
 
+## Date: 2026-03-11
+- - Flip board according to the player's color ( Keep a state variable color )
+- - Add the onMessage handler to the websocket on the start page itself, since adding it later on, on the play page is too late and the message has already been sent by the backend.

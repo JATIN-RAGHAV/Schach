@@ -5,12 +5,15 @@ import type { Board as BoardType,moveSocketResponse, startGameResponse,moveSocke
 import { color as colors, Pieces } from "../../../../common/interfaces/enums";
 import { useEffect, useRef, useState } from "react";
 import { gameState as gameStateType} from "./lib";
+import { Button } from "@/components/ui/button";
+import { BlackKing, WhiteKing } from "@/assets/pieces";
 
 export const Play = () => {
     const game = useGame();
     const inMoveRef = useRef<boolean>(false);
     const [gameState,setGameState] = useState<gameStateType>(game.gameState);
     const [board,setBoard] = useState<BoardType>(initBoard());
+    const [boardSide,setBoardSide] = useState<colors>(colors.White);
     const winnerRef = useRef<colors>(colors.Random);
     const pieceMovedRef = useRef<Pieces>(Pieces.NN);
 
@@ -26,7 +29,10 @@ export const Play = () => {
         }
     }
 
-    console.log('hello there')
+    const handleBoardFlipbuttonClick = () => {
+        setBoardSide(boardSide => boardSide == colors.White ? colors.Black : colors.White);
+    }
+
 
     useEffect(() => {
         if(game.socket != null){
@@ -37,28 +43,22 @@ export const Play = () => {
              * 3-> Message to give a move by other player
              * 4-> Message to confirm the move made by current player
              */
-            console.log("on message working")
             game.socket.onmessage = ((message:MessageEvent<any>) => {
                 let data = JSON.parse(message.data);
                 // Handle starting of game
-                console.log("original")
-                console.log(data)
                 if(game.gameState == gameStateType.waiting){
                     data = data as startGameResponse;
-                    console.log("waiting")
                     if(data.start){
                         game.gameState = gameStateType.running;
                         setGameState(gameStateType.running);
                         game.color = data.color;
-                        console.log('game STarted')
+                        setBoardSide(data.color);
                     }
                 }
                 else{
-                    console.log("not waiting")
                     data = data as moveSocketResponse;
                     // Handle move made by current player being conformed
                     if(inMoveRef.current){
-                        console.log('move made by curretn player')
                         inMoveRef.current = false;
                         if(!data.error){
                             const moveIndex = moveCharsToIndex(data.move);
@@ -75,7 +75,6 @@ export const Play = () => {
                     }
                     // Handle other player making a move
                     else if(!data.over){
-                        console.log("move made by other player")
                         const moveIndex = moveCharsToIndex(data.move);
                         if(moveIndex){
                             setBoard(board => {
@@ -89,7 +88,6 @@ export const Play = () => {
                     }
                     // Handle game ending
                     else{
-                        console.log("dead")
                         game.gameState = gameStateType.ended;
                         setGameState(gameStateType.ended);
                         const colorC = game.color || colors.White;
@@ -118,7 +116,12 @@ export const Play = () => {
             <h1>Game Type: {game.gameType}</h1>
             <h1>Color: {game.color}</h1>
             <h1>Increment: {game.gameIncrement}</h1>
-            <Board board={board} setBoard={setBoard} color={game.color || colors.White} makeMove={makeMove} pieceMovedRef = {pieceMovedRef}/>
+            <Button onClick={handleBoardFlipbuttonClick}>
+            {
+                boardSide == colors.White ? <WhiteKing size={15}/> : <BlackKing size={15}/>
+            }
+            </Button>
+            <Board board={board} boardSide={boardSide} setBoard={setBoard} color={game.color || colors.White} makeMove={makeMove} pieceMovedRef = {pieceMovedRef}/>
             </div>)
 
     }
