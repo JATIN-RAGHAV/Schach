@@ -7,22 +7,6 @@ import { ThemeButton } from './components/ui/themeButton'
 import SignupPage from './pages/signup/signup'
 import { GamePage } from './pages/start/game'
 import { Play } from './pages/play/game'
-import {create} from 'zustand'
-import { type gameStartState } from './lib/interfaces/customHooks'
-import type { color, gameTypes } from '../../common/interfaces/enums'
-import { gameState } from './pages/play/lib'
-
-export const useGame = create<gameStartState>((set) => ({
-    gameType:null,
-    color:null,
-    gameIncrement:null,
-    socket:null,
-    gameState:gameState.waiting,
-    setGameType:(gameType:gameTypes) => set({gameType}),
-    setColor:(color:color) => set({color}),
-    setGameIncrement:(gameIncrement:number) => set({gameIncrement}),
-    setSocket:(socket:WebSocket) => set({socket}),
-}))
 
     createRoot(document.getElementById('root')!).render(
 

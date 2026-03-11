@@ -109,4 +109,5 @@ And then we start the game.
 
 ## Date: 2026-03-11
 - - Flip board according to the player's color ( Keep a state variable color )
+- - - Added a new state variable at the board page level which is passed to a flip button and the board. And the setter is passed to the flip button only.
 - - Add the onMessage handler to the websocket on the start page itself, since adding it later on, on the play page is too late and the message has already been sent by the backend.

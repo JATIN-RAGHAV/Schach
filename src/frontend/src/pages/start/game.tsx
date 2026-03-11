@@ -13,15 +13,14 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
-import { startGame } from "@/lib/network/websocket"
 import { useNavigate } from "react-router"
-import { useGame } from "@/main"
+import { useGame } from "@/lib/interfaces/customHooks"
 export const GamePage = () => {
     const [gameType,setGameType] = useState<gameTypes>(gameTypes.Rapid);
     const [color,setcolor] = useState<colors>(colors.Random);
     const [gameIncrement,setGameIncrement] = useState<string>("0");
     const [start,setStart] = useState<boolean>(false);
-    const gameState = useGame();
+    const {connect} = useGame()
     const navigate = useNavigate();
     useEffect(() => {
         if(start){
@@ -105,19 +104,8 @@ export const GamePage = () => {
                 </Select>
             </div>
             <Button onClick={()=> {
-                const res = startGame(color,gameType,parseInt(gameIncrement));
-                res.onopen = () => {
-                    gameState.setColor(color);
-                    gameState.setGameType(gameType);
-                    gameState.setGameIncrement(parseInt(gameIncrement));
-                    gameState.setSocket(res);
-                    setStart(true);
-                }
-                res.onerror = (err) => {
-                    console.error("Error starting game",err);
-                    alert("Error starting game");
-                }
-
+                console.log("hi")
+                connect(color,gameType,parseInt(gameIncrement),setStart);
             }}
             className="w-full max-w-sm">Start Game</Button>
         </div>

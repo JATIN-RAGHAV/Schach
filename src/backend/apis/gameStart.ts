@@ -58,7 +58,6 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
                 }
             }
 
-            await new Promise(res => setTimeout(res, 1000));
             // Remove the users from the game Queue
             Data.removeGameQueue(userId,color,time,increment);
             Data.removeGameQueue(opponentResponse.oppo.userId,color,time,increment);[]

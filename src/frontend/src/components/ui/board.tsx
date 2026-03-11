@@ -5,9 +5,12 @@ import { squareIndexToKey, squareKeyToIndex } from "@/lib/utils";
 import {color as colors, Pieces, piecesColorMap } from "../../../../common/interfaces/enums";
 import { MousePieceDraggalbe } from "./mousePieceDraggable";
 import { isMoveOk, moveIndexToChars } from "../../../../common/game";
+import { useGame } from "@/lib/interfaces/customHooks";
+import { useOnMessageHandlerState } from "@/lib/interfaces/onMessageHandlerState";
 
-export const Board = ({board,color,setBoard,makeMove,pieceMovedRef,boardSide}:{board:BoardType,color:colors,setBoard:React.Dispatch<React.SetStateAction<BoardType>>,makeMove:(move:string)=>void,pieceMovedRef:React.RefObject<Pieces>,boardSide:colors}) => {
-
+export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSide:colors}) => {
+    const {board,color,setBoard} = useGame();
+    const {pieceMoved,setPieceMoved} = useOnMessageHandlerState();
     // A reference to the whole board, to get cordiantes to the board
     const boardRef = useRef<HTMLDivElement>(null);
     // The piece that is currently dragged under the cursor
@@ -83,12 +86,10 @@ export const Board = ({board,color,setBoard,makeMove,pieceMovedRef,boardSide}:{b
                     const newSquare = squareIndexToKey(row,col);
                     squareRef.current = newSquare;
                     // Also hide the piece on the clicked square
-                    setBoard(board => {
-                        let newBoard =  structuredClone(board);
-                        pieceMovedRef.current = piece;
-                        newBoard[row][col] = Pieces.NN;
-                        return newBoard;
-                    });
+                    let newBoard =  structuredClone(board);
+                    setPieceMoved(piece);
+                    newBoard[row][col] = Pieces.NN;
+                    setBoard(newBoard)
                 }
             }
         }
@@ -103,7 +104,7 @@ export const Board = ({board,color,setBoard,makeMove,pieceMovedRef,boardSide}:{b
             const [targetRow,targetCol] = getSquareBeingClicked(ev);
             if(targetRow != -1){
                 const moveString = moveIndexToChars([sourceRow,sourceCol,targetRow,targetCol]);
-                const isValidMove = isMoveOk(board,moveString,color,0);
+                const isValidMove = isMoveOk(board,moveString,color || colors.Random ,0);
                 // If valid move then make the move
                 if(isValidMove){
                     makeMove(moveString);
@@ -111,13 +112,11 @@ export const Board = ({board,color,setBoard,makeMove,pieceMovedRef,boardSide}:{b
             }
 
             // Clean up
-            setBoard(board => {
-                let newBoard = structuredClone(board);
-                if(pieceMovedRef.current != null){
-                    newBoard[sourceRow][sourceCol] = pieceMovedRef.current;
-                }
-                return newBoard;
-            })
+            let newBoard = structuredClone(board);
+            if(setPieceMoved!= null){
+                newBoard[sourceRow][sourceCol] = pieceMoved;
+            }
+            setBoard(newBoard)
             squareRef.current = null;
             pieceComponentRef.current = null;
         }
