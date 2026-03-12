@@ -57,8 +57,10 @@ export const useGame = create<gameStartState>((set) => ({
                 let data = JSON.parse(message.data);
                 const {inMove,pieceMoved,setInMove,setWinner,} = useOnMessageHandlerState.getState();
                 const {gameState,setGameState,board,setBoard,setColor,color} = useGame.getState();
+                console.log(data)
                 // Handle starting of game
                 if(gameState == gameStateType.waiting){
+                    console.log("Game starting")
                     data = data as startGameResponse;
                     if(data.start){
                         setGameState(gameStateType.running);
@@ -69,6 +71,7 @@ export const useGame = create<gameStartState>((set) => ({
                     data = data as moveSocketResponse;
                     // Handle move made by current player being conformed
                     if(inMove){
+                        console.log("Move Confirmed")
                         setInMove(false)
                         if(!data.error){
                             const moveIndex = moveCharsToIndex(data.move);
@@ -79,10 +82,22 @@ export const useGame = create<gameStartState>((set) => ({
                                 newBoard[sRow][sCol] = Pieces.NN;
                                 setBoard(newBoard);
                             }
+                            // If game ended
+                            if(data.over){
+                                setGameState(gameStateType.ended);
+                                const colorC = color ? color : colors.White;
+                                if(data.winner){
+                                    setWinner(colorC)
+                                }
+                                else{
+                                    setWinner(colorC == colors.White ? colors.Black : colors.White);
+                                }
+                            }
                         }
                     }
                     // Handle other player making a move
                     else if(!data.over){
+                        console.log("Move made by other player")
                         const moveIndex = moveCharsToIndex(data.move);
                         if(moveIndex){
                             const [sRow,sCol,tRow,tCol] = moveIndex;
@@ -94,7 +109,7 @@ export const useGame = create<gameStartState>((set) => ({
                     }
                     // Handle game ending
                     else{
-                        console.log("Game Over")
+                        console.log("Game ended")
                         setGameState(gameStateType.ended);
                         const colorC = color ? color : colors.White;
                         if(data.winner){
