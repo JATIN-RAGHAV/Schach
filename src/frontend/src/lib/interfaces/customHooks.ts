@@ -7,6 +7,12 @@ import { color as colors } from "../../../../common/interfaces/enums";
 import { startGame } from "../network/websocket";
 import { useOnMessageHandlerState } from "./onMessageHandlerState";
 
+// Sounds
+const normalMoveAudio = new Audio("/move-self.mp3");
+const captureMoveAudio = new Audio("/capture.mp3");
+normalMoveAudio.volume = 0.5;
+captureMoveAudio.volume = 0.5;
+
 export interface gameStartState{
     gameType:gameTypes|null,
     gameState:gameStateType,
@@ -37,12 +43,12 @@ export const useGame = create<gameStartState>((set) => ({
         setSocket:(socket:WebSocket) => set({socket}),
         setBoard:(board:Board) => set({board}),
         connect:(color:colors,gameType:gameTypes,increment:number,setStart:React.Dispatch<React.SetStateAction<boolean>>) => {
-            const res = startGame(color,gameType,increment);
-            res.onopen = () => {
-                set({color,gameType,gameIncrement:increment,socket:res})
+            const socket = startGame(color,gameType,increment);
+            socket.onopen = () => {
+                set({color,gameType,gameIncrement:increment,socket:socket})
                 setStart(true);
             }
-            res.onerror = (err) => {
+            socket.onerror = (err) => {
                 console.error("Error starting game",err);
                 alert("Error starting game");
             }
@@ -53,14 +59,12 @@ export const useGame = create<gameStartState>((set) => ({
              * 3-> Message to give a move by other player
              * 4-> Message to confirm the move made by current player
              */
-            res.onmessage = ((message:MessageEvent<any>) => {
+            socket.onmessage = ((message:MessageEvent<any>) => {
                 let data = JSON.parse(message.data);
                 const {inMove,pieceMoved,setInMove,setWinner,} = useOnMessageHandlerState.getState();
                 const {gameState,setGameState,board,setBoard,setColor,color} = useGame.getState();
-                console.log(data)
                 // Handle starting of game
                 if(gameState == gameStateType.waiting){
-                    console.log("Game starting")
                     data = data as startGameResponse;
                     if(data.start){
                         setGameState(gameStateType.running);
@@ -71,7 +75,6 @@ export const useGame = create<gameStartState>((set) => ({
                     data = data as moveSocketResponse;
                     // Handle move made by current player being conformed
                     if(inMove){
-                        console.log("Move Confirmed")
                         setInMove(false)
                         if(!data.error){
                             const moveIndex = moveCharsToIndex(data.move);
@@ -81,6 +84,14 @@ export const useGame = create<gameStartState>((set) => ({
                                 newBoard[tRow][tCol] = pieceMoved;
                                 newBoard[sRow][sCol] = Pieces.NN;
                                 setBoard(newBoard);
+
+                                // Play sound
+                                if(board[tRow][tCol] == Pieces.NN){
+                                    normalMoveAudio.play();
+                                }
+                                else{
+                                    captureMoveAudio.play();
+                                }
                             }
                             // If game ended
                             if(data.over){
@@ -97,7 +108,6 @@ export const useGame = create<gameStartState>((set) => ({
                     }
                     // Handle other player making a move
                     else if(!data.over){
-                        console.log("Move made by other player")
                         const moveIndex = moveCharsToIndex(data.move);
                         if(moveIndex){
                             const [sRow,sCol,tRow,tCol] = moveIndex;
@@ -105,11 +115,18 @@ export const useGame = create<gameStartState>((set) => ({
                             newBoard[sRow][sCol] = Pieces.NN;
                             newBoard[tRow][tCol] = board[sRow][sCol];
                             setBoard(newBoard)
+
+                            // Play sound
+                            if(board[tRow][tCol] == Pieces.NN){
+                                normalMoveAudio.play();
+                            }
+                            else{
+                                captureMoveAudio.play();
+                            }
                         }
                     }
                     // Handle game ending
                     else{
-                        console.log("Game ended")
                         setGameState(gameStateType.ended);
                         const colorC = color ? color : colors.White;
                         if(data.winner){
@@ -123,4 +140,4 @@ export const useGame = create<gameStartState>((set) => ({
             })
         }
 }
-                                                       ))
+))
