@@ -54,27 +54,21 @@ export const useGame = create<gameStartState>((set) => ({
              * 4-> Message to confirm the move made by current player
              */
             res.onmessage = ((message:MessageEvent<any>) => {
-                console.log("On message handler working")
                 let data = JSON.parse(message.data);
                 const {inMove,pieceMoved,setInMove,setWinner,} = useOnMessageHandlerState.getState();
                 const {gameState,setGameState,board,setBoard,setColor,color} = useGame.getState();
                 // Handle starting of game
                 if(gameState == gameStateType.waiting){
-                    console.log(gameState)
-                    console.log("waiting for start of game")
                     data = data as startGameResponse;
                     if(data.start){
-                        console.log("game starting")
                         setGameState(gameStateType.running);
                         setColor(data.color);
                     }
                 }
                 else{
-                    console.log("not start of game.")
                     data = data as moveSocketResponse;
                     // Handle move made by current player being conformed
                     if(inMove){
-                        console.log("In a move")
                         setInMove(false)
                         if(!data.error){
                             const moveIndex = moveCharsToIndex(data.move);
@@ -100,17 +94,18 @@ export const useGame = create<gameStartState>((set) => ({
                     }
                     // Handle game ending
                     else{
+                        console.log("Game Over")
                         setGameState(gameStateType.ended);
                         const colorC = color ? color : colors.White;
                         if(data.winner){
                             setWinner(colorC)
                         }
                         else{
-                            setWinner(colorC);
+                            setWinner(colorC == colors.White ? colors.Black : colors.White);
                         }
                     }
                 }
             })
         }
 }
-                                                           ))
+                                                       ))

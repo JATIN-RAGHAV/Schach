@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export const MousePieceDraggalbe = ({Piece,size}:{Piece:React.FC<{size: number;}> | null,size:number}) => {
+export const MousePieceDraggalbe = ({Piece,size}:{Piece:React.RefObject<React.FC<{size: number}> | null> ,size:number}) => {
     // Store the mouse positions in state to update to the right place
     const pieceRef = useRef<HTMLSpanElement>(null);
 
@@ -27,6 +27,8 @@ export const MousePieceDraggalbe = ({Piece,size}:{Piece:React.FC<{size: number;}
     })
 
     return <span ref={pieceRef} className={`fixed top-0 left-0 translate-x-[-50%] translate-y-[-50%]`} >
-    {Piece != null && <Piece size={size} />}
+    {
+        Piece.current == null || <Piece.current size={size} />
+    }
     </span>
 }

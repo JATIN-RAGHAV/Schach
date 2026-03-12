@@ -550,7 +550,6 @@ export const isMoveOk = (board:Board,move:string,color:colors,specialMoveFlags:n
     let sourceSquare = sourceRow[sCol] as Pieces;
     let targetSquare = targetRow[tCol] as Pieces;
     const purePiece = purePiecesMap.get(sourceSquare);
-
     // Check whether the move makes sense on it's own
     if(!isMoveOkWithoutContext(board,[sRow,sCol,tRow,tCol],color,specialMoveFlags)){
         return false;

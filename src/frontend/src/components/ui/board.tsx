@@ -9,8 +9,8 @@ import { useGame } from "@/lib/interfaces/customHooks";
 import { useOnMessageHandlerState } from "@/lib/interfaces/onMessageHandlerState";
 
 export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSide:colors}) => {
-    const {board,color,setBoard} = useGame();
-    const {pieceMoved,setPieceMoved} = useOnMessageHandlerState();
+    const {board,color,setBoard} = useGame.getState();
+    const {pieceMoved,setPieceMoved} = useOnMessageHandlerState.getState();
     // A reference to the whole board, to get cordiantes to the board
     const boardRef = useRef<HTMLDivElement>(null);
     // The piece that is currently dragged under the cursor
@@ -20,7 +20,6 @@ export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSi
     const boardShownRef = useRef<BoardType>(board);
 
     boardShownRef.current = structuredClone(board);
-    console.log(boardSide)
     /*
      * By default we have a1 at the top left,
      * For White at bottom we have to swap the rows, ie: make row[0] = row[7]
@@ -55,16 +54,15 @@ export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSi
             }
         }
         // In case of black we reverse the rows individually -> row[0][0] <=> row[0][7]
-        console.log("origianl",row,col)
-        console.log(boardSide)
-        if(boardSide == colors.Black){
-            col = 7 - col;
+        if(row != -1){
+            if(boardSide == colors.Black){
+                col = 7 - col;
+            }
+            else{
+                // In case of white we reversed the row -> row[0] <=> row[7]
+                row = 7 - row;
+            }
         }
-        else{
-            // In case of white we reversed the row -> row[0] <=> row[7]
-            row = 7 - row;
-        }
-        console.log("updated",row,col)
         return [row,col];
     }
 
@@ -94,7 +92,6 @@ export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSi
             }
         }
     }
-
     // Handle what happens when mouse click is unclicked
     const handleMouseUp = (ev:MouseEvent) => {
         // If we were dragging a piece or not
@@ -102,25 +99,29 @@ export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSi
             // Get the source and targe squares
             const [sourceRow,sourceCol] = squareKeyToIndex(squareRef.current);
             const [targetRow,targetCol] = getSquareBeingClicked(ev);
+
+            // Put the piece back
+            let originalBoard = structuredClone(board);
+            if(pieceMoved != null){
+                originalBoard[sourceRow][sourceCol] = pieceMoved;
+            }
+
             if(targetRow != -1){
                 const moveString = moveIndexToChars([sourceRow,sourceCol,targetRow,targetCol]);
-                const isValidMove = isMoveOk(board,moveString,color || colors.Random ,0);
+                const isValidMove = isMoveOk(originalBoard,moveString,color || colors.Random ,0);
                 // If valid move then make the move
                 if(isValidMove){
                     makeMove(moveString);
                 }
             }
 
-            // Clean up
-            let newBoard = structuredClone(board);
-            if(setPieceMoved!= null){
-                newBoard[sourceRow][sourceCol] = pieceMoved;
-            }
-            setBoard(newBoard)
+            // Reset the state
+            setBoard(originalBoard)
             squareRef.current = null;
             pieceComponentRef.current = null;
         }
     }
+
 
     useEffect(() => {
         // Add even listener to mouse Being clicked
@@ -142,7 +143,7 @@ export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSi
      * Because the getSquareBeingClicked function is dependant on the boardSide
      * Which affects the handler functions
     */
-    }, [boardSide]); 
+    }, [boardSide,boardRef,handleMouseDown,handleMouseUp]); 
 
     const windowWidth = window.innerWidth;
     let cellSize = 45;
@@ -153,7 +154,7 @@ export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSi
         cellSize = (windowWidth*0.50)/8;
     }
     return <div className="w-full flex items-center justify-center">
-    <MousePieceDraggalbe Piece={pieceComponentRef.current} size={cellSize} />
+    <MousePieceDraggalbe Piece={pieceComponentRef} size={cellSize} />
     <div ref={boardRef} className={`w-[${cellSize * 8}px] h-[${cellSize*8}px] flex border rounded-xl overflow-clip flex-col items-center justify-center`}>{
         boardShownRef.current.map((row,rowI) => {
             return <div key={`${rowI}`} className={`w-full h-${cellSize}px flex flex-row items-center justify-center`}>
