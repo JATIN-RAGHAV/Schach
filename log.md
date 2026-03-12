@@ -111,3 +111,11 @@ And then we start the game.
 - - Flip board according to the player's color ( Keep a state variable color )
 - - - Added a new state variable at the board page level which is passed to a flip button and the board. And the setter is passed to the flip button only.
 - - Add the onMessage handler to the websocket on the start page itself, since adding it later on, on the play page is too late and the message has already been sent by the backend.
+
+## Date: 2026-03-11
+- Fix the bugs.
+
+- Persistent Session after reload of page or close of tab for 20 seconds.
+- - The backend must change. It must keep a track of all the on going sockets and when a sockect closes while in a game two things happen.
+- - - A settime out is set for 20 second and a reference to it is stored in a variable. where the key would be a token given to the palyer at start of the game.And a socket request comes with that token from the same user then. the settimeout is called off. Otherwise it cleans up game state and tells the other user that they won.
+- - - We tell the other user that this user is gone and they will see a 20 second timer, and if the gone user comes back then another socket message is sent to this user and they continue the game and remove the timer. Other wise they get a victory message.
