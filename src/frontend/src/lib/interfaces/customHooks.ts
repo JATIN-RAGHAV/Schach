@@ -26,7 +26,8 @@ export interface gameStartState{
         setGameIncrement:(gameIncrement:number) => void,
         setSocket:(socket:WebSocket) => void,
         setBoard:(board:Board) => void,
-        connect:(color:colors,gameType:gameTypes,increment:number,setStart:React.Dispatch<React.SetStateAction<boolean>>) => void
+        connect:(color:colors,gameType:gameTypes,increment:number,setStart:React.Dispatch<React.SetStateAction<boolean>>) => void,
+    disconnect:() => void
 }
 
 export const useGame = create<gameStartState>((set) => ({
@@ -42,6 +43,9 @@ export const useGame = create<gameStartState>((set) => ({
         setGameIncrement:(gameIncrement:number) => set({gameIncrement}),
         setSocket:(socket:WebSocket) => set({socket}),
         setBoard:(board:Board) => set({board}),
+        disconnect:() => {
+        useGame.getState().socket?.close();
+    },
         connect:(color:colors,gameType:gameTypes,increment:number,setStart:React.Dispatch<React.SetStateAction<boolean>>) => {
             const socket = startGame(color,gameType,increment);
             socket.onopen = () => {

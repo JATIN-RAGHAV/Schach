@@ -4,12 +4,14 @@ import { LoginForm } from "@/components/forms/login-form"
 import { useNavigate } from "react-router"
 import { useEffect } from "react";
 import { navigateBasedOnLogin } from "@/lib/utils";
+import { useGame } from "@/lib/interfaces/customHooks";
 
 export default function LoginPage() {
-
+    const {disconnect} = useGame();
     const navigate = useNavigate();
 
     useEffect(() => {
+        disconnect();
         navigateBasedOnLogin(() => 
                              {navigate("/",{replace:true})},
                              true)

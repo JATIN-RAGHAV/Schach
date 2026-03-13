@@ -15,13 +15,13 @@ import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import { useGame } from "@/lib/interfaces/customHooks"
-import {  navigateBasedOnLogin } from "@/lib/utils"
+import { navigateBasedOnLogin } from "@/lib/utils"
 export const GamePage = () => {
     const [gameType,setGameType] = useState<gameTypes>(gameTypes.Rapid);
     const [color,setcolor] = useState<colors>(colors.Random);
     const [gameIncrement,setGameIncrement] = useState<string>("0");
     const [start,setStart] = useState<boolean>(false);
-    const {connect} = useGame()
+    const {connect,disconnect} = useGame()
     const navigate = useNavigate();
     useEffect(() => {
         if(start){
@@ -30,6 +30,7 @@ export const GamePage = () => {
     },[start])
     
     useEffect(() => {
+        disconnect();
         navigateBasedOnLogin(() => {
             navigate("/login",{replace:true})
         },false)

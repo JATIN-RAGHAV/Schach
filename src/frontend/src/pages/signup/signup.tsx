@@ -4,13 +4,14 @@ import { SignupForm } from "@/components/forms/singup-form"
 import { useEffect } from "react"
 import { navigateBasedOnLogin } from "@/lib/utils"
 import { useNavigate } from "react-router"
+import { useGame } from "@/lib/interfaces/customHooks"
 
 export default function SignupPage() {
-    
+    const {disconnect} = useGame();
     const navigate = useNavigate();
 
-
     useEffect(() => {
+        disconnect();
         navigateBasedOnLogin(() => 
                              {navigate("/",{replace:true})},
                              true)
