@@ -27,3 +27,15 @@ export const navigateBasedOnLogin = async (navigate:()=>void,when:boolean) => {
         navigate();
     }
 }
+
+export const getCellSize = () => {
+    const windowWidth = window.innerWidth;
+    let cellSize = 45;
+    if(windowWidth <= 500){
+        cellSize = (windowWidth*0.9)/8;
+    }
+    else{
+        cellSize = (windowWidth*0.50)/8;
+    }
+    return cellSize;
+}

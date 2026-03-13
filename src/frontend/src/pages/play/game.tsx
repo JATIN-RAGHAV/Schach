@@ -7,8 +7,9 @@ import { gameState as gameStateType} from "./lib";
 import { Button } from "@/components/ui/button";
 import { BlackKing, WhiteKing } from "@/assets/pieces";
 import { useOnMessageHandlerState } from "@/lib/interfaces/onMessageHandlerState";
-import { isUserLoggedIn, navigateBasedOnLogin } from "@/lib/utils";
+import { navigateBasedOnLogin } from "@/lib/utils";
 import { useNavigate } from "react-router";
+import { PlayLoading } from "@/components/ui/playLoading";
 
 export const Play = () => {
     const [boardSide,setBoardSide] = useState<colors>(colors.Random);// Random means game has not started
@@ -47,7 +48,7 @@ export const Play = () => {
     },[])
 
     if(gameState == gameStateType.waiting){
-        return <div>Loading...</div>
+        return <PlayLoading/>
     }
     else if(gameState == gameStateType.running){
         return (

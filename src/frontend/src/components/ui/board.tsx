@@ -1,7 +1,7 @@
 import { PieceComponents } from "@/assets/pieces";
 import { type Board as BoardType, type Row } from "../../../../common/interfaces/game";
 import { useEffect, useRef } from "react";
-import { squareIndexToKey, squareKeyToIndex } from "@/lib/utils";
+import { getCellSize, squareIndexToKey, squareKeyToIndex } from "@/lib/utils";
 import {color as colors, Pieces, piecesColorMap } from "../../../../common/interfaces/enums";
 import { MousePieceDraggalbe } from "./mousePieceDraggable";
 import { isMoveOk, moveIndexToChars } from "../../../../common/game";
@@ -145,14 +145,7 @@ export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSi
     */
     }, [boardSide,boardRef,handleMouseDown,handleMouseUp]); 
 
-    const windowWidth = window.innerWidth;
-    let cellSize = 45;
-    if(windowWidth <= 500){
-        cellSize = (windowWidth*0.9)/8;
-    }
-    else{
-        cellSize = (windowWidth*0.50)/8;
-    }
+    let cellSize = getCellSize();
     return <div className="w-full flex items-center justify-center">
     <MousePieceDraggalbe Piece={pieceComponentRef} size={cellSize} />
     <div ref={boardRef} className={`w-[${cellSize * 8}px] h-[${cellSize*8}px] flex border rounded-xl overflow-clip flex-col items-center justify-center`}>{
