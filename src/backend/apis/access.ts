@@ -54,3 +54,7 @@ access.post('/login', async ({ body }) => {
         };
     }
 });
+
+access.get('/me', async ({body}) => {
+
+})

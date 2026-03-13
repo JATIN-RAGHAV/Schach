@@ -7,11 +7,14 @@ import { gameState as gameStateType} from "./lib";
 import { Button } from "@/components/ui/button";
 import { BlackKing, WhiteKing } from "@/assets/pieces";
 import { useOnMessageHandlerState } from "@/lib/interfaces/onMessageHandlerState";
+import { isUserLoggedIn, navigateBasedOnLogin } from "@/lib/utils";
+import { useNavigate } from "react-router";
 
 export const Play = () => {
     const [boardSide,setBoardSide] = useState<colors>(colors.Random);// Random means game has not started
     const {winner,setInMove} = useOnMessageHandlerState();
     const {color,socket,gameType,gameState,gameIncrement} = useGame();
+    const navigate = useNavigate();
 
     // Function to pass to board component to call and make a move
     const makeMove = (move:string) => {
@@ -37,6 +40,11 @@ export const Play = () => {
         }
     },[color])
 
+    useEffect(() => {
+        navigateBasedOnLogin(() => 
+                             {navigate("/login",{replace:true})},
+                             false)
+    },[])
 
     if(gameState == gameStateType.waiting){
         return <div>Loading...</div>

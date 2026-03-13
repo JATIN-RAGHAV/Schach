@@ -2,6 +2,7 @@ import { errorPlugin } from './errorPlugin';
 import JWT from '../../helper/jwt';
 import { type JWT_PAYLOAD } from '../../interfaces/jwt_payload';
 
+// This adds user:{username,userId} to the context.
 const authPlugin = errorPlugin.resolve(async ({ query }) => {
     // Verify query exists
     if (query == undefined) {

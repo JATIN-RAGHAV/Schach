@@ -83,6 +83,13 @@ export function LoginForm({
                     }}
                     >Login</Button>
                     </Field>
+
+                    <Field>
+                    <div className="flex justify-start flex-row">
+                    New here? 
+                    <Button variant="link" size="sm" className="inline" onClick={() => {navigate("/signup")}}>Create new</Button>
+                    </div>
+                    </Field>
                     {error}
                     {
                         // <FieldSeparator className="*:data-[slot=field-separator-content]:bg-muted dark:*:data-[slot=field-separator-content]:bg-card">

@@ -46,3 +46,31 @@ Response:
     token: String
 }
 ```
+
+
+## Get User Info
+
+Url:
+```bash
+POST https:/url/user/me
+```
+
+Headers:
+```bash
+Authorization: Bearer <token>
+
+```
+
+Body:
+```typescript
+{}
+
+```
+
+Response:
+```typescript
+{
+    username:string,
+    userId:string
+}
+```

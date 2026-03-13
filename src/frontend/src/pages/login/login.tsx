@@ -1,32 +1,45 @@
 import { GalleryVerticalEnd } from "lucide-react"
 
 import { LoginForm } from "@/components/forms/login-form"
+import { useNavigate } from "react-router"
+import { useEffect } from "react";
+import { navigateBasedOnLogin } from "@/lib/utils";
 
 export default function LoginPage() {
-  return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        navigateBasedOnLogin(() => 
+                             {navigate("/",{replace:true})},
+                             true)
+    },[])
+
+
+    return (
+        <div className="grid min-h-svh lg:grid-cols-2">
+        <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <GalleryVerticalEnd className="size-4" />
-            </div>
-            Schach
-          </a>
+        <a href="#" className="flex items-center gap-2 font-medium">
+        <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+        <GalleryVerticalEnd className="size-4" />
+        </div>
+        Schach
+        </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <LoginForm />
-          </div>
+        <div className="w-full max-w-xs">
+        <LoginForm />
         </div>
-      </div>
-      <div className="bg-muted relative hidden lg:block">
+        </div>
+        </div>
+        <div className="bg-muted relative hidden lg:block">
         <img
-          src="/src/assets/Mikhail_Tal.jpg"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.8] dark:grayscale"
+        src="/src/assets/Mikhail_Tal.jpg"
+        alt="Image"
+        className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.8] dark:grayscale"
         />
-      </div>
-    </div>
-  )
+        </div>
+        </div>
+    )
 }

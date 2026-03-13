@@ -67,3 +67,21 @@ export const loginUser = async (username: string, password: string):Promise<bool
         return false;
     }
 }
+
+export const getUserInfo = async ():Promise<{username:string,userId:string}|null>=> {
+    const route = "http://" + baseUrl + "/user/me";
+    const token = localStorage.getItem("token");
+    if(!token){
+        return null;
+    }
+    try{
+        const res = await axios.get(route,{headers:{
+            Authorization:"Bearer "+ token
+        }});
+        res.data as {username:string,userId:string};
+        return res.data;
+    }
+    catch(err){
+        return null;
+    }
+}

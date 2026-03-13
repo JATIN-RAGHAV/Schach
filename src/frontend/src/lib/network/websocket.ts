@@ -15,7 +15,6 @@ export const startGame = (color:colors,gameType:gameTypes,increment:number)=>{
     const token = localStorage.getItem('token');
     const url = "ws://" + baseUrl + "/game/run";
     const route = `${url}?authorization=Bearer ${token}&color=${color}&time=${time}&increment=${increment}`;
-    console.log(route);
 
     // Start a ws connection with the server at the given route
     const ws = new WebSocket(route);
