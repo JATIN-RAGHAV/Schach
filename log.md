@@ -119,3 +119,11 @@ And then we start the game.
 - - The backend must change. It must keep a track of all the on going sockets and when a sockect closes while in a game two things happen.
 - - - A settime out is set for 20 second and a reference to it is stored in a variable. where the key would be a token given to the palyer at start of the game.And a socket request comes with that token from the same user then. the settimeout is called off. Otherwise it cleans up game state and tells the other user that they won.
 - - - We tell the other user that this user is gone and they will see a 20 second timer, and if the gone user comes back then another socket message is sent to this user and they continue the game and remove the timer. Other wise they get a victory message.
+
+- Added sounds to moves.
+- If use not logged in then should be redirected to login page.
+
+## Date: 2026-03-12
+- Make the UI work fully on frontend.
+- - Page navigation.
+- - User redirection to login page if not logged in.

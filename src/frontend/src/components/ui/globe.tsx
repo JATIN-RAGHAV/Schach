@@ -1,12 +1,13 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import createGlobe, { type COBEOptions } from "cobe"
 import { useMotionValue, useSpring } from "motion/react"
 
 import { cn } from "@/lib/utils"
+import { getLocation } from "@/pages/home/lib"
 
 const MOVEMENT_DAMPING = 1400
 
-const GLOBE_CONFIG: COBEOptions = {
+let GLOBE_CONFIG: COBEOptions = {
   width: 800,
   height: 800,
   onRender: () => {},
@@ -20,10 +21,8 @@ const GLOBE_CONFIG: COBEOptions = {
   baseColor: [1, 1, 1],
   markerColor: [251 / 255, 100 / 255, 21 / 255],
   glowColor: [1, 1, 1],
-    // Add location for meerut and sarajevo
   markers: [
-        { location: [28.9845, 77.7064], size: 0.05 }, // Meerut
-        { location: [43.8563, 18.4131], size: 0.05 }, // Sarajevo
+        { location: [0, 0], size: 0.1 },
   ],
 }
 
@@ -34,6 +33,23 @@ export function Globe({
   className?: string
   config?: COBEOptions
 }) {
+    const [updated,setUpdated] = useState(false);
+
+    useEffect(() => {
+        const setLocation = async () => {
+            const location = await getLocation();
+            if(location[0] != 200){
+                GLOBE_CONFIG.markers[0].location[0] = location[0];
+                GLOBE_CONFIG.markers[0].location[1] = location[1];
+            }
+            setUpdated(true);
+        }
+        if(!updated){
+            setLocation();
+        }
+        console.log(updated)
+    },[updated]);
+
   let phi = 0
   let width = 0
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -95,7 +111,7 @@ export function Globe({
     <abbr
             title="Globe"
       className={cn(
-        "absolute inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]",
+        "inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]",
         className
       )}
     >
