@@ -21,9 +21,7 @@ let GLOBE_CONFIG: COBEOptions = {
   baseColor: [1, 1, 1],
   markerColor: [251 / 255, 100 / 255, 21 / 255],
   glowColor: [1, 1, 1],
-  markers: [
-        { location: [0, 0], size: 0.1 },
-  ],
+  markers: [],
 }
 
 export function Globe({

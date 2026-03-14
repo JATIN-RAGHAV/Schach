@@ -127,3 +127,10 @@ And then we start the game.
 - Make the UI work fully on frontend.
 - - Page navigation.
 - - User redirection to login page if not logged in.
+
+## Date: 2026-03-14
+- Divide the pages in the play page into components, one for the Loading, one for end screen and one for game play in the same file.
+
+# Bugs
+- One queen can take other with piece in between
+

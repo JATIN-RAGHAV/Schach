@@ -35,7 +35,7 @@ export const useGame = create<gameStartState>((set) => ({
     color:null,
     gameIncrement:null,
     socket:null,
-    gameState:gameStateType.waiting,
+    gameState:gameStateType.noSocket,
     board:initBoard(),
     setGameState:(gameState:gameStateType) => set({gameState}),
         setGameType:(gameType:gameTypes) => set({gameType}),
@@ -44,18 +44,28 @@ export const useGame = create<gameStartState>((set) => ({
         setSocket:(socket:WebSocket) => set({socket}),
         setBoard:(board:Board) => set({board}),
         disconnect:() => {
+        const {setWinner} = useOnMessageHandlerState.getState();
+        setWinner(null);
+        set({gameState:gameStateType.noSocket})
         useGame.getState().socket?.close();
     },
         connect:(color:colors,gameType:gameTypes,increment:number,setStart:React.Dispatch<React.SetStateAction<boolean>>) => {
+            const {disconnect} = useGame.getState();
+            disconnect();
             const socket = startGame(color,gameType,increment);
             socket.onopen = () => {
-                set({color,gameType,gameIncrement:increment,socket:socket})
+                set({color,gameType,gameIncrement:increment,socket:socket,gameState:gameStateType.waiting})
                 setStart(true);
             }
             socket.onerror = (err) => {
                 console.error("Error starting game",err);
                 alert("Error starting game");
             }
+
+            socket.onclose = () => {
+                set({gameState:gameStateType.noSocket});
+            }
+
             /*
              * A message could mean a couple of things
              * 1-> Message to indicate start of game

@@ -65,5 +65,6 @@ export const game2 = [
     'g2g3','e4e3',
     'h2g2','f1f2',
     'g2g1','d6d1',
-
 ]
+
+export const gameGoingOverPieces = ['d1d8','e8d8'];

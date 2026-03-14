@@ -1,4 +1,4 @@
 import { runGame } from "./testGame";
-import { game2 } from "./games";
+import { gameGoingOverPieces } from "./games";
 
-runGame(game2,1000)
+runGame(gameGoingOverPieces,1000)

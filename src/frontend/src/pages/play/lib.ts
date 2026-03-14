@@ -1,5 +1,6 @@
 export enum gameState {
     running="running",
     ended="ended",
-    waiting="waiting"
+    waiting="waiting",
+    noSocket="noSocket"
 }

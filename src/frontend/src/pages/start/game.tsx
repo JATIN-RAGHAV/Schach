@@ -111,7 +111,6 @@ export const GamePage = () => {
                 </Select>
             </div>
             <Button onClick={()=> {
-                console.log("hi")
                 connect(color,gameType,parseInt(gameIncrement),setStart);
             }}
             className="w-full max-w-sm">Start Game</Button>

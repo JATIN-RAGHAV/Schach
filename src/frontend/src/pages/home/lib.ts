@@ -30,14 +30,13 @@ export const getGlobeConfig = async ():Promise<COBEOptions> => {
         baseColor: [1, 1, 1],
         markerColor: [251 / 255, 100 / 255, 21 / 255],
         glowColor: [1, 1, 1],
-        markers: [
-            { location: [0, 0], size: 0.1 },
-        ],
+        markers: [],
     }
 
     if(location[0] != 200){
-        config.markers[0].location[0] = location[0];
-        config.markers[0].location[1] = location[1];
+        config.markers.push(
+            { location: [location[0], location[1]], size: 0.3 },
+        )
     }
 
     return config;
