@@ -453,7 +453,7 @@ export const arePieceInMiddle = (board:Board,move:moveIndex,color:colors) => {
     // Check for pieces in the middle
     const rowDir = (dy != 0 ? dy/(Math.abs(dy)) : 0 );
     const colDir = (dx != 0 ? dx/(Math.abs(dx)) : 0 );
-    for(let cRow=sRow+rowDir,cCol=sCol+colDir; cRow!=tRow && cCol!=tCol ; cRow+=rowDir,cCol+=colDir){
+    for(let cRow=sRow+rowDir,cCol=sCol+colDir; cRow!=tRow || cCol!=tCol ; cRow+=rowDir,cCol+=colDir){
         const cRowFull = board[cRow] as Row;
         const cPiece = cRowFull[cCol] as Pieces;
         if(cPiece != Pieces.NN){
