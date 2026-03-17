@@ -132,7 +132,7 @@ export const useGameState = create<gameState>((set) => ({
                     setWhiteTimeLeft(time);
                     setBlackTimeLeft(time);
 
-                    if(color == colors.White){
+                    if(data.color == colors.White){
                         setBlackUserName(data.opponentName)
                         setWhiteUserName(userName)
                     }

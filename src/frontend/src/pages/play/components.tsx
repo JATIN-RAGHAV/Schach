@@ -37,6 +37,8 @@ export const PlayPage = () => {
         }
     }
 
+    console.log(whiteUserName)
+    console.log(blackUserName)
     return (
         <div>
 
