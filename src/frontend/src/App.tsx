@@ -11,16 +11,16 @@ function App() {
 
     return (
         <>
-        <BrowserRouter>
-        <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/login' element={<LoginPage/>}/>
-        <Route path='/signup' element={<SignupPage />}/>
-        <Route path='/start' element={<GamePage/>}/>
-        <Route path='/play' element={<Play/>}/>
-        </Routes>
-        </BrowserRouter>
-        <ThemeButton/>
+            <BrowserRouter>
+                <Routes>
+                    <Route path='/' element={<Home/>}/>
+                    <Route path='/login' element={<LoginPage/>}/>
+                    <Route path='/signup' element={<SignupPage />}/>
+                    <Route path='/start' element={<GamePage/>}/>
+                    <Route path='/play' element={<Play/>}/>
+                </Routes>
+            </BrowserRouter>
+            <ThemeButton/>
         </>
     )
 }

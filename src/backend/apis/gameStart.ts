@@ -5,7 +5,7 @@ import { gameCreatePlugin } from './plugins/gameApiPlugins';
 import type { gameQueueObject } from '../database/interfaces';
 import { isGameEnded, isMoveOk, printBoard, updateGameObject } from '../../common/game';
 import type { ElysiaWS } from 'elysia/ws';
-import { gameOverReasons, moveSocketRequestZod, type gameObject,  type moveSocketResponse } from '../../common/interfaces/game';
+import { gameOverReasons, moveSocketRequestZod, type gameObject,  type moveSocketResponse ,startGameResponse} from '../../common/interfaces/game';
 import { getResponsePostMove } from '../helper/game';
 
 export const gameRun = gameCreatePlugin.ws('/game/run', {
@@ -74,14 +74,18 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             );
 
             // Tell the users that their games has started
-            whiteSocket.send({
+            const whiteStartResponse: startGameResponse = {
                 start: true,
                 color: colorType.White,
-            });
-            blackSocket.send({
+                opponentName: blackUsername,
+            }
+            const blackStartResponse: startGameResponse = {
                 start: true,
                 color: colorType.Black,
-            });
+                opponentName: whiteUsername,
+            }
+            whiteSocket.send(whiteStartResponse);
+            blackSocket.send(blackStartResponse);
             return;
         }
         Data.addGameQueue(currentUserId, currentPlayer, color, time, increment);
@@ -185,7 +189,7 @@ export const gameRun = gameCreatePlugin.ws('/game/run', {
             const oppoId = Data.getUserOppo(userId)
             // If the other player left
             if(oppoId){
-            console.log(`Opponent left`)
+                console.log(`Opponent left`)
                 const oppoSocket = Data.getUserIdSocket(oppoId) as ElysiaWS;
                 const responseObject:moveSocketResponse = {
                     winner:true,

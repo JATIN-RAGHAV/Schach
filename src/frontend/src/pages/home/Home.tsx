@@ -5,13 +5,13 @@ import { getGlobeConfig } from "./lib";
 import { useEffect, useState } from "react";
 import type { COBEOptions } from "cobe";
 import { navigateBasedOnLogin } from "@/lib/utils";
-import { useGame } from "@/lib/interfaces/customHooks";
+import { useGameState } from "@/lib/states/gameState";
 
 const Home = () => {
     const navigate = useNavigate();
-    const {disconnect} = useGame();
+    const {disconnect} = useGameState();
     const [globeConfig, setGlobeConfig] = useState<COBEOptions | undefined>(undefined);
-    
+
     useEffect(() => {
         const getConfig = async () => {
             const config = await getGlobeConfig();
@@ -23,22 +23,22 @@ const Home = () => {
     useEffect(() => {
         disconnect();
         navigateBasedOnLogin(() => 
-                             {navigate("/login",{replace:true})},
-                             false)
+        {navigate("/login",{replace:true})},
+            false)
     },[])
 
     return <div className="w-dvw h-dvh flex items-center justify-center align-middle flex-col">
-    <div className="font-bold text-4xl">
-        Schach
-    </div>
-    <Globe config={globeConfig}/>
-    <Button className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-    onClick={() => {
-        navigate("/start");
-    }}
-    >
-    Play!
-    </Button>
+        <div className="font-bold text-4xl">
+            Schach
+        </div>
+        <Globe config={globeConfig}/>
+        <Button className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            onClick={() => {
+                navigate("/start");
+            }}
+        >
+            Play!
+        </Button>
     </div>
 
 }

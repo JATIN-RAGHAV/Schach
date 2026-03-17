@@ -68,7 +68,8 @@ export interface moveSocketResponse{
 // Start Game Response
 export interface startGameResponse {
     start:boolean,
-    color:color
+    color:color,
+    opponentName:string,
 }
 
 // [SourceRow,SourceCol,TargetRow,TargetCol]

@@ -5,12 +5,10 @@ import { getCellSize, squareIndexToKey, squareKeyToIndex } from "@/lib/utils";
 import {color as colors, Pieces, piecesColorMap } from "../../../../common/interfaces/enums";
 import { MousePieceDraggalbe } from "./mousePieceDraggable";
 import { isMoveOk, moveIndexToChars } from "../../../../common/game";
-import { useGame } from "@/lib/interfaces/customHooks";
-import { useOnMessageHandlerState } from "@/lib/interfaces/onMessageHandlerState";
+import { useGameState } from "@/lib/states/gameState";
 
 export const Board = ({makeMove,boardSide}:{makeMove:(move:string)=>void,boardSide:colors}) => {
-    const {board,color,setBoard} = useGame.getState();
-    const {pieceMoved,setPieceMoved} = useOnMessageHandlerState.getState();
+    const {board,color,pieceMoved,setPieceMoved,setBoard} = useGameState.getState();
     // A reference to the whole board, to get cordiantes to the board
     const boardRef = useRef<HTMLDivElement>(null);
     // The piece that is currently dragged under the cursor

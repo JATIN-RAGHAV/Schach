@@ -3,15 +3,13 @@ import { Button } from "@/components/ui/button"
 import { color as colors } from "../../../../common/interfaces/enums"
 import { Board } from "@/components/ui/board"
 import type { moveSocketRequest } from "../../../../common/interfaces/game"
-import { useOnMessageHandlerState } from "@/lib/interfaces/onMessageHandlerState"
-import { useGame } from "@/lib/interfaces/customHooks"
+import { useGameState } from "@/lib/states/gameState"
 import { useEffect, useState } from "react"
-import { getCellSize } from "@/lib/utils"
+import { formatTime, getCellSize, oppositeColor } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export const PlayPage = () => {
-    const {color,socket,gameType,gameIncrement} = useGame();
-    const {setInMove} = useOnMessageHandlerState();
+    const {color,socket,whiteUserName,blackUserName,setInMove} = useGameState();
     const [boardSide,setBoardSide] = useState<colors>(colors.Random);// Random means game has not started
     const handleBoardFlipbuttonClick = () => {
         setBoardSide(boardSide => boardSide == colors.White ? colors.Black : colors.White);
@@ -39,18 +37,25 @@ export const PlayPage = () => {
     return (
         <div>
 
-            {/* Game Info */}
-            <div>
-                <h1>Game Type: {gameType}</h1>
-                <h1>Color {color}</h1>
-                <h1>Increment: {gameIncrement}</h1>
-            </div>
-
             {/* Board on left and options and moves on right*/}
             <div className="flex gap-4 justify-center">
-                {/* Board */}
-                <div>
-                    <Board boardSide={boardSide}  makeMove={makeMove} />
+                <div className="flex flex-col">
+                    {/* Top of Board Game Info */}
+                    <div>
+                        <h1>{boardSide == colors.White ? blackUserName : whiteUserName}</h1>
+                        <Time color={oppositeColor(boardSide)}/>
+                    </div>
+
+                    {/* Board */}
+                    <div>
+                        <Board boardSide={boardSide}  makeMove={makeMove} />
+                    </div>
+
+                    {/* Bottom of Board Game Info */}
+                    <div>
+                        <h1>{boardSide == colors.White ? whiteUserName : blackUserName}</h1>
+                        <Time color = {boardSide}/>
+                    </div>
                 </div>
                 {/* Options */}
                 <div>
@@ -74,4 +79,15 @@ export const PlayLoading = () => {
         <Skeleton className="z-0" style={{width:boardSize,height:boardSize}}>
         </Skeleton>
     </div>
+}
+
+const Time = ({color}:{color:colors}) => {
+    let timeLeft = 0;
+    if(color == colors.White){
+        timeLeft = useGameState.getState().whiteTimeLeft;
+    }
+    else{
+        timeLeft = useGameState.getState().blackTimeLeft;
+    }
+    return <h1>{formatTime(timeLeft)}</h1>
 }

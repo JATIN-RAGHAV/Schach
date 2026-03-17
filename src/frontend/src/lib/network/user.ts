@@ -1,6 +1,7 @@
 import axios from "axios";
 import { userCreateZod } from "@/../../common/interfaces/userZodTypes";
 import {type userCreatedResponse } from "@/../../common/interfaces/responses";
+import { useUserState } from "../states/userState";
 
 // Get the base url to make the request
 const baseUrl = import.meta.env.VITE_BASE_API_URL
@@ -31,6 +32,8 @@ export const createUser = async (username: string, password: string):Promise<boo
         }
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("username", username);
+        const {setUserName} = useUserState.getState();
+        setUserName(username);
         return true;
     }
     catch(err){
@@ -59,6 +62,8 @@ export const loginUser = async (username: string, password: string):Promise<bool
             { username, password }
         )    
         res.data as userCreatedResponse;
+        const { setUserName } = useUserState.getState();
+        setUserName(username);
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("username", username);
         return true;

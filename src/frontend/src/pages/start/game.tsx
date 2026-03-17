@@ -14,21 +14,21 @@ import {
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { useGame } from "@/lib/interfaces/customHooks"
+import { useGameState } from "@/lib/states/gameState"
 import { navigateBasedOnLogin } from "@/lib/utils"
 export const GamePage = () => {
     const [gameType,setGameType] = useState<gameTypes>(gameTypes.Rapid);
     const [color,setcolor] = useState<colors>(colors.Random);
     const [gameIncrement,setGameIncrement] = useState<string>("0");
     const [start,setStart] = useState<boolean>(false);
-    const {connect,disconnect} = useGame()
+    const {connect,disconnect} = useGameState()
     const navigate = useNavigate();
     useEffect(() => {
         if(start){
             navigate("/play");
         }
     },[start])
-    
+
     useEffect(() => {
         disconnect();
         navigateBasedOnLogin(() => {
@@ -51,17 +51,17 @@ export const GamePage = () => {
                     }}
                 >
                     <SelectTrigger className="w-full max-w-48">
-                    <SelectValue />
+                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent
                         position="popper"
                     >
-                    <SelectGroup>
-                    <SelectLabel>colors</SelectLabel>
-                    <SelectItem value={colors.Random}>{colors.Random}</SelectItem>
-                    <SelectItem value={colors.White}>{colors.White}</SelectItem>
-                    <SelectItem value={colors.Black}>{colors.Black}</SelectItem>
-                    </SelectGroup>
+                        <SelectGroup>
+                            <SelectLabel>colors</SelectLabel>
+                            <SelectItem value={colors.Random}>{colors.Random}</SelectItem>
+                            <SelectItem value={colors.White}>{colors.White}</SelectItem>
+                            <SelectItem value={colors.Black}>{colors.Black}</SelectItem>
+                        </SelectGroup>
                     </SelectContent>
                 </Select>
 
@@ -73,17 +73,17 @@ export const GamePage = () => {
                     }}
                 >
                     <SelectTrigger className="w-full max-w-48">
-                    <SelectValue/>
+                        <SelectValue/>
                     </SelectTrigger>
                     <SelectContent
                         position="popper"
                     >
-                    <SelectGroup>
-                    <SelectLabel>Game Type</SelectLabel>
-                    <SelectItem value={gameTypes.Rapid}>{gameTypes.Rapid}</SelectItem>
-                    <SelectItem value={gameTypes.Blitz}>{gameTypes.Blitz}</SelectItem>
-                    <SelectItem value={gameTypes.Bullet}>{gameTypes.Bullet}</SelectItem>
-                    </SelectGroup>
+                        <SelectGroup>
+                            <SelectLabel>Game Type</SelectLabel>
+                            <SelectItem value={gameTypes.Rapid}>{gameTypes.Rapid}</SelectItem>
+                            <SelectItem value={gameTypes.Blitz}>{gameTypes.Blitz}</SelectItem>
+                            <SelectItem value={gameTypes.Bullet}>{gameTypes.Bullet}</SelectItem>
+                        </SelectGroup>
                     </SelectContent>
                 </Select>
 
@@ -95,25 +95,25 @@ export const GamePage = () => {
                     }}
                 >
                     <SelectTrigger className="w-full max-w-48">
-                    <SelectValue />
+                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent
                         position="popper"
                     >
-                    <SelectGroup>
-                    <SelectLabel>Game Increment</SelectLabel>
-                    <SelectItem value="0">no Increment</SelectItem>
-                    <SelectItem value="5000">5 Secs</SelectItem>
-                    <SelectItem value="10000">10 Secs</SelectItem>
-                    <SelectItem value="15000">15 Secs</SelectItem>
-                    </SelectGroup>
+                        <SelectGroup>
+                            <SelectLabel>Game Increment</SelectLabel>
+                            <SelectItem value="0">no Increment</SelectItem>
+                            <SelectItem value="5000">5 Secs</SelectItem>
+                            <SelectItem value="10000">10 Secs</SelectItem>
+                            <SelectItem value="15000">15 Secs</SelectItem>
+                        </SelectGroup>
                     </SelectContent>
                 </Select>
             </div>
             <Button onClick={()=> {
                 connect(color,gameType,parseInt(gameIncrement),setStart);
             }}
-            className="w-full max-w-sm">Start Game</Button>
+                className="w-full max-w-sm">Start Game</Button>
         </div>
     )
 }
