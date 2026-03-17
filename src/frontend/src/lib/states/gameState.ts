@@ -117,7 +117,6 @@ export const useGameState = create<gameState>((set) => ({
              */
         socket.onmessage = ((message:MessageEvent<any>) => {
             let data = JSON.parse(message.data);
-            console.log(data)
             const {color,inMove,pieceMoved,gameState,board,whoseChance,setInMove,setWinner,setGameState,setBoard,setColor,setWhiteUserName,setBlackUserName,setWhoseChance,startUpdatingTime} = useGameState.getState();
             const {userName} = useUserState.getState();
             // Handle starting of game

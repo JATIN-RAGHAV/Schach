@@ -24,13 +24,16 @@ export const PlayPage = () => {
 
     // Function to pass to board component to call and make a move
     const makeMove = (move:string) => {
-        const res:moveSocketRequest= {
-            move,
-            isMessage: false
-        }
-        if(socket){
-            socket.send(JSON.stringify(res));
-            setInMove(true);
+        const {whoseChance} = useGameState.getState();
+        if(whoseChance == color) {
+            const res:moveSocketRequest= {
+                move,
+                isMessage: false
+            }
+            if(socket){
+                socket.send(JSON.stringify(res));
+                setInMove(true);
+            }
         }
     }
 
@@ -89,5 +92,6 @@ const Time = ({color}:{color:colors}) => {
     else{
         timeLeft = useGameState.getState().blackTimeLeft;
     }
+    console.log(timeLeft)
     return <h1>{formatTime(timeLeft)}</h1>
 }
