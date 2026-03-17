@@ -23,7 +23,8 @@ const Home = () => {
     useEffect(() => {
         disconnect();
         navigateBasedOnLogin(() => 
-        {navigate("/login",{replace:true})},
+        {
+                navigate("/login",{replace:true})},
             false)
     },[])
 

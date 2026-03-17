@@ -16,7 +16,6 @@ export const access = new Elysia({ prefix: '/user' })
         const { username, password: pass } = res.data;
         const payload = await Data.createUser(username, pass);
         const token = await JWT.sign(payload);
-        console.log(`User created: ${username}`);
         return {
             error: false,
             token: token,
@@ -40,7 +39,6 @@ export const access = new Elysia({ prefix: '/user' })
         const { username, password: pass } = res.data;
         const payload = await Data.verifyUser(username, pass);
         const token = await JWT.sign(payload);
-        console.log(`User logged in: ${username}`);
         return {
             error: false,
             token: token,

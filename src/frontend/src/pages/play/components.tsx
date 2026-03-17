@@ -1,5 +1,4 @@
 import { BlackKing, WhiteKing } from "@/assets/pieces"
-import { Button } from "@/components/ui/button"
 import { color as colors } from "../../../../common/interfaces/enums"
 import { Board } from "@/components/ui/board"
 import type { moveSocketRequest } from "../../../../common/interfaces/game"
@@ -37,38 +36,41 @@ export const PlayPage = () => {
         }
     }
 
-    console.log(whiteUserName)
-    console.log(blackUserName)
     return (
-        <div>
+        <div className="flex w-full justify-center">
 
             {/* Board on left and options and moves on right*/}
-            <div className="flex gap-4 justify-center">
-                <div className="flex flex-col">
+            <div className="w-auto">
+                <div className="grid grid-rows-[auto_auto_auto] grid-cols-[auto_auto_auto]">
+
                     {/* Top of Board Game Info */}
-                    <div>
-                        <h1>{boardSide == colors.White ? blackUserName : whiteUserName}</h1>
+                    <div className="my-2 flex flex-col w-full gap-1 ">
+                        <h1 className="font-bold">{boardSide == colors.White ? blackUserName : whiteUserName}</h1>
                         <Time color={oppositeColor(boardSide)}/>
                     </div>
 
                     {/* Board */}
-                    <div>
-                        <Board boardSide={boardSide}  makeMove={makeMove} />
+                    <div className="row-start-2">
+                        <Board boardSide={boardSide} makeMove={makeMove} />
                     </div>
 
+                    {/* Options */}
+                    <div className="row-start-2 col-start-2 m-3 flex flex-col md:flex-row gap-2">
+                        <div onClick={handleBoardFlipbuttonClick} className="w-min h-min px-2 py-1 bg-secondary rounded-sm">
+                            {
+                                boardSide == colors.White ? <WhiteKing size={25}/> : <BlackKing size={25}/>
+                            }
+                        </div>
+                    </div>
+
+                    {/* Moves */}
+                    <Moves />
+
                     {/* Bottom of Board Game Info */}
-                    <div>
-                        <h1>{boardSide == colors.White ? whiteUserName : blackUserName}</h1>
+                    <div className="my-2 flex flex-col w-full items-end row-start-3 col-start-1">
+                        <h1 className="font-bold">{boardSide == colors.White ? whiteUserName : blackUserName}</h1>
                         <Time color = {boardSide}/>
                     </div>
-                </div>
-                {/* Options */}
-                <div>
-                    <Button onClick={handleBoardFlipbuttonClick}>
-                        {
-                            boardSide == colors.White ? <WhiteKing size={25}/> : <BlackKing size={25}/>
-                        }
-                    </Button>
                 </div>
             </div>
         </div>
@@ -94,6 +96,20 @@ const Time = ({color}:{color:colors}) => {
     else{
         timeLeft = useGameState.getState().blackTimeLeft;
     }
-    console.log(timeLeft)
-    return <h1>{formatTime(timeLeft)}</h1>
+    return <h1 className="px-3 py-1 border rounded-3xl w-min bg-secondary">{formatTime(timeLeft)}</h1>
+}
+
+export const Moves = () => {
+    const {moves} = useGameState();
+    return <div className="min-w-36 gap-4 flex flex-col align-middle items-center rounded-sm row-start-4 font-extrabold col-start-1 md:row-start-2 md:col-start-3 bg-secondary p-2">
+        <div>
+            Moves
+        </div>
+        <div className="w-full flex flex-col gap-1">
+            {moves.map((e,i) => {
+                return <div key={i} className={`px-3 py-1 rounded-sm w-min ${i%2 ? 'bg-black text-white' : 'bg-white text-black'}`}>{e}</div>
+            }
+            )}
+        </div>
+    </div>
 }

@@ -76,14 +76,19 @@ export const loginUser = async (username: string, password: string):Promise<bool
 export const getUserInfo = async ():Promise<{username:string,userId:string}|null>=> {
     const route = "http://" + baseUrl + "/user/me";
     const token = localStorage.getItem("token");
+    console.log(token)
+    console.log(route)
     if(!token){
         return null;
     }
     try{
         const res = await axios.get(route,{headers:{
-            Authorization:"Bearer "+ token
+            authorization:"Bearer "+ token
         }});
+        console.log(res)
         res.data as {username:string,userId:string};
+        const { setUserName } = useUserState.getState();
+        setUserName(res.data.username);
         return res.data;
     }
     catch(err){

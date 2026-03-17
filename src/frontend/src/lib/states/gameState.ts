@@ -30,6 +30,8 @@ export interface gameState{
     blackTimeLeft:number,
     whoseChance:colors,
     timeUpdateInterval:number|null,
+    moves:string[],
+    addMove:(move:string) => void,
     startUpdatingTime:() => void,
     setWhoseChance:(color:colors) => void,
     setWhiteTimeLeft:(timeLeft:number) => void,
@@ -65,6 +67,8 @@ export const useGameState = create<gameState>((set) => ({
     blackUserName:null,
     whoseChance:colors.White,
     timeUpdateInterval:null,
+    moves:[],
+    addMove:(move:string) => set({moves:[...useGameState.getState().moves,move]}),
     startUpdatingTime:() => {
         const timeUpdateInterval = setInterval(updateTimeLeft,1000);
         set({timeUpdateInterval});
@@ -117,7 +121,7 @@ export const useGameState = create<gameState>((set) => ({
              */
         socket.onmessage = ((message:MessageEvent<any>) => {
             let data = JSON.parse(message.data);
-            const {color,inMove,pieceMoved,gameState,board,whoseChance,setInMove,setWinner,setGameState,setBoard,setColor,setWhiteUserName,setBlackUserName,setWhoseChance,startUpdatingTime} = useGameState.getState();
+            const {color,inMove,pieceMoved,gameState,board,whoseChance,addMove,setInMove,setWinner,setGameState,setBoard,setColor,setWhiteUserName,setBlackUserName,setWhoseChance,startUpdatingTime} = useGameState.getState();
             const {userName} = useUserState.getState();
             // Handle starting of game
             if(gameState == gameStateType.waiting){
@@ -153,7 +157,7 @@ export const useGameState = create<gameState>((set) => ({
                     setInMove(false)
                     if(!data.error){
                         const moveIndex = moveCharsToIndex(data.move);
-                        
+                        addMove(data.move);
                         if(moveIndex){
                             const [sRow,sCol,tRow,tCol] = moveIndex;
                             let newBoard = structuredClone(board);
@@ -185,7 +189,7 @@ export const useGameState = create<gameState>((set) => ({
                 // Handle other player making a move
                 else if(!data.over){
                     const moveIndex = moveCharsToIndex(data.move);
-                    console.log(data.move)
+                    addMove(data.move)
                     if(moveIndex){
                         const [sRow,sCol,tRow,tCol] = moveIndex;
                         let newBoard = structuredClone(board);

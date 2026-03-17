@@ -14,7 +14,6 @@ export const gameRun = new Elysia().use(authQueryPlugin)
     // Handle Connection starting
     async open(ws) {
         // Get the current player Data
-        console.log("connected")
         const { username, userId, color, time, increment } = ws.data.user;
         const currentUserId = userId;
         const currentPlayer: gameQueueObject= {
