@@ -3,9 +3,8 @@ import Data from '../database/data';
 import JWT from '../helper/jwt';
 import { userCreateZod } from '../../common/interfaces/userZodTypes';
 
-export const access = new Elysia({ prefix: '/user' });
-
-access.post('/create', async ({ body }) => {
+export const access = new Elysia({ prefix: '/user' })
+.post('/create', async ({ body }) => {
     const res = userCreateZod.safeParse(body);
     if (!res.success) {
         return {
@@ -28,9 +27,8 @@ access.post('/create', async ({ body }) => {
             message: e,
         };
     }
-});
-
-access.post('/login', async ({ body }) => {
+})
+.post('/login', async ({ body }) => {
     const res = userCreateZod.safeParse(body);
     if (!res.success) {
         return {
@@ -53,8 +51,4 @@ access.post('/login', async ({ body }) => {
             message: e,
         };
     }
-});
-
-access.get('/me', async ({body}) => {
-
 })

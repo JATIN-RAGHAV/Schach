@@ -1,8 +1,10 @@
-import authPlugin from "./plugins/authPlugin";
+import Elysia from "elysia";
+import "./plugins/authPlugin";
+import { authHeaderPlugin } from "./plugins/authPlugin";
 
-authPlugin.get("/me", async ({ user }) => {
+export const userData = new Elysia({prefix:"/user"}).use(authHeaderPlugin).get('/me', ({user}) => {
     return {
-        username: user.username,
-        userId: user.userId,
-    };
-})
+        username:user.username,
+        userId:user.userId
+    }
+});

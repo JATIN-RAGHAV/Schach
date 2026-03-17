@@ -1,9 +1,14 @@
 import Elysia from 'elysia';
 import { access } from './access';
 import { gameRun } from './gameStart';
+import { userData } from './userInfo';
 
-const router = new Elysia();
+// Paths which require authrization
+const noAuthPaths = new Elysia()
+.use(access);
 
-router.use(access).use(gameRun);
+// Paths which use tokens in the headers
+const authPaths = new Elysia().use(userData).use(gameRun)
 
+const router = new Elysia().use(noAuthPaths).use(authPaths);
 export default router;

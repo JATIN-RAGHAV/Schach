@@ -1,9 +1,13 @@
 import { errorPlugin } from './errorPlugin';
 import JWT from '../../helper/jwt';
-import { type JWT_PAYLOAD } from '../../interfaces/jwt_payload';
+import { JWT_PAYLOAD } from '../../interfaces/jwt_payload';
+import Elysia from 'elysia';
+import { gameCreateZod } from '../../../common/interfaces/gameZodTypes';
+import { gameCreate } from '../../interfaces/game';
+import Data from '../../database/data';
 
 // This adds user:{username,userId} to the context.
-const authPlugin = errorPlugin.resolve(async ({ query }) => {
+export const authQueryPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped'},async ({ query,status}) => {
     // Verify query exists
     if (query == undefined) {
         throw new Error('query is absent.');
@@ -15,15 +19,62 @@ const authPlugin = errorPlugin.resolve(async ({ query }) => {
         throw new Error('No auth query given in the query.');
     }
     const token = splitted[1];
+    let user: JWT_PAYLOAD | undefined;
     if(token){
         // Get the user
         const res: JWT_PAYLOAD = await JWT.verify(token);
         // Add user to the context
-        return {
-            user: { ...res },
-        };
+        user = res;
     }
-    throw new Error('No auth query given in the query.');
+    else{
+        throw new Error('No auth query given in the query.');
+    }
+
+    // Now after verifying token get game info
+    const res = gameCreateZod.safeParse(query);
+    if (!res.success) {
+        return status(400);
+    }
+    const { color, time, increment } = res.data as gameCreate;
+
+    // Check if the user is in the queue
+    if (Data.isUserQueue((user as JWT_PAYLOAD).userId)) {
+        return status(400);
+    }
+
+    return {
+        user: {
+            color,
+            time,
+            increment,
+            ...user,
+        },
+    };
 });
 
-export default authPlugin;
+
+// This adds user:{username,userId} to the context.
+export const authHeaderPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped'},async ({headers}) => {
+    // Verify headers exists
+    if (headers == undefined) {
+        throw new Error('headers is absent.');
+    }
+
+    // Get the token
+    const splitted = headers['authorization']?.split(" ");
+    if (splitted == undefined || splitted.length != 2) {
+        throw new Error('No auth headers given in the headers.');
+    }
+    const token = splitted[1];
+    let user: JWT_PAYLOAD | undefined;
+    if(token){
+        // Get the user
+        const res: JWT_PAYLOAD = await JWT.verify(token);
+        user = res;
+    }
+    else{
+        throw new Error('No auth query given in the query.');
+    }
+    // Add user to the context
+    return {user}
+});

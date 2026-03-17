@@ -1,17 +1,20 @@
 import Data from '../database/data';
 import { color as colorType } from '../../common/interfaces/enums';
 import { getOpponent } from '../helper/getOpponent';
-import { gameCreatePlugin } from './plugins/gameApiPlugins';
+import { authQueryPlugin } from './plugins/authPlugin';
 import type { gameQueueObject } from '../database/interfaces';
 import { isGameEnded, isMoveOk, printBoard, updateGameObject } from '../../common/game';
 import type { ElysiaWS } from 'elysia/ws';
 import { gameOverReasons, moveSocketRequestZod, type gameObject,  type moveSocketResponse ,startGameResponse} from '../../common/interfaces/game';
 import { getResponsePostMove } from '../helper/game';
+import Elysia from 'elysia';
 
-export const gameRun = gameCreatePlugin.ws('/game/run', {
+export const gameRun = new Elysia().use(authQueryPlugin)
+.ws('/game/run', {
     // Handle Connection starting
     async open(ws) {
         // Get the current player Data
+        console.log("connected")
         const { username, userId, color, time, increment } = ws.data.user;
         const currentUserId = userId;
         const currentPlayer: gameQueueObject= {
