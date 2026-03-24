@@ -8,19 +8,20 @@ import (
 	lipgloss "charm.land/lipgloss/v2"
 )
 
+
 type model struct {
 	options []string
 	current int
 	width int
 	height int
 	started bool
+	status status
+
+	// Game Type selection page
+	game_types []string
+	game_type_selected int
 }
 
-styles := {
-	red = lipgloss.NewStyle().Foreground(lipgloss.Color("#FF0000"))
-	green = lipgloss.NewStyle().Foreground(lipgloss.Color("#00FF00"))
-	blue = lipgloss.NewStyle().Foreground(lipgloss.Color("#0055DD"))
-}
 
 // The state of the App, called model
 func InitModel () model {
@@ -36,54 +37,72 @@ func InitModel () model {
 		width:0,
 		height:0,
 		started:false,
+		status:status_select_game_type,
+
+		// Game Type selection page
+		game_types:[]string{
+			"Rapid",
+			"Blitz",
+			"Bullet",
+		},
+		game_type_selected:0,
 	}
 }
+
 
 // This initializes the model
 func (m model) Init () tea.Cmd {
 	return nil;
 }
 
+
 // This updates the model
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		switch msg.String() {
-		case "j":
-			if (m.current < (len(m.options)-1)) && (m.started){
-				m.current++;
-			}
-		case "k":
-			if (m.current > 0) && m.started {
-				m.current--;
-			}
-		case "q","esc":
-			return m,tea.Quit
-		case "enter":
-            m.started = true
-		}
+		// Get Window size
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+
+	case tea.KeyPressMsg:
+		// Game Type selection page
+		if(m.status == status_select_game_type){
+			switch msg.String(){
+			case "j":
+				if (m.game_type_selected < (len(m.game_types)-1)){
+					m.game_type_selected++;
+				}
+			case "k":
+				if (m.game_type_selected > 0){
+					m.game_type_selected--;
+				}
+			case "q","esc":
+				return m,tea.Quit
+			}
+		}
+
 	}
 	return m,nil
 }
 
 // This renders the model
 func (m model) View() (v tea.View) {
-	var s string;
-	if(m.started){
-		for i, book := range m.options {
-			if(m.current == i) {
-				s += red.Render(">") + green.Render(fmt.Sprintf(" %s",book)) + "\n"
-			} else {
-				s += blue.Render(fmt.Sprintf("%s %s", " ", book)) + "\n"
+	s := "";
+
+	// Game Type selection page
+	if(m.status == status_select_game_type){
+		s += fmt.Sprintf("%s\n\n",styles_Red.Render("Select a Game Type"))
+		for i,val := range m.game_types{
+			if i == m.game_type_selected{
+				s += fmt.Sprintf("%s %s\n",styles_Red.Render(">"),styles_Green.Render(val))
+			}else{
+				s += fmt.Sprintf("  %s\n",styles_Blue.Render(val))
 			}
 		}
-	} else {
-		s = lipgloss.Place(m.width,m.height,lipgloss.Center,lipgloss.Center,red.Render("Cool Books")) + "\n\n";
 	}
-	v = tea.NewView(s)
+
+	// Put text in center and take control of the whole terminal
+	v = tea.NewView(lipgloss.Place(m.width,m.height,lipgloss.Center,lipgloss.Center,s))
 	v.AltScreen = true
 	return 
 }
@@ -91,7 +110,7 @@ func (m model) View() (v tea.View) {
 func main() {
 	prog := tea.NewProgram(InitModel())
 	if _,err := prog.Run(); err != nil{
-		lipgloss.Println(red.Render("Error"))
+		lipgloss.Println(styles_Red.Render("Error"))
 		os.Exit(1)
 	}
 }
