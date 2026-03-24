@@ -113,3 +113,9 @@ export const Moves = () => {
         </div>
     </div>
 }
+
+export const EndScreen = ({winner}:{winner:colors|null}) => {
+    return <h1>
+        {winner}
+    </h1>
+}

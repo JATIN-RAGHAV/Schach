@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { gameState as gameStateType} from "./lib";
 import { navigateBasedOnLogin } from "@/lib/utils";
 import { useNavigate } from "react-router";
-import { PlayPage, PlayLoading } from "./components";
+import { PlayPage, PlayLoading, EndScreen } from "./components";
 
 export const Play = () => {
     const {gameState,winner} = useGameState();
@@ -28,11 +28,6 @@ export const Play = () => {
         )
     }
     else if(gameState == gameStateType.ended || winner){
-        return <h1>
-            Game Over
-            <h2>
-                Winner: {winner}
-            </h2>
-        </h1>
+        return <EndScreen winner={winner} />
     }
 }
