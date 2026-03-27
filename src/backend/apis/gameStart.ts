@@ -69,7 +69,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
             // Set the users as opponents
             Data.setUserOppo(whiteUserId,blackUserId)
             // Add the game object to active games
-            Data.setGameObject(whiteUserId,blackUserId,time,false);
+            Data.setGameObject(whiteUserId,blackUserId,time);
 
             console.log(
                 `Starting a game between ${whiteUsername}(white) and ${blackUsername}(black).`,
@@ -98,7 +98,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
         // Get user data and check if the user is playing
         const moveTime = Date.now();
         const {userId,username,increment,time} = ws.data.user;
-        const color = Data.getPlayerColor(userId,false);
+        const color = Data.getPlayerColor(userId);
         if(!Data.isUserPlaying(userId)){
             const res:moveSocketResponse = {
                 error:true,
@@ -132,7 +132,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
         }
 
         // Get the gameObject and the inner parts
-        const gameObject = Data.getGameObject(whiteUserId,blackUserId,false) as gameObject;
+        const gameObject = Data.getGameObject(whiteUserId,blackUserId) as gameObject;
         let {board,moveNumber,specialMoveFlags} = gameObject;
 
         // move number initially == 0, so even moves are white and odd are black
@@ -167,7 +167,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
         if(gameState.over){
             console.log(`Game over Reason: ${gameOverReasons[gameState.gameEndReason]}`)
             // Remove the game from active games
-            Data.endGame(whiteUserId,blackUserId,false);
+            Data.endGame(whiteUserId,blackUserId);
             // Store the game in the database
             Data.storeGame(gameObject,userId,whiteUserId,blackUserId,gameState.gameEndReason,increment,time);
             // Close websockets
@@ -205,15 +205,15 @@ export const gameRun = new Elysia().use(authQueryPlugin)
                 // Prepare to store and end game
                 // Get game Object before hand and remove the game Object from active games
                 //  Remove from active games -> close oppo connection -> store in database
-                const color = Data.getPlayerColor(userId,false);
+                const color = Data.getPlayerColor(userId);
                 let whiteUserId = userId;
                 let blackUserId = oppoId;
                 if(color == colorType.Black){
                     [whiteUserId, blackUserId] = [blackUserId, whiteUserId];
                 }
-                const gameObject = Data.getGameObject(whiteUserId,blackUserId,false);
+                const gameObject = Data.getGameObject(whiteUserId,blackUserId);
                 // Remove game from active games
-                Data.endGame(whiteUserId,blackUserId,false);
+                Data.endGame(whiteUserId,blackUserId);
                 oppoSocket.close();
                 if(gameObject){
                     console.log("saving game")

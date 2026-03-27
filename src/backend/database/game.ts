@@ -15,10 +15,6 @@ const Game = <Tbase extends Constructor>(Base: Tbase) =>
         // To map userId with their color
         static playerColor:Map<string,color>=new Map<string,color>();
         static userOppo: userOppo = new Map();
-        // Data structures to store data related to anonymous users
-        static anonymousGamesList:Map<string,gameObject>=new Map<string,gameObject>();
-        static anonymousPlayerColor:Map<string,color>=new Map<string,color>();
-        static anonymousUserOppo: userOppo = new Map();
 
         // Get the key for a pair of users
         static getKey(whiteUserId:string, blackUserId:string){
@@ -26,125 +22,72 @@ const Game = <Tbase extends Constructor>(Base: Tbase) =>
         }
 
         // Get the game object give the user Ids
-        static getGameObject(whiteUserId:string, blackuserId:string, isAnonymous:boolean){
+        static getGameObject(whiteUserId:string, blackuserId:string){
             const key = this.getKey(whiteUserId,blackuserId);
-            if(isAnonymous){
-                return this.anonymousGamesList.get(key)
-            }
-            else{
-                return this.gamesList.get(key)
-            }
+            return this.gamesList.get(key)
         }
 
         // Initalise a gameObject and add it to the gamesList
-        static setGameObject(whiteUserId:string, blackUserId:string,time:number,isAnonymous:boolean){
+        static setGameObject(whiteUserId:string, blackUserId:string,time:number){
             const key = Data.getKey(whiteUserId,blackUserId);
 
-            if(isAnonymous){
-                // Set user colors
-                this.anonymousPlayerColor.set(blackUserId,color.Black);
-                this.anonymousPlayerColor.set(whiteUserId,color.White);
+            // Set user colors
+            this.playerColor.set(blackUserId,color.Black);
+            this.playerColor.set(whiteUserId,color.White);
 
-                //moveNumber, movesTimes, whiteTimeLeft, blackTimeLeft 
-                this.anonymousGamesList.set(key,getInitialGameObject(time));
-            }
-            else{
-                // Set user colors
-                this.playerColor.set(blackUserId,color.Black);
-                this.playerColor.set(whiteUserId,color.White);
-
-                //moveNumber, movesTimes, whiteTimeLeft, blackTimeLeft 
-                this.gamesList.set(key,getInitialGameObject(time));
-            }
+            //moveNumber, movesTimes, whiteTimeLeft, blackTimeLeft 
+            this.gamesList.set(key,getInitialGameObject(time));
         }
 
         // Removes a game object
-        static removeGameObject(whiteUserId:string, blackUserId:string, isAnonymous:boolean){
+        static removeGameObject(whiteUserId:string, blackUserId:string){
             const key = Data.getKey(whiteUserId,blackUserId);
-            if(isAnonymous){
-                this.anonymousGamesList.delete(key);
-            }
-            else{
-                this.gamesList.delete(key);
-            }
+            this.gamesList.delete(key);
         }
 
-        // Get the player color given the userId
-        static getPlayerColor = (userId:string, isAnonymous: boolean) => {
-            if(isAnonymous){
-                return this.anonymousPlayerColor.get(userId) as color;
-            }
-            
+        // Get the player color give the userId
+        static getPlayerColor = (userId:string) => {
             return this.playerColor.get(userId) as color;
         }
 
-        static getUserOppo(userId:string,isAnonymous:boolean):(string|null){
-            if(isAnonymous){
-                const res = this.anonymousUserOppo.get(userId)
-                if(res != undefined){
-                    return res
-                }
-            }
-            else{
-                const res = this.userOppo.get(userId)
-                if(res != undefined){
-                    return res
-                }
+        static getUserOppo(userId:string):(string|null){
+            const res = this.userOppo.get(userId)
+            if(res != undefined){
+                return res
             }
             return null;
         }
 
-        static isUserPlaying(userId:string,isAnonymous:boolean):boolean{
-            if(isAnonymous){
-                return this.anonymousUserOppo.has(userId);
-            }
+        static isUserPlaying(userId:string):boolean{
             return this.userOppo.has(userId);
         }
 
-        static setUserOppo(user1Id:string, user2Id:string, isAnonymous:boolean):boolean{
-            if(this.isUserPlaying(user1Id, isAnonymous) || this.isUserPlaying(user2Id,isAnonymous)){
+        static setUserOppo(user1Id:string, user2Id:string):boolean{
+            if(this.isUserPlaying(user1Id) || this.isUserPlaying(user2Id)){
                 return false
             }
-            if(isAnonymous){
-                this.anonymousUserOppo.set(user1Id,user2Id)
-                this.anonymousUserOppo.set(user2Id,user1Id)
-            }
-            else{
-                this.userOppo.set(user1Id,user2Id)
-                this.userOppo.set(user2Id,user1Id)
-            }
+            this.userOppo.set(user1Id,user2Id)
+            this.userOppo.set(user2Id,user1Id)
             return true
         }
 
-        static removeUsersOppo(user1Id:string, user2Id:string,isAnonymous:boolean):boolean{
-            if(!this.isUserPlaying(user1Id,isAnonymous) || !this.isUserPlaying(user2Id,isAnonymous)){
+        static removeUsersOppo(user1Id:string, user2Id:string):boolean{
+            if(!this.isUserPlaying(user1Id) || !this.isUserPlaying(user2Id)){
                 return false
             }
-            if(isAnonymous){
-                this.anonymousUserOppo.delete(user1Id)
-                this.anonymousUserOppo.delete(user2Id)
-            }
-            else{
-                this.userOppo.delete(user1Id)
-                this.userOppo.delete(user2Id)
-            }
+            this.userOppo.delete(user1Id)
+            this.userOppo.delete(user2Id)
             return true
         }
 
         // Removes all the in memory data about the game
-        static endGame(whiteUserId:string, blackUserId:string,isAnonymous:boolean){
-            this.removeGameObject(whiteUserId,blackUserId,isAnonymous);
-            this.removeUsersOppo(whiteUserId,blackUserId,isAnonymous);
-            if(isAnonymous){
-                this.anonymousPlayerColor.delete(whiteUserId);
-                this.anonymousPlayerColor.delete(blackUserId);
-            }
-            else{
-                this.playerColor.delete(whiteUserId);
-                this.playerColor.delete(blackUserId);
-            }
-            Data.removeUserIdSocket(whiteUserId,isAnonymous);
-            Data.removeUserIdSocket(blackUserId,isAnonymous);
+        static endGame(whiteUserId:string, blackUserId:string){
+            this.removeGameObject(whiteUserId,blackUserId);
+            this.playerColor.delete(whiteUserId);
+            this.playerColor.delete(blackUserId);
+            this.removeUsersOppo(whiteUserId,blackUserId);
+            Data.removeUserIdSocket(whiteUserId);
+            Data.removeUserIdSocket(blackUserId);
         }
 
         // Stores the game on the backend

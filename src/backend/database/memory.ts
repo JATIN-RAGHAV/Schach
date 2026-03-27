@@ -25,7 +25,6 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
         static userQueue: userQueue = new Set<string>();
         static userOppo: userOppo = new Map();
         static userIdWebSocket: userIdWebSocket = new Map();
-        static anonymousUserIdWebSocket: userIdWebSocket = new Map();
 
         static isGameQueue(color: color, time: number, increment: number): boolean {
             // key -> time:increment
@@ -151,14 +150,9 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
             return null
         }
 
-        static removeUserIdSocket(userId:string,isAnonymous:boolean){
+        static removeUserIdSocket(userId:string){
             if(this.userIdWebSocket.has(userId)){
-                if(isAnonymous){
-                    this.anonymousUserIdWebSocket.delete(userId)
-                }
-                else{
-                    this.userIdWebSocket.delete(userId)
-                }
+                this.userIdWebSocket.delete(userId)
             }
         }
     };
