@@ -3,7 +3,7 @@ import {
     type gameWaitingObject,
     type userIdWebSocket,
     type userOppo,
-    type userQueue as userWaiting,
+    type usersWaiting as userWaiting,
 } from './interfaces';
 import { color } from '../../common/interfaces/enums';
 import { GameNotFound } from '../helper/errors';
@@ -27,13 +27,27 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
         static userWaitings: userWaiting = new Set<string>();
         // Maps opponents to each other
         static userOppo: userOppo = new Map();
-        // Maps userId to socket
+        // Maps userId to socket and their color
         static userIdWebSocket: userIdWebSocket = new Map();
+
+        // Anmonymouse User and Game data
+        // Maps color,time and increment to userWaitingObject
+        static anonymouseGameWaitingObjects: gameWaitingObject = {
+            [color.Black]: {},
+            [color.White]: {},
+            [color.Random]: {},
+        };
 
         // Is there a game Object waiting with the give color, time and increment ??
         static isGameWaiting(color: color, time: number, increment: number): boolean {
             // key -> time:increment
             return getTimeKey(time, increment) in this.gameWaitingObjects[color];
+        }
+
+        // Is there a game Object waiting with the give color, time and increment ??
+        static isAnonymouseGameWaiting(color: color, time: number, increment: number): boolean {
+            // key -> time:increment
+            return getTimeKey(time, increment) in this.anonymouseGameWaitingObjects[color];
         }
 
         // Set a game waiting object with the give color, time and increment
@@ -48,7 +62,24 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
                 return false;
             }
             const timeKey = getTimeKey(time, increment);
-            this.gameWaitingObjects[color][timeKey] = userWaitingObject;
+            this.gameWaitingObjects[color][timeKey] = {...userWaitingObject};
+            this.userWaitings.add(userId);
+            return true;
+        }
+
+        // Set an anonymouse game waiting object with the give color, time and increment
+        static setAnonymousGameWaitingObject(
+            userId: string,
+            userWaitingObject: userWaitingObject,
+            color: color,
+            time: number,
+            increment: number,
+        ): boolean {
+            if (this.isUserWaiting(userId)) {
+                return false;
+            }
+            const timeKey = getTimeKey(time, increment);
+            this.anonymouseGameWaitingObjects[color][timeKey] = userWaitingObject;
             this.userWaitings.add(userId);
             return true;
         }
@@ -69,6 +100,22 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
             throw GameNotFound;
         }
 
+        // Get a Game Object with the give color, time and increment
+        static getAnonymousGameWaitingObject(color: color, time: number, increment: number) {
+            const timeKey = getTimeKey(time, increment);
+            if (!this.isAnonymouseGameWaiting(color, time, increment)) {
+                throw GameNotFound;
+            }
+            const anonymousGameWaitingObject = this.anonymouseGameWaitingObjects[color][timeKey];
+            if (anonymousGameWaitingObject != undefined) {
+                let userId = anonymousGameWaitingObject.userId;
+                this.userWaitings.delete(userId);
+                this.removeAnonymousGameWaitingObject(userId, color, time, increment);
+                return anonymousGameWaitingObject;
+            }
+            throw GameNotFound;
+        }
+
         // Remove a Game Object with the give color, time and increment
         static removeGameWaitingObject(
             userId: string,
@@ -82,6 +129,22 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
                 return;
             }
             const h = (this.gameWaitingObjects[color])
+            delete h[timeKey];
+        }
+
+        // Remove a Game Object with the give color, time and increment
+        static removeAnonymousGameWaitingObject(
+            userId: string,
+            color: color,
+            time: number,
+            increment: number,
+        ) {
+            const timeKey = getTimeKey(time, increment);
+            this.userWaitings.delete(userId);
+            if (!this.isAnonymouseGameWaiting(color, time, increment)) {
+                return;
+            }
+            const h = (this.anonymouseGameWaitingObjects[color])
             delete h[timeKey];
         }
 
@@ -125,7 +188,6 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
                 return color;
             }
             return null
-
         }
 
         static setUserIdSocket(userId:string, socket:ElysiaWS,color:color):boolean{

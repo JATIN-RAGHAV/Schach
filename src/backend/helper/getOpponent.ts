@@ -1,6 +1,6 @@
 import { color } from '../../common/interfaces/enums';
 import Data from '../database/data';
-import type { gameQueueObject } from '../database/interfaces';
+import type { userWaitingObject } from '../database/interfaces';
 
 export const getOpponentColor = (inColor: color): color[] => {
     const res: color[] = [];
@@ -27,13 +27,36 @@ export const getOpponent = (
     time: number,
     increment: number,
 ): {
-    oppo: gameQueueObject;
+    oppo: userWaitingObject;
     color: color;
 } | null => {
     const oppColors: color[] = getOpponentColor(inColor);
     for (const c of oppColors) {
         try {
-            const oppo = Data.getGameQueue(c, time, increment);
+            const oppo = Data.getGameWaitingObject(c, time, increment);
+            if (oppo != undefined) {
+                return { oppo, color: c };
+            }
+        } catch {
+            // eslint-disable-next-line
+        }
+    }
+    return null;
+};
+
+
+export const getAnonymousOpponent = (
+    inColor: color,
+    time: number,
+    increment: number,
+): {
+    oppo: userWaitingObject;
+    color: color;
+} | null => {
+    const oppColors: color[] = getOpponentColor(inColor);
+    for (const c of oppColors) {
+        try {
+            const oppo = Data.getAnonymousGameWaitingObject(c, time, increment);
             if (oppo != undefined) {
                 return { oppo, color: c };
             }

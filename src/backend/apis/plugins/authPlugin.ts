@@ -5,6 +5,7 @@ import Elysia from 'elysia';
 import { gameCreateZod } from '../../../common/interfaces/gameZodTypes';
 import { gameCreate } from '../../interfaces/game';
 import Data from '../../database/data';
+import { Zobrist } from '../../../common/interfaces/Zobrist';
 
 // This adds user:{username,userId} to the context.
 export const authQueryPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped'},async ({ query,status}) => {
@@ -38,7 +39,7 @@ export const authQueryPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped
     const { color, time, increment } = res.data as gameCreate;
 
     // Check if the user is in the queue
-    if (Data.isUserQueue((user as JWT_PAYLOAD).userId)) {
+    if (Data.isUserWaiting((user as JWT_PAYLOAD).userId)) {
         return status(400);
     }
 
@@ -51,6 +52,26 @@ export const authQueryPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped
         },
     };
 });
+
+// Get colors, time and increment and also generates a random userId for anonymouse game play
+export const anonymousGameStartPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped'},async ({ query,status}) => {
+    const res = gameCreateZod.safeParse(query);
+    if (!res.success) {
+        return status(400);
+    }
+    const { color, time, increment } = res.data as gameCreate;
+    const userId = String(Zobrist.getRandomNumber());
+
+    console.log("anonymouse player coming.")
+    return {
+        user: {
+            color,
+            time,
+            increment,
+            userId
+        },
+    };
+})
 
 
 // This adds user:{username,userId} to the context.
