@@ -1,6 +1,6 @@
 import Elysia from 'elysia';
 import { access } from './access';
-import { gameRun } from './gameStart';
+import { gameRun } from './gameStartAuth';
 import { userData } from './userInfo';
 
 // Paths which require authrization

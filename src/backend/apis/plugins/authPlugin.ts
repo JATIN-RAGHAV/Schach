@@ -6,7 +6,7 @@ import { gameCreateZod } from '../../../common/interfaces/gameZodTypes';
 import { gameCreate } from '../../interfaces/game';
 import Data from '../../database/data';
 
-// This adds user:{username,userId} to the context.
+// This adds user:{username,userId,color,time,increment} to the context.
 export const authQueryPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped'},async ({ query,status}) => {
     // Verify query exists
     if (query == undefined) {

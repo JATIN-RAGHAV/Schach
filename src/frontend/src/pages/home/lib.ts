@@ -17,14 +17,14 @@ export const getLocation = async ():Promise<[number, number]> => {
 export const getGlobeConfig = async ():Promise<COBEOptions> => {
     const location = await getLocation();
     let config:COBEOptions = {
-        width: 800,
-        height: 800,
+        width: 200,
+        height: 200,
         onRender: () => {},
             devicePixelRatio: 2,
         phi: 0,
         theta: 0.3,
         dark: 0,
-        diffuse: 0.4,
+        diffuse: 0,
         mapSamples: 16000,
         mapBrightness: 1.2,
         baseColor: [1, 1, 1],
