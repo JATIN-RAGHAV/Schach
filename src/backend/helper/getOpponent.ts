@@ -26,7 +26,6 @@ export const getOpponent = (
     inColor: color,
     time: number,
     increment: number,
-    isAnonymouse: boolean
 ): {
     oppo: gameQueueObject;
     color: color;
@@ -34,7 +33,7 @@ export const getOpponent = (
     const oppColors: color[] = getOpponentColor(inColor);
     for (const c of oppColors) {
         try {
-            const oppo = Data.getGameQueue(c, time, increment,isAnonymouse);
+            const oppo = Data.getGameQueue(c, time, increment);
             if (oppo != undefined) {
                 return { oppo, color: c };
             }

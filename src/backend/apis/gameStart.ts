@@ -27,7 +27,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
         );
 
         // Check if another player exists for the same kind of game with the right color
-        const opponentResponse = getOpponent(color, time, increment,false);
+        const opponentResponse = getOpponent(color, time, increment);
         if (opponentResponse) {
             // Decide who is going to play as white and who is going to play as black
             let whiteSocket = currentPlayer.ws;
@@ -61,13 +61,13 @@ export const gameRun = new Elysia().use(authQueryPlugin)
             }
 
             // Remove the users from the game Queue
-            Data.removeGameQueue(userId,color,time,increment,false);
-            Data.removeGameQueue(opponentResponse.oppo.userId,color,time,increment,false);[]
+            Data.removeGameQueue(userId,color,time,increment);
+            Data.removeGameQueue(opponentResponse.oppo.userId,color,time,increment);[]
             // Map userIds to their sockets to get when someone plays a move
-            Data.setUserIdSocket(whiteUserId,whiteSocket,colorType.White,false)
-            Data.setUserIdSocket(blackUserId,blackSocket,colorType.Black,false)
+            Data.setUserIdSocket(whiteUserId,whiteSocket,colorType.White)
+            Data.setUserIdSocket(blackUserId,blackSocket,colorType.Black)
             // Set the users as opponents
-            Data.setUserOppo(whiteUserId,blackUserId,false)
+            Data.setUserOppo(whiteUserId,blackUserId)
             // Add the game object to active games
             Data.setGameObject(whiteUserId,blackUserId,time,false);
 
@@ -90,7 +90,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
             blackSocket.send(blackStartResponse);
             return;
         }
-        Data.addGameQueue(currentUserId, currentPlayer, color, time, increment,false);
+        Data.addGameQueue(currentUserId, currentPlayer, color, time, increment);
     },
 
     // Handle incoming moves
@@ -99,7 +99,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
         const moveTime = Date.now();
         const {userId,username,increment,time} = ws.data.user;
         const color = Data.getPlayerColor(userId,false);
-        if(!Data.isUserPlaying(userId,false)){
+        if(!Data.isUserPlaying(userId)){
             const res:moveSocketResponse = {
                 error:true,
                 message:"Game has not started yet",
@@ -121,8 +121,8 @@ export const gameRun = new Elysia().use(authQueryPlugin)
         const {move}= res.data;
 
         // Get Opponent data
-        const oppoUserId = Data.getUserOppo(userId,false)as string;
-        const oppoSocket = Data.getUserIdSocket(oppoUserId,false) as ElysiaWS;
+        const oppoUserId = Data.getUserOppo(userId)as string;
+        const oppoSocket = Data.getUserIdSocket(oppoUserId) as ElysiaWS;
 
         // Get white player id and black player id
         let whiteUserId = userId;
@@ -169,7 +169,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
             // Remove the game from active games
             Data.endGame(whiteUserId,blackUserId,false);
             // Store the game in the database
-            Data.storeGame(gameObject,userId,whiteUserId,blackUserId,gameState.gameEndReason,increment,time,false);
+            Data.storeGame(gameObject,userId,whiteUserId,blackUserId,gameState.gameEndReason,increment,time);
             // Close websockets
             ws.close();
             oppoSocket.close();
@@ -181,18 +181,18 @@ export const gameRun = new Elysia().use(authQueryPlugin)
         const { username, userId,  time, increment } = ws.data.user;
         let {color} = ws.data.user;
         // If the user was in the queue
-        if(Data.isUserQueue(userId,false)){
-            Data.removeGameQueue(userId, color, time, increment,false);
+        if(Data.isUserQueue(userId)){
+            Data.removeGameQueue(userId, color, time, increment);
             console.log(`${username} has closed it's connection from the Queue`);
         }
 
         // If the user was in a game
-        if(Data.isUserPlaying(userId,false)){
-            const oppoId = Data.getUserOppo(userId,false)
+        if(Data.isUserPlaying(userId)){
+            const oppoId = Data.getUserOppo(userId)
             // If the other player left
             if(oppoId){
                 console.log(`Opponent left`)
-                const oppoSocket = Data.getUserIdSocket(oppoId,false) as ElysiaWS;
+                const oppoSocket = Data.getUserIdSocket(oppoId) as ElysiaWS;
                 const responseObject:moveSocketResponse = {
                     winner:true,
                     error:false,
@@ -217,7 +217,7 @@ export const gameRun = new Elysia().use(authQueryPlugin)
                 oppoSocket.close();
                 if(gameObject){
                     console.log("saving game")
-                    Data.storeGame(gameObject,oppoId,whiteUserId,blackUserId,gameOverReasons.otherAbandoned,increment,time,false)
+                    Data.storeGame(gameObject,oppoId,whiteUserId,blackUserId,gameOverReasons.otherAbandoned,increment,time)
                 }
             }
             console.log(`${username} closed connection midgame as ${colorType[color]} and ${oppoId} has won the game`)

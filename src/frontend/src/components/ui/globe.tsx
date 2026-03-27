@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils"
 const MOVEMENT_DAMPING = 1400
 
 let GLOBE_CONFIG: COBEOptions = {
-    width: 200,
-    height: 200,
+    width: 800,
+    height: 800,
     onRender: () => {},
     devicePixelRatio: 2,
     phi: 0,
     theta: 0.3,
-    dark: 2,
+    dark: 0,
     diffuse: 0.4,
     mapSamples: 16000,
     mapBrightness: 1.2,

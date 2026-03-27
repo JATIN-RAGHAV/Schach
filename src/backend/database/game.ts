@@ -148,7 +148,7 @@ const Game = <Tbase extends Constructor>(Base: Tbase) =>
         }
 
         // Stores the game on the backend
-        static async storeGame(gameObject:gameObject,winnerId:string,whiteUserId:string,blackUserId:string,gameOverReason:gameOverReasons,incrementTime:number,gameTime:number,isAnonymous: boolean){
+        static async storeGame(gameObject:gameObject,winnerId:string,whiteUserId:string,blackUserId:string,gameOverReason:gameOverReasons,incrementTime:number,gameTime:number){
             let gameType = gameTypes.Bullet;
             console.log(`Game Time: ${gameTime}`)
             if(gameTime >= 2 * (60 * 1000)){// If time >= 2 minutes then Blitz
@@ -157,11 +157,9 @@ const Game = <Tbase extends Constructor>(Base: Tbase) =>
             if(gameTime >= 7*(60 * 1000)){// If time >= 7 minutes Rapid
                 gameType = gameTypes.Rapid;
             }
-            if(!isAnonymous){
-                Data.storeGameDatabase(gameObject,winnerId,whiteUserId,blackUserId,gameOverReason,incrementTime,gameTime,gameType).then(() => {
-                    console.log("Game stored on database");
-                })
-            }
+            Data.storeGameDatabase(gameObject,winnerId,whiteUserId,blackUserId,gameOverReason,incrementTime,gameTime,gameType).then(() => {
+                console.log("Game stored on database");
+            })
 
         }
     };

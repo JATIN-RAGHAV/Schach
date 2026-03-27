@@ -18,9 +18,9 @@ export class Zobrist {
     private static castleHashes = new Map<specialMoveFlagsEnums, bigint>();
 
     // Function which generates random 64 bit numbers
-    public static getRandomNumber():bigint{
-        const low = BigInt(Math.floor(Math.random() << 31));
-        const high = BigInt(Math.floor(Math.random() << 31));
+    private static getRandomNumber():bigint{
+        const low = BigInt(Math.floor(Math.random() * (1<<31)));
+        const high = BigInt(Math.floor(Math.random() * (1<<31)));
         return (high << 32n) | low;
     }
 

@@ -25,25 +25,11 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
         static userQueue: userQueue = new Set<string>();
         static userOppo: userOppo = new Map();
         static userIdWebSocket: userIdWebSocket = new Map();
-
-        // Data structures to store data related to anonymous users
-        static AnonymousGameQueue: gameObjectQueue = {
-            [color.Black]: {},
-            [color.White]: {},
-            [color.Random]: {},
-        };
-        static anonymousUserQueue: userQueue = new Set<string>();
-        static anonymousUserOppo: userOppo = new Map();
         static anonymousUserIdWebSocket: userIdWebSocket = new Map();
 
-        static isGameQueue(color: color, time: number, increment: number,isAnonymous: boolean): boolean {
+        static isGameQueue(color: color, time: number, increment: number): boolean {
             // key -> time:increment
-            if(isAnonymous){
-                return getTimeKey(time, increment) in this.AnonymousGameQueue[color];
-            }
-            else{
-                return getTimeKey(time, increment) in this.gameQueue[color];
-            }
+            return getTimeKey(time, increment) in this.gameQueue[color];
         }
 
         static addGameQueue(
@@ -52,20 +38,11 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
             color: color,
             time: number,
             increment: number,
-            isAnonymous: boolean
         ): boolean {
-            if (this.isUserQueue(userId,isAnonymous)) {
+            if (this.isUserQueue(userId)) {
                 return false;
             }
             const timeKey = getTimeKey(time, increment);
-            if(isAnonymous){
-                if (!(timeKey in this.AnonymousGameQueue[color])) {
-                    this.AnonymousGameQueue[color][timeKey] = new Map<string, gameQueueObject>();
-                }
-                this.AnonymousGameQueue[color][timeKey]?.set(userId, gameQueueObject);
-                this.anonymousUserQueue.add(userId);
-                return true
-            }
             if (!(timeKey in this.gameQueue[color])) {
                 this.gameQueue[color][timeKey] = new Map<string, gameQueueObject>();
             }
@@ -74,22 +51,10 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
             return true;
         }
 
-        static getGameQueue(color: color, time: number, increment: number,isAnonymouse:boolean) {
+        static getGameQueue(color: color, time: number, increment: number) {
             const timeKey = getTimeKey(time, increment);
-            if (!this.isGameQueue(color, time, increment,isAnonymouse)) {
+            if (!this.isGameQueue(color, time, increment)) {
                 throw GameNotFound;
-            }
-
-            if(isAnonymouse){
-                const gameQueueObjectMap = this.AnonymousGameQueue[color][timeKey];
-                if (gameQueueObjectMap != undefined) {
-                    let userId = gameQueueObjectMap.keys().next().value;
-                    userId = userId != undefined ? userId : 'shit';
-                    const gameQueueObject = gameQueueObjectMap.get(userId);
-                    this.anonymousUserQueue.delete(userId);
-                    this.removeGameQueue(userId, color, time, increment,isAnonymouse);
-                    return gameQueueObject;
-                }
             }
             const gameQueueObjectMap = this.gameQueue[color][timeKey];
             if (gameQueueObjectMap != undefined) {
@@ -97,7 +62,7 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
                 userId = userId != undefined ? userId : 'shit';
                 const gameQueueObject = gameQueueObjectMap.get(userId);
                 this.userQueue.delete(userId);
-                this.removeGameQueue(userId, color, time, increment,isAnonymouse);
+                this.removeGameQueue(userId, color, time, increment);
                 return gameQueueObject;
             }
             throw GameNotFound;
@@ -108,142 +73,77 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
             color: color,
             time: number,
             increment: number,
-            isAnonymouse: boolean
         ) {
             const timeKey = getTimeKey(time, increment);
-            if(isAnonymouse){
-                this.anonymousUserQueue.delete(userId);
-            }
-            else{
-                this.userQueue.delete(userId);
-            }
-            if (!this.isGameQueue(color, time, increment,isAnonymouse)) {
+            this.userQueue.delete(userId);
+            if (!this.isGameQueue(color, time, increment)) {
                 return;
             }
-            if(isAnonymouse){
-                if (this.AnonymousGameQueue[color][timeKey]?.has(userId)) {
-                    this.AnonymousGameQueue[color][timeKey].delete(userId);
-                }
-            }
-            else{
-                if (this.gameQueue[color][timeKey]?.has(userId)) {
-                    this.gameQueue[color][timeKey].delete(userId);
-                }
+            if (this.gameQueue[color][timeKey]?.has(userId)) {
+                this.gameQueue[color][timeKey].delete(userId);
             }
         }
 
-        static isUserQueue(userId: string,isAnonymous: boolean): boolean {
-            if(isAnonymous){
-                return this.anonymousUserQueue.has(userId);
-            }
-            else{
-                return this.userQueue.has(userId);
-            }
+        static isUserQueue(userId: string): boolean {
+            return this.userQueue.has(userId);
         }
 
         static print() {
             console.log(this.gameQueue);
         }
 
-        static getUserOppo(userId:string,isAnonymous: boolean):(string|null){
-            if(isAnonymous){
-                const res = this.anonymousUserOppo.get(userId)
-                if(res != undefined){
-                    return res
-                }
-            }
-            else{
-                const res = this.userOppo.get(userId)
-                if(res != undefined){
-                    return res
-                }
+        static getUserOppo(userId:string):(string|null){
+            const res = this.userOppo.get(userId)
+            if(res != undefined){
+                return res
             }
             return null;
         }
 
-        static isUserPlaying(userId:string,isAnonymous: boolean):boolean{
-            if(isAnonymous){
-                return this.anonymousUserOppo.has(userId);
-            }
-            else{
-                return this.userOppo.has(userId);
-            }
+        static isUserPlaying(userId:string):boolean{
+            return this.userOppo.has(userId);
         }
 
-        static setUserOppo(user1Id:string, user2Id:string,isAnonymous:boolean):boolean{
-            if(this.isUserPlaying(user1Id,isAnonymous) || this.isUserPlaying(user2Id,isAnonymous)){
+        static setUserOppo(user1Id:string, user2Id:string):boolean{
+            if(this.isUserPlaying(user1Id) || this.isUserPlaying(user2Id)){
                 return false
-            }
-            if(isAnonymous){
-                this.anonymousUserOppo.set(user1Id,user2Id)
-                this.anonymousUserOppo.set(user2Id,user1Id)
-                return true
             }
             this.userOppo.set(user1Id,user2Id)
             this.userOppo.set(user2Id,user1Id)
             return true
         }
 
-        static removeUsersOppo(user1Id:string, user2Id:string,isAnonymous: boolean):boolean{
-            if(!this.isUserPlaying(user1Id,isAnonymous) || !this.isUserPlaying(user2Id,isAnonymous)){
+        static removeUsersOppo(user1Id:string, user2Id:string):boolean{
+            if(!this.isUserPlaying(user1Id) || !this.isUserPlaying(user2Id)){
                 return false
-            }
-            if(isAnonymous){
-                this.anonymousUserOppo.delete(user1Id)
-                this.anonymousUserOppo.delete(user2Id)
-                return true
             }
             this.userOppo.delete(user1Id)
             this.userOppo.delete(user2Id)
             return true
         }
 
-        static getUserColor(userId:string,isAnonymous:boolean):(color|null){
-            if(isAnonymous){
-                const color = this.anonymousUserIdWebSocket.get(userId)?.color;
-                if(color != undefined){
-                    return color;
-                }
-            }
-            else{
-                const color = this.userIdWebSocket.get(userId)?.color;
-                if(color != undefined){
-                    return color;
-                }
+        static getUserColor(userId:string):(color|null){
+            const color = this.userIdWebSocket.get(userId)?.color;
+            if(color != undefined){
+                return color;
             }
             return null
+
         }
 
-        static setUserIdSocket(userId:string, socket:ElysiaWS,color:color,isAnonymous: boolean):boolean{
-            if(isAnonymous){
-                if(this.anonymousUserIdWebSocket.has(userId)){
-                    return false
-                }
-                this.anonymousUserIdWebSocket.set(userId,{
-                    color,
-                    socket
-                })
-            }
-            else{
-                if(this.userIdWebSocket.has(userId)){
-                    return false
-                }
-                this.userIdWebSocket.set(userId,{
-                    color,
-                    socket
-                })
+        static setUserIdSocket(userId:string, socket:ElysiaWS,color:color):boolean{
+            if(this.userIdWebSocket.has(userId)){
+                return false
             }
 
+            this.userIdWebSocket.set(userId,{
+                color,
+                socket
+            })
             return true
         }
 
-        static getUserIdSocket(userId:string,isAnonymous: boolean):(ElysiaWS|null){
-            if(isAnonymous){
-                const socket = this.anonymousUserIdWebSocket.get(userId)?.socket;
-                if(socket != undefined){
-                    return socket;
-                }
-            }
+        static getUserIdSocket(userId:string):(ElysiaWS|null){
             const socket = this.userIdWebSocket.get(userId)?.socket;
             if(socket != undefined){
                 return socket;
