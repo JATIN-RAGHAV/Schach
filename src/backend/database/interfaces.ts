@@ -19,7 +19,8 @@ export interface gameQueueObject {
     username: string;
     ws: ElysiaWS;
 }
+// Maps colors to a map of time:increment to a user with that color and time:increment
 export type gameObjectQueue = Record<
     color,
-    Record<string, Map<string, gameQueueObject>>
+    Record<string, gameQueueObject>
 >;

@@ -1,9 +1,9 @@
 import {
-    type gameQueueObject,
-    type gameObjectQueue,
+    type userWaitingObject,
+    type gameWaitingObject,
     type userIdWebSocket,
     type userOppo,
-    type userQueue,
+    type userQueue as userWaiting,
 } from './interfaces';
 import { color } from '../../common/interfaces/enums';
 import { GameNotFound } from '../helper/errors';
@@ -17,78 +17,76 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
     class extends Base {
 
         // Static Variables defined before hand
-        static gameQueue: gameObjectQueue = {
+        // Maps color,time and increment to userWaitingObject
+        static gameWaitingObjects: gameWaitingObject = {
             [color.Black]: {},
             [color.White]: {},
             [color.Random]: {},
         };
-        static userQueue: userQueue = new Set<string>();
+        // Set of users waiting for game to start
+        static userWaitings: userWaiting = new Set<string>();
+        // Maps opponents to each other
         static userOppo: userOppo = new Map();
+        // Maps userId to socket
         static userIdWebSocket: userIdWebSocket = new Map();
 
-        static isGameQueue(color: color, time: number, increment: number): boolean {
+        // Is there a game Object waiting with the give color, time and increment ??
+        static isGameWaiting(color: color, time: number, increment: number): boolean {
             // key -> time:increment
-            return getTimeKey(time, increment) in this.gameQueue[color];
+            return getTimeKey(time, increment) in this.gameWaitingObjects[color];
         }
 
-        static addGameQueue(
+        // Set a game waiting object with the give color, time and increment
+        static setGameWaitingObject(
             userId: string,
-            gameQueueObject: gameQueueObject,
+            userWaitingObject: userWaitingObject,
             color: color,
             time: number,
             increment: number,
         ): boolean {
-            if (this.isUserQueue(userId)) {
+            if (this.isUserWaiting(userId)) {
                 return false;
             }
             const timeKey = getTimeKey(time, increment);
-            if (!(timeKey in this.gameQueue[color])) {
-                this.gameQueue[color][timeKey] = new Map<string, gameQueueObject>();
-            }
-            this.gameQueue[color][timeKey]?.set(userId, gameQueueObject);
-            this.userQueue.add(userId);
+            this.gameWaitingObjects[color][timeKey] = userWaitingObject;
+            this.userWaitings.add(userId);
             return true;
         }
 
-        static getGameQueue(color: color, time: number, increment: number) {
+        // Get a Game Object with the give color, time and increment
+        static getGameWaitingObject(color: color, time: number, increment: number) {
             const timeKey = getTimeKey(time, increment);
-            if (!this.isGameQueue(color, time, increment)) {
+            if (!this.isGameWaiting(color, time, increment)) {
                 throw GameNotFound;
             }
-            const gameQueueObjectMap = this.gameQueue[color][timeKey];
-            if (gameQueueObjectMap != undefined) {
-                let userId = gameQueueObjectMap.keys().next().value;
-                userId = userId != undefined ? userId : 'shit';
-                const gameQueueObject = gameQueueObjectMap.get(userId);
-                this.userQueue.delete(userId);
-                this.removeGameQueue(userId, color, time, increment);
-                return gameQueueObject;
+            const gameWaitingObject = this.gameWaitingObjects[color][timeKey];
+            if (gameWaitingObject != undefined) {
+                let userId = gameWaitingObject.userId;
+                this.userWaitings.delete(userId);
+                this.removeGameWaitingObject(userId, color, time, increment);
+                return gameWaitingObject;
             }
             throw GameNotFound;
         }
 
-        static removeGameQueue(
+        // Remove a Game Object with the give color, time and increment
+        static removeGameWaitingObject(
             userId: string,
             color: color,
             time: number,
             increment: number,
         ) {
             const timeKey = getTimeKey(time, increment);
-            this.userQueue.delete(userId);
-            if (!this.isGameQueue(color, time, increment)) {
+            this.userWaitings.delete(userId);
+            if (!this.isGameWaiting(color, time, increment)) {
                 return;
             }
-            if (this.gameQueue[color][timeKey]?.has(userId)) {
-                this.gameQueue[color][timeKey].delete(userId);
-            }
+            const h = (this.gameWaitingObjects[color])
+            delete h[timeKey];
         }
 
-        static isUserQueue(userId: string): boolean {
-            return this.userQueue.has(userId);
-        }
-
-        static print() {
-            console.log(this.gameQueue);
+        static isUserWaiting(userId: string): boolean {
+            return this.userWaitings.has(userId);
         }
 
         static getUserOppo(userId:string):(string|null){
