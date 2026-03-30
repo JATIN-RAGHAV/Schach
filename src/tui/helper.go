@@ -30,10 +30,12 @@ func moveToIndex (move string) (moveIndex [4]int){
 
 func sendMove(move string, socket *websocket.Conn){
 	moveStruct := socketMoveRequest{
-		move:move,
+		Move:move,
+		IsMessage: false,
 	}
 	moveString,error := json.Marshal(moveStruct)
-	if(error == nil){
-		socket.WriteMessage(websocket.TextMessage, moveString)
+	if(error != nil){
+		return
 	}
+	socket.WriteMessage(websocket.TextMessage, moveString)
 }

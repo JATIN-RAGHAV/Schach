@@ -148,8 +148,11 @@ func (m model) View() (v tea.View) {
 		}
 		s += fmt.Sprintf("Playing With: %s\n\n",m.gameStruct.opponentName)
 		s += fmt.Sprintf("Playing as: %s\n\n",m.gameStruct.color)
+
+		s += printBoard(m.gameStruct.board)
+
 		if(color == m.gameStruct.color){
-			s += fmt.Sprintf("%s\n\n",styles_Blue.Render("Your Turn"))
+			s += fmt.Sprintf("%s: ",styles_Blue.Render("Your Turn"))
 			s += m.move
 		}else{
 			s += fmt.Sprintf("%s\n\n",styles_Red.Render("Opponent's Turn"))

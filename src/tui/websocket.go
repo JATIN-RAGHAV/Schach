@@ -75,9 +75,11 @@ func startSocket(m *model) {
 				// Make move and update time
 				if(message.Move != nil){
 					move := moveToIndex(*message.Move)
-					sRow , sCol, tRow, tCol := move[0],move[1],move[2],move[3];
+					sCol, sRow , tCol, tRow := move[0],move[1],move[2],move[3];
 					(*m).gameStruct.board[tRow][tCol] = (*m).gameStruct.board[sRow][sCol];
 					(*m).gameStruct.board[sRow][sCol] = NN;
+					(*m).gameStruct.moveNumber++;
+					(*m).gameStruct.moves = append((*m).gameStruct.moves,(*message.Move));
 				}
 
 				if(message.WhiteTimeLeft != nil){

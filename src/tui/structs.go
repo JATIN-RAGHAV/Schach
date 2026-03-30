@@ -29,5 +29,6 @@ type gameStartSocketResponse struct{
 }
 
 type socketMoveRequest struct{
-	move string
+	Move string `json:"move"`
+	IsMessage bool `json:"isMessage"`
 }
