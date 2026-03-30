@@ -17,9 +17,10 @@ const (
 )
 
 // Colors
+type color string;
 const (
-	White = "White"
-	Black = "Black"
+	White color = "White"
+	Black color = "Black"
 )
 
 // Pieces

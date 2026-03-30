@@ -7,7 +7,7 @@ type gameStruct struct {
     moves []string
     whiteTimeLeft int // In miliseconds
     blackTimeLeft int// In minliseconds
-	color string
+	color color
     opponentName string
 }
 
@@ -24,7 +24,7 @@ type gameActiveSocketResponse struct{
 
 type gameStartSocketResponse struct{
     Start 			bool   `json:"start"`
-    Color 			string `json:"color"`
+    Color 			color `json:"color"`
     OpponentName 	string `json:"opponentName"`
 }
 

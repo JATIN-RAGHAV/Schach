@@ -140,7 +140,7 @@ func (m model) View() (v tea.View) {
 
 	// Game Active Page
 	if(m.status == status_play){
-		color := ""
+		var color color;
 		if((m.gameStruct.moveNumber % 2) == 1){
 			color = Black
 		}else{
@@ -149,11 +149,11 @@ func (m model) View() (v tea.View) {
 		s += fmt.Sprintf("Playing With: %s\n\n",m.gameStruct.opponentName)
 		s += fmt.Sprintf("Playing as: %s\n\n",m.gameStruct.color)
 
-		s += printBoard(m.gameStruct.board)
+		s += printBoard(m.gameStruct.board,m.gameStruct.color);
 
 		if(color == m.gameStruct.color){
 			s += fmt.Sprintf("%s: ",styles_Blue.Render("Your Turn"))
-			s += m.move
+			s += m.move + "\n\n";
 		}else{
 			s += fmt.Sprintf("%s\n\n",styles_Red.Render("Opponent's Turn"))
 		}
