@@ -41,6 +41,7 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
         // Is there a game Object waiting with the give color, time and increment ??
         static isGameWaiting(color: color, time: number, increment: number): boolean {
             // key -> time:increment
+            console.log(this.gameWaitingObjects[color])
             return getTimeKey(time, increment) in this.gameWaitingObjects[color];
         }
 
@@ -128,7 +129,7 @@ const Memory = <Tbase extends Constructor>(Base: Tbase) =>
             if (!this.isGameWaiting(color, time, increment)) {
                 return;
             }
-            const h = (this.gameWaitingObjects[color])
+            const h = this.gameWaitingObjects[color]
             delete h[timeKey];
         }
 

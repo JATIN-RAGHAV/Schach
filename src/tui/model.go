@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	websocket "github.com/gorilla/websocket"
 	tea "charm.land/bubbletea/v2"
 	lipgloss "charm.land/lipgloss/v2"
+	websocket "github.com/gorilla/websocket"
 )
 
 type model struct {
@@ -54,7 +54,6 @@ func (m model) Init () tea.Cmd {
 	return nil;
 }
 
-
 // This updates the model
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
@@ -71,7 +70,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 
 		if(msg.String() == "q" || msg.String() == "esc"){
-            return m,tea.Quit
+			closeSocket()
+			return m, tea.Quit
 		}
 
 		// Game Type selection page
@@ -109,7 +109,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// End Game Page
 		if(m.status == status_end_game){
 			switch msg.String(){
-			case "r","R":
+			case "r","R","enter":
 				m.status = status_select_game_type
 			}
 		}
@@ -146,7 +146,6 @@ func (m model) View() (v tea.View) {
 		}else{
 			color = White
 		}
-		s += fmt.Sprintf("Playing With: %s\n\n",m.gameStruct.opponentName)
 		s += fmt.Sprintf("Playing as: %s\n\n",m.gameStruct.color)
 
 		s += printBoard(m.gameStruct.board,m.gameStruct.color);

@@ -1,6 +1,6 @@
 import Data from '../database/data';
 import { color as colorType } from '../../common/interfaces/enums';
-import { getAnonymousOpponent, getOpponent } from '../helper/getOpponent';
+import { getAnonymousOpponent } from '../helper/getOpponent';
 import { anonymousGameStartPlugin } from './plugins/authPlugin';
 import type { userWaitingObject } from '../database/interfaces';
 import { isGameEnded, isMoveOk, printBoard, updateGameObject } from '../../common/game';
@@ -184,7 +184,7 @@ export const anonymouseGameRun = new Elysia().use(anonymousGameStartPlugin)
         let {color} = ws.data.user;
         // If the user was in the queue
         if(Data.isUserWaiting(userId)){
-            Data.removeGameWaitingObject(userId, color, time, increment);
+            Data.removeAnonymousGameWaitingObject(userId, color, time, increment);
             console.log(`${username} has closed it's connection from the Queue`);
         }
 

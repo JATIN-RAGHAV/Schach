@@ -60,9 +60,8 @@ export const anonymousGameStartPlugin = new Elysia().use(errorPlugin).resolve({a
         return status(400);
     }
     const { color, time, increment } = res.data as gameCreate;
-    const userId = String(Zobrist.getRandomNumber());
+    const userId = Zobrist.getRandomNumber().toString();
 
-    console.log("anonymouse player coming.")
     return {
         user: {
             color,
