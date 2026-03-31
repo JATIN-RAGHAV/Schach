@@ -1,4 +1,4 @@
-package main;
+package schach_TUI;
 
 // Time is in miliseconds
 type gameStruct struct {

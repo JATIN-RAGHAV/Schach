@@ -1,4 +1,4 @@
-package main
+package schach_TUI;
 
 import lipgloss "charm.land/lipgloss/v2"
 

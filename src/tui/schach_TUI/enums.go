@@ -1,4 +1,4 @@
-package main
+package schach_TUI;
 
 // State of the game
 type status int;

@@ -1,4 +1,4 @@
-package main;
+package schach_TUI;
 
 func initBoard() (board Board){
 	// Make all the pieces null

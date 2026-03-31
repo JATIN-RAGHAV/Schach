@@ -1,4 +1,4 @@
-package main;
+package schach_TUI;
 
 type updateModelTeaMessage struct{
 	model model
