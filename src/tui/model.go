@@ -60,8 +60,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	
+	// Custom Tea messages
 	case updateModelTeaMessage:
         return msg.model, nil
+
+	case updateTimeTeaMessage:
+		m.gameStruct.whiteTimeLeft = msg.whiteTimeLeft;
+		m.gameStruct.blackTimeLeft = msg.blackTimeLeft;
 
 	// Get Window size
 	case tea.WindowSizeMsg:
@@ -148,8 +153,7 @@ func (m model) View() (v tea.View) {
 			color = White
 		}
 		fmt.Fprintf(&s,"Playing as: %s\n\n",m.gameStruct.color)
-
-		s.WriteString(printBoard(m.gameStruct.board,m.gameStruct.color));
+		s.WriteString(printBoard(m.gameStruct.board,m.gameStruct.color,m.gameStruct.whiteTimeLeft,m.gameStruct.blackTimeLeft));
 
 		var text strings.Builder
 		if(color == m.gameStruct.color){
@@ -159,7 +163,7 @@ func (m model) View() (v tea.View) {
 				fmt.Fprintf(&text," ");
 			}
 		}else{
-			fmt.Fprintf(&text,"%s",styles_Red.Render("Opponent's Turn"))
+			fmt.Fprintf(&text,"%s",styles_Red.Render("Opponent's Turn  "))
 		}
 
 		s.WriteString(styles_left_align.Render(styles_Red_text_border.Render(text.String())))

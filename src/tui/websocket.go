@@ -61,6 +61,7 @@ func startSocket(m *model) {
 				(*m).gameStruct.whiteTimeLeft = time;
 				(*m).gameStruct.blackTimeLeft = time;
 				(*m).message = fmt.Appendf([]byte{},"color: %s",message.Color);
+				go updateTime(&(*m).gameStruct);
 
 			}else{
 				// Handle Active Game Response

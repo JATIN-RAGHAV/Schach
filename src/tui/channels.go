@@ -6,7 +6,6 @@ import (
 
 var messageChan = make(chan []byte)
 var closeSocketChan = make(chan bool)
-var closeProg = make(chan bool)
 
 func closeSocket() {
 	closeSocketChan <- true
@@ -27,6 +26,3 @@ func getMessage(socket *websocket.Conn) {
 	}
 }
 
-func closeProgram() {
-	closeProg <- true
-}

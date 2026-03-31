@@ -7,3 +7,8 @@ type updateModelTeaMessage struct{
 type updateMessageTeaMessage struct {
 	message int
 }
+
+type updateTimeTeaMessage struct {
+	whiteTimeLeft int
+    blackTimeLeft int
+}

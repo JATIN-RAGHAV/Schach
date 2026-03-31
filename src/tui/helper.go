@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"time"
 
 	websocket "github.com/gorilla/websocket"
 )
@@ -38,4 +39,24 @@ func sendMove(move string, socket *websocket.Conn){
 		return
 	}
 	socket.WriteMessage(websocket.TextMessage, moveString)
+}
+
+func updateTime(gameStruct *gameStruct){
+	for{
+		select{
+		case <- closeSocketChan:
+			return
+		default:
+			time.Sleep(1 * time.Second);
+			if gameStruct.moveNumber % 2 == 0{
+                (*gameStruct).whiteTimeLeft -= 1000;
+			}else{
+                (*gameStruct).blackTimeLeft -= 1000;
+			}
+			prog.Send(updateTimeTeaMessage{
+				whiteTimeLeft:(*gameStruct).whiteTimeLeft,
+				blackTimeLeft:(*gameStruct).blackTimeLeft,
+			})
+		}
+	}
 }
