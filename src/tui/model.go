@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	tea "charm.land/bubbletea/v2"
 	lipgloss "charm.land/lipgloss/v2"
@@ -119,23 +120,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // This renders the model
 func (m model) View() (v tea.View) {
-	s := "";
+	var s strings.Builder;
 
 	// Game Type selection page
 	if(m.status == status_select_game_type){
-		s += fmt.Sprintf("%s\n\n",styles_Red.Render("Select a Game Type"))
+		fmt.Fprintf(&s,"%s\n\n",styles_Red.Render("Select a Game Type"));
 		for i,val := range m.game_types{
 			if i == m.game_type_selected{
-				s += fmt.Sprintf("%s %s\n",styles_Red.Render(">"),styles_Green.Render(val))
+				fmt.Fprintf(&s,"%s %s\n",styles_Red.Render(">"),styles_Green.Render(val))
 			}else{
-				s += fmt.Sprintf("  %s\n",styles_Blue.Render(val))
+				fmt.Fprintf(&s,"  %s\n",styles_Blue.Render(val))
 			}
 		}
 	}
 
 	// Game Loading page
 	if(m.status == status_loading){
-		s += fmt.Sprintf("%s\n\n",styles_Red.Render("Waiting for Opponent..."))
+		fmt.Fprintf(&s,"%s\n\n",styles_Red.Render("Waiting for Opponent..."))
 	}
 
 	// Game Active Page
@@ -146,17 +147,22 @@ func (m model) View() (v tea.View) {
 		}else{
 			color = White
 		}
-		s += fmt.Sprintf("Playing as: %s\n\n",m.gameStruct.color)
+		fmt.Fprintf(&s,"Playing as: %s\n\n",m.gameStruct.color)
 
-		s += printBoard(m.gameStruct.board,m.gameStruct.color);
+		s.WriteString(printBoard(m.gameStruct.board,m.gameStruct.color));
 
+		var text strings.Builder
 		if(color == m.gameStruct.color){
-			s += fmt.Sprintf("%s: ",styles_Blue.Render("Your Turn"))
-			s += m.move + "\n\n";
+			fmt.Fprintf(&text,"%s: ",styles_Green.Render("Your Turn"))
+			fmt.Fprintf(&text,m.move);
+			for i := 0 ;i<(6 - len(m.move));i++{
+				fmt.Fprintf(&text," ");
+			}
 		}else{
-			s += fmt.Sprintf("%s\n\n",styles_Red.Render("Opponent's Turn"))
+			fmt.Fprintf(&text,"%s",styles_Red.Render("Opponent's Turn"))
 		}
-		
+
+		s.WriteString(styles_left_align.Render(styles_Red_text_border.Render(text.String())))
 	}
 
 	// Game End Page
@@ -169,14 +175,12 @@ func (m model) View() (v tea.View) {
 			msg = styles_Red.Render("You lost")
 		}
 
-		s += fmt.Sprintf("%s\n\n",styles_Blue.Render("Game Over"))
-		s += fmt.Sprintf("%s\n\n",msg)
+		fmt.Fprintf(&s,"%s\n\n",styles_Blue.Render("Game Over"))
+		fmt.Fprintf(&s,"%s\n\n",msg)
 	}
 
-	// s += string(m.message)
-
 	// Put text in center and take control of the whole terminal
-	v = tea.NewView(lipgloss.Place(m.width,m.height,lipgloss.Center,lipgloss.Center,s))
+	v = tea.NewView(lipgloss.Place(m.width,m.height,lipgloss.Center,lipgloss.Center,s.String()))
 	v.AltScreen = true
 	return 
 }
