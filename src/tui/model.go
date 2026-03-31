@@ -70,8 +70,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 
 		if(msg.String() == "q" || msg.String() == "esc"){
-			closeSocket();
-			fmt.Printf("Quitting");
 			return m, tea.Quit
 		}
 
@@ -137,7 +135,7 @@ func (m model) View() (v tea.View) {
 
 	// Game Loading page
 	if(m.status == status_loading){
-		s += fmt.Sprintf("%s\n\n",styles_Red.Render("Loading Game..."))
+		s += fmt.Sprintf("%s\n\n",styles_Red.Render("Waiting for Opponent..."))
 	}
 
 	// Game Active Page
