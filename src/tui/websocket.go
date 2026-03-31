@@ -36,7 +36,7 @@ func startSocket(m *model) {
 	// On message handler
 	for {
 		select {
-		case <-closeSocketChan:
+		case <- closeSocketChan:
 			goto End;
 		case msg := <-messageChan:
 			(*m).message = msg;
@@ -115,7 +115,9 @@ func startSocket(m *model) {
 
 	End:
 	// Handle closing of socket
-	(*m).status = status_select_game_type;
+	if(*m).status != status_end_game{
+		(*m).status = status_select_game_type;
+	}
 	(*m).move = ""
 	prog.Send(updateModelTeaMessage{model:*m})
 }

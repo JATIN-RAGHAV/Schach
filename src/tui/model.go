@@ -70,7 +70,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 
 		if(msg.String() == "q" || msg.String() == "esc"){
-			closeSocket()
+			closeSocket();
+			fmt.Printf("Quitting");
 			return m, tea.Quit
 		}
 
@@ -86,6 +87,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.game_type_selected--;
 				}
 			case "enter":
+				openSocket()
 				go startSocket(&m);
 			}
 		}
