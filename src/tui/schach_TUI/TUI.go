@@ -1,17 +1,13 @@
 package schach_TUI
 
 import (
-	"os"
 	tea "charm.land/bubbletea/v2"
-	lipgloss "charm.land/lipgloss/v2"
+	"github.com/charmbracelet/ssh"
 )
 
 var prog *tea.Program;
 
-func TUI() {
-	prog = tea.NewProgram(InitModel())
-	if _,err := prog.Run(); err != nil{
-		lipgloss.Println(styles_Red.Render("Error"))
-		os.Exit(1)
-	}
+func Handler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+	newModel := InitModel();
+	return newModel, []tea.ProgramOption{}
 }
