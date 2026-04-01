@@ -2,15 +2,21 @@
 
 This is a chess project I am building.
 
+## Prerequisites
+- [bun](https://bun.sh/)
+
 ## To run this just follow the following commands
 
 1. To install dependencies:
 ```bash
+git clone https://github.com/jatin-raghav/schach.git # to install codebase
+cd schach
 bun install
+echo "{}" > src/backend/helper/keys.json
 
 ```
 
-2. Put Database details in `.env.development.local`, example below:
+2. Put Database details in a file named `.env.development.local` in the root directory, example below:
 
 ```
 
