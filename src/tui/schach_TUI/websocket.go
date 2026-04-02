@@ -14,7 +14,7 @@ func startSocket(m *model) {
 	}
 	(*m).status = status_loading;
 	time := getTime(*m);
-	url := fmt.Sprintf("ws://localhost:2222/game/anonymous/run?color=Random&increment=0&time=%d",time)
+	url := fmt.Sprintf("ws://schach-backend.walrus.codes/game/anonymous/run?color=Random&increment=0&time=%d",time)
 
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
