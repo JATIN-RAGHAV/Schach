@@ -17,7 +17,7 @@ jobs:
             host: walrus.codes
             username: admin
             key: ${{ secrets.SSH_KEY }}
-            port: ${{ 22 }}
+            port: 4321
             script: |
               cd /home/admin/projects/schach
               bash .github/.scripts/deploy.sh
@@ -32,7 +32,7 @@ jobs:
             host: walrus.codes
             username: admin
             key: ${{ secrets.SSH_KEY }}
-            port: ${{ 22 }}
+            port: 4321
             script: |
               mkdir -p /home/admin/projects/schach/src/tui/.ssh
               echo ${{ secrets.TUI_KEY }} > /home/admin/projects/schach/src/tui/.ssh/tui.key
