@@ -35,6 +35,6 @@ jobs:
             port: 4321
             script: |
               mkdir -p /home/admin/projects/schach/src/tui/.ssh
-              echo ${{ secrets.TUI_KEY }} > /home/admin/projects/schach/src/tui/.ssh/tui.key
+              echo "${{ secrets.TUI_KEY }}" > /home/admin/projects/schach/src/tui/.ssh/tui.key
               cd /home/admin/projects/schach
               bash .github/.scripts/deploy.sh
