@@ -95,20 +95,18 @@ export const isPawnFirstMove2 = (board:Board,move:string,color:colors,col:number
 
 export const printBoard = (board:Board) => {
     for(let i = rowSize-1 ;i>=0; i--){
-        Bun.write(Bun.stdout,i+1+" ");
+        let str:string = "";
+        str += (i+1).toString() + " ";
         for(let j = 0; j<columnSize; j++){
             const row = board[i];
             if(row != undefined){
                 const piece = row[j];
-                Bun.write(Bun.stdout,pieceToEmoji.get(piece as Pieces)+' ');
+                str += pieceToEmoji.get(piece as Pieces)+' ';
             }
         }
-        Bun.write(Bun.stdout,'\n')
+        console.log(str);
     }
-    Bun.write(Bun.stdout,"  ");
-    for(let i of "abcdefgh"){
-        Bun.write(Bun.stdout,i+" ");
-    }
+    console.log("  a b c d e f g h");
     console.log()
     console.log()
 }
