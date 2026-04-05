@@ -15,12 +15,12 @@ import (
 	"charm.land/wish/v2/activeterm"
 	bwish "charm.land/wish/v2/bubbletea"
 	"charm.land/wish/v2/logging"
-	"github.com/charmbracelet/ssh"
+	ssh "github.com/charmbracelet/ssh"
 )
 
 const (
 	ip = "0.0.0.0"
-	port = "22"
+	port = "2222"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 			return true
 		}),
 		wish.WithMiddleware(
-            bwish.Middleware(TUI.TeaHandler),
+            bwish.MiddlewareWithProgramHandler(TUI.TeaHandler),
             activeterm.Middleware(), // ensures a PTY is present
             logging.Middleware(),
         ),
