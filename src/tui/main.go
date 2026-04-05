@@ -20,7 +20,7 @@ import (
 
 const (
 	ip = "0.0.0.0"
-	port = "4242"
+	port = "22"
 )
 
 func main() {
