@@ -15,6 +15,7 @@ import (
 	"charm.land/wish/v2/activeterm"
 	bwish "charm.land/wish/v2/bubbletea"
 	"charm.land/wish/v2/logging"
+	"github.com/charmbracelet/ssh"
 )
 
 const (
@@ -25,8 +26,11 @@ const (
 func main() {
     s, err := wish.NewServer(
         wish.WithAddress(net.JoinHostPort(ip,port)),
-        wish.WithHostKeyPath(".ssh/id_ed25519"),
-        wish.WithMiddleware(
+        wish.WithHostKeyPath(".ssh/tui.key"),
+		wish.WithPasswordAuth(func(ctx ssh.Context, password string) bool {
+			return true
+		}),
+		wish.WithMiddleware(
             bwish.Middleware(TUI.TeaHandler),
             activeterm.Middleware(), // ensures a PTY is present
             logging.Middleware(),
