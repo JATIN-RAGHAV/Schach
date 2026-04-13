@@ -5,7 +5,6 @@
     "private": true,
     "scripts": {
         "back": "bun run ./index.ts",
-        "test": "bun run ../common/tests/index.ts",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier . --write"

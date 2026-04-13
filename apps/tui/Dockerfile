@@ -8,6 +8,10 @@ COPY go.sum go.sum
 
 RUN go mod tidy
 
+EXPOSE 22
+
 COPY . .
 
-CMD ["go", "run", "."]
+RUN go build
+
+CMD ["./tui_ssh"]

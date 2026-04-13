@@ -3,5 +3,8 @@
     "workspaces": [
         "apps/*",
         "packages/*"
-    ]
+    ],
+    "scripts": {
+        "frontendBuild":"bun run frontendBuild --workspaces --if-present"
+    }
 }

@@ -6,10 +6,14 @@ import { exportJWK, importJWK, type JWK } from 'jose';
 class JWT {
     static publicKey: keyType;
     static privateKey: keyType;
-    static path: string = 'helper/keys.json';
+    static path: string = './helper/keys.json';
 
     static async initKeys() {
         const keyFile = Bun.file(this.path);
+        if(!(await keyFile.exists())){
+            this.genNewKeys();
+            return;
+        }
         const keys = (await keyFile.json()) as {
             publicKey: JWK;
             privateKey: JWK;

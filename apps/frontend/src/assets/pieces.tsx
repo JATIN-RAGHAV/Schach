@@ -1,6 +1,6 @@
 
 import React from 'react'
-import type { Pieces } from '../../../common/interfaces/enums'
+import type { Pieces } from '@schach/common/interfaces/enums'
 
 // SVG Chess Pieces - Clean, scalable vector graphics
 
