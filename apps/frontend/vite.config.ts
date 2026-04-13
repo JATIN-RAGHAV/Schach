@@ -5,8 +5,6 @@ import  {resolve, dirname } from "path"
 
 // https://vite.dev/config/
 const __dirname = dirname(__filename)
-console.log("right here")
-console.log(resolve(__dirname,"src"))
 export default defineConfig({
   plugins: [
         react(),
