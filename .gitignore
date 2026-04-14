@@ -1,5 +1,6 @@
 # dependencies (bun install)
 node_modules
+secret.*
 
 # output
 out

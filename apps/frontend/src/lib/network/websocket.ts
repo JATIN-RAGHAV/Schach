@@ -2,7 +2,7 @@ import {color as colors, gameTypes } from "@schach/common/interfaces/enums";
 import { getTimeFromGameType } from "../utils";
 
 // Get the base url to make the request
-const baseUrl = import.meta.env.VITE_BASE_API_URL
+const baseUrl = import.meta.env.BACKEND_API_URL
 
 // Returns an object with the error status and the ws connection if successful
 export const startGame = (color:colors,gameType:gameTypes,increment:number)=>{

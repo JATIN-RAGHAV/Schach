@@ -18,19 +18,51 @@ EXPOSE 2222
 
 CMD ["bun","/apps/backend/index.ts"]
 
-# Building the frontend
-FROM base AS frontend
+# Building the development frontend
+FROM base AS frontenddev
 
 RUN bun i -g typescript
-RUN bun run frontendBuild
+RUN bun run dev
 
-# Starting nginx
-FROM nginx:1.29.8-alpine AS nginx
+# Building the production frontend
+FROM base AS frontendprod
 
-COPY --from=frontend /app/apps/frontend/dist /var/www/html
-COPY --from=frontend /app/infra/nginx/index.html /var/www/default/index.html
-COPY --from=frontend /app/infra/nginx/nginx.conf /etc/nginx/nginx.conf
+RUN bun run build
+
+# Starting nginx for production
+FROM nginx:1.29.8-alpine AS nginxprod
+
+COPY --from=frontendprog /app/apps/frontend/dist /var/www/html
+COPY --from=frontendprog /app/infra/nginx/index.html /var/www/default/index.html
+COPY --from=frontendprog /app/infra/nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+
+# Starting nginx for development
+FROM nginx:1.29.8-alpine AS nginxdev
+
+COPY --from=frontenddev /app/apps/frontend/dist /var/www/html
+COPY --from=frontenddev /app/infra/nginx/index.html /var/www/default/index.html
+COPY --from=frontenddev /app/infra/nginx/nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+
+# Building the tui
+FROM golang:1.26.2-alpine3.23 AS tui
+
+WORKDIR /app
+
+COPY apps/tui/go.mod go.mod
+COPY apps/tui/go.sum go.sum
+RUN go mod tidy
+
+EXPOSE 22
+
+COPY apps/tui/ .
+RUN go build
+
+CMD ["./tui_ssh"]

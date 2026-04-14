@@ -4,7 +4,8 @@ import {type userCreatedResponse } from "@schach/common/interfaces/responses";
 import { useUserState } from "../states/userState";
 
 // Get the base url to make the request
-const baseUrl = import.meta.env.VITE_BASE_API_URL
+const baseUrl = import.meta.env.BACKEND_API_URL
+console.log(baseUrl)
 
 // Takes in the username and password and returns the jwt token
 // If userCreated successfully then return true else return false

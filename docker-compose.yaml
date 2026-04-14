@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    container_name: backend
+    image: backend:latest
+    ports:
+      - 2222:2222
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://postgres:password@localhost:5432/chess
+
+  nginxdev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginxdev
+    container_name: nginxdev
+    image: nginx:dev
+    ports:
+      - 1234:80
+    depends_on:
+      - backend
+
+  tui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: tui
+    container_name: tui
+    image: tui:latest
+    depends_on:
+      - backend
+    ports:
+      - 2345:22
+
+  postgres:
+    image: postgres:18.3-alpine3.23
+    ports:
+      - 5432:5432
+    command: -c listen_addresses='*'
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: chess

@@ -11,19 +11,8 @@ import type { gameObject, gameOverReasons } from '@schach/common/interfaces/game
 import { gameTypes } from '@schach/common/interfaces/enums';
 
 const defaultGameLink = "https://github.com/jatin-raghav/Schach/";
-const database_url = Bun.env.DATABASE_URL;
-const host = Bun.env.HOST;
-const port: number = +(Bun.env.PORT ? Bun.env.PORT : 5432);
-const database = Bun.env.DATABASE;
-const username = Bun.env.USERNAME;
-const password = Bun.env.PASSWORD;
-const psql = postgres(database_url ? database_url : '', {
-    host,
-    port,
-    database,
-    username,
-    password,
-});
+const database_url = process.env.DATABASE_URL;
+const psql = postgres(database_url ? database_url : '');
 
 type Constructor<T extends object = object> =
 // eslint-disable-next-line

@@ -5,6 +5,7 @@
         "packages/*"
     ],
     "scripts": {
-        "frontendBuild":"bun run frontendBuild --workspaces --if-present"
+        "build":"bun run build --workspaces --if-present",
+        "dev":"bun run dev --workspaces --if-present"
     }
 }
