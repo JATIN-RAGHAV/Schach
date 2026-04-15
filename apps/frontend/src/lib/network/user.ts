@@ -3,13 +3,13 @@ import { userCreateZod } from "@schach/common/interfaces/userZodTypes";
 import {type userCreatedResponse } from "@schach/common/interfaces/responses";
 import { useUserState } from "../states/userState";
 
-// Get the base url to make the request
-const baseUrl = import.meta.env.BACKEND_API_URL
+const baseUrl = import.meta.env.SADAHARU_BACKEND_API_URL
 console.log(baseUrl)
 
 // Takes in the username and password and returns the jwt token
 // If userCreated successfully then return true else return false
 export const createUser = async (username: string, password: string):Promise<boolean> => {
+    // Get the base url to make the request
     const route = "http://" + baseUrl + "/user/create";
 
     // Verify the payload before sending it to the server
@@ -45,6 +45,7 @@ export const createUser = async (username: string, password: string):Promise<boo
 // Takes in the username and password and returns the jwt token
 // If logged in successfully then returns true else returns false
 export const loginUser = async (username: string, password: string):Promise<boolean> => {
+    // Get the base url to make the request
     const route = "http://" + baseUrl + "/user/login";
 
     // Verify the payload before sending it to the server
@@ -75,6 +76,7 @@ export const loginUser = async (username: string, password: string):Promise<bool
 }
 
 export const getUserInfo = async ():Promise<{username:string,userId:string}|null>=> {
+    // Get the base url to make the request
     const route = "http://" + baseUrl + "/user/me";
     const token = localStorage.getItem("token");
     console.log(token)

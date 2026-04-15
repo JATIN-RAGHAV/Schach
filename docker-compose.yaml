@@ -1,4 +1,5 @@
 services:
+  # service 1
   backend:
     build:
       context: .
@@ -13,6 +14,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:password@localhost:5432/chess
 
+  # service 2
   nginxdev:
     build:
       context: .
@@ -25,6 +27,7 @@ services:
     depends_on:
       - backend
 
+  # service 3
   tui:
     build:
       context: .
@@ -37,11 +40,16 @@ services:
     ports:
       - 2345:22
 
+  # service 4
   postgres:
-    image: postgres:18.3-alpine3.23
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: postgres
+    container_name: postgres
+    image: postgres:local
     ports:
       - 5432:5432
     command: -c listen_addresses='*'
     environment:
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: chess

@@ -7,9 +7,11 @@ COPY package.json package.json
 COPY apps/backend/package.json apps/backend/package.json
 COPY apps/frontend/package.json apps/frontend/package.json
 COPY packages/common/package.json packages/common/package.json
-RUN bun install
+COPY bun.lock bun.lock
+RUN bun install --filter '*'
 
 COPY . .
+
 
 # Building the backend
 FROM base AS backend
@@ -21,13 +23,12 @@ CMD ["bun","/apps/backend/index.ts"]
 # Building the development frontend
 FROM base AS frontenddev
 
-RUN bun i -g typescript
-RUN bun run dev
+RUN bun run build:dev
 
 # Building the production frontend
 FROM base AS frontendprod
 
-RUN bun run build
+RUN bun run build:prod
 
 # Starting nginx for production
 FROM nginx:1.29.8-alpine AS nginxprod
@@ -66,3 +67,10 @@ COPY apps/tui/ .
 RUN go build
 
 CMD ["./tui_ssh"]
+
+# Building the database with tables
+FROM postgres:18.3-alpine3.23 AS postgres
+
+WORKDIR /app
+
+COPY apps/backend/database/SETUP.sql /docker-entrypoint-initdb.d

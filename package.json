@@ -5,7 +5,7 @@
         "packages/*"
     ],
     "scripts": {
-        "build":"bun run build --workspaces --if-present",
-        "dev":"bun run dev --workspaces --if-present"
+        "build:prod":"bun run --filter '@schach/frontend' build:prod",
+        "build:dev":"bun run --filter '@schach/frontend' build:dev"
     }
 }

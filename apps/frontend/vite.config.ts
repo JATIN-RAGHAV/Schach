@@ -15,6 +15,5 @@ export default defineConfig({
       "@": resolve(__dirname, "src")
     }
   },
-    envPrefix: 'SADAHARU_',
+  envPrefix: ["SADAHARU_","VITE_"]
 })
-

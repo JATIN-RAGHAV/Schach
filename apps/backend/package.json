@@ -1,5 +1,5 @@
 {
-    "name": "schach",
+    "name": "@schach/backend",
     "module": "index.ts",
     "type": "module",
     "private": true,
