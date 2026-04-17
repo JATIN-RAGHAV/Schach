@@ -1,15 +1,17 @@
-CREATE TABLE Users (
+CREATE SCHEMA IF NOT EXISTS chess;
+
+CREATE TABLE chess.Users (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         username VARCHAR UNIQUE,
         hashPass VARCHAR
 );
-CREATE TABLE Friends (
+CREATE TABLE chess.Friends (
         user1 INT,
         user2 INT,
         FOREIGN KEY (user1) REFERENCES Users(id),
         FOREIGN KEY (user2) REFERENCES Users(id)
 );
-CREATE TABLE RapidGames (
+CREATE TABLE chess.RapidGames (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         moves TEXT,
         whiteId INT,
@@ -24,7 +26,7 @@ CREATE TABLE RapidGames (
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (winnerId) REFERENCES Users(id)
 );
-CREATE TABLE BulletGames (
+CREATE TABLE chess.BulletGames (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         moves TEXT,
         whiteId INT,
@@ -39,7 +41,7 @@ CREATE TABLE BulletGames (
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (winnerId) REFERENCES Users(id)
 );
-CREATE TABLE BlitzGames (
+CREATE TABLE chess.BlitzGames (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         moves TEXT,
         whiteId INT,
@@ -54,7 +56,7 @@ CREATE TABLE BlitzGames (
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (winnerId) REFERENCES Users(id)
 );
-CREATE TABLE RapidRatings(
+CREATE TABLE chess.RapidRatings(
         whiteRating INT,
         blackRating INT,
         gameId  INT,
@@ -64,7 +66,7 @@ CREATE TABLE RapidRatings(
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (gameId) REFERENCES RapidGames(id)
 );
-CREATE TABLE BulletRatings(
+CREATE TABLE chess.BulletRatings(
         whiteRating INT,
         blackRating INT,
         gameId  INT,
@@ -74,7 +76,7 @@ CREATE TABLE BulletRatings(
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (gameId) REFERENCES BulletGames(id)
 );
-CREATE TABLE BlitzRatings(
+CREATE TABLE chess.BlitzRatings(
         whiteRating INT,
         blackRating INT,
         gameId  INT,

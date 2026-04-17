@@ -1,9 +1,10 @@
-package schach_TUI;
+package schach_TUI
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	websocket "github.com/gorilla/websocket"
 )
@@ -14,7 +15,7 @@ func startSocket(m *model) {
 	}
 	(*m).status = status_loading;
 	time := getTime(*m);
-	url := fmt.Sprintf("http://backend:2222/game/anonymous/run?color=Random&increment=0&time=%d",time)
+	url := fmt.Sprintf("http://"+os.Getenv("BACKEND_URL")+"/game/anonymous/run?color=Random&increment=0&time=%d",time)
 
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {

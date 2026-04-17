@@ -6,7 +6,7 @@ import { exportJWK, importJWK, type JWK } from 'jose';
 class JWT {
     static publicKey: keyType;
     static privateKey: keyType;
-    static path: string = './helper/keys.json';
+    static path: string = './keys/keys.json';
 
     static async initKeys() {
         const keyFile = Bun.file(this.path);

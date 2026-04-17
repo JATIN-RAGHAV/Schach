@@ -1,3 +1,7 @@
+networks:
+  schach:
+    name: schach
+
 services:
   # service 1
   backend:
@@ -6,13 +10,15 @@ services:
       dockerfile: Dockerfile
       target: backend
     container_name: backend
+    networks:
+      - schach
     image: backend:latest
     ports:
       - 2222:2222
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://postgres:password@localhost:5432/chess
+      DATABASE_URL: postgres://postgres:password@postgres:5432
 
   # service 2
   nginxdev:
@@ -32,9 +38,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BACKEND_URL: localhost:2222
       target: tui
     container_name: tui
     image: tui:latest
+    environment:
+      BACKEND_API: localhost:2222
     depends_on:
       - backend
     ports:
@@ -42,14 +52,15 @@ services:
 
   # service 4
   postgres:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: postgres
+    image: postgres:18.3-alpine3.23
     container_name: postgres
-    image: postgres:local
+    networks:
+      - schach
     ports:
       - 5432:5432
     command: -c listen_addresses='*'
     environment:
+      POSTGRES_DB: chess
       POSTGRES_PASSWORD: password
+    volumes:
+      - ./apps/backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql

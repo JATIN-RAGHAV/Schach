@@ -46,7 +46,9 @@ export const createUser = async (username: string, password: string):Promise<boo
 // If logged in successfully then returns true else returns false
 export const loginUser = async (username: string, password: string):Promise<boolean> => {
     // Get the base url to make the request
+    console.log("sending request to create account")
     const route = "http://" + baseUrl + "/user/login";
+    console.log("sent request to backend")
 
     // Verify the payload before sending it to the server
     const payload = userCreateZod.safeParse({
@@ -63,6 +65,10 @@ export const loginUser = async (username: string, password: string):Promise<bool
         const res = await axios.post(route, 
             { username, password }
         )    
+        console.log("resposen: ",res)
+        if(res.data.error){
+            throw new Error("Error logging in");
+        }
         res.data as userCreatedResponse;
         const { setUserName } = useUserState.getState();
         setUserName(username);

@@ -1,10 +1,10 @@
 import Elysia from 'elysia';
 
 export const errorPlugin = new Elysia()
-.onError({as:'global'},({ error, status }) => {
-    status(400);
+.onError({as:'global'},({ set }) => {
+    set.status = 400;
     return {
         error: true,
-        message: error,
+        message: "Some thing broke, shit",
     };
 });

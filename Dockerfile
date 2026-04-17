@@ -64,7 +64,10 @@ RUN go mod tidy
 EXPOSE 22
 
 COPY apps/tui/ .
-RUN go build
+
+ARG BACKEND_URL
+
+RUN BACKEND_URL=$BACKEND_URL go build
 
 CMD ["./tui_ssh"]
 
@@ -73,4 +76,4 @@ FROM postgres:18.3-alpine3.23 AS postgres
 
 WORKDIR /app
 
-COPY apps/backend/database/SETUP.sql /docker-entrypoint-initdb.d
+COPY apps/backend/database/SETUP.sql /docker-entrypoint-initdb.d/init.sql

@@ -12,6 +12,7 @@ import { gameTypes } from '@schach/common/interfaces/enums';
 
 const defaultGameLink = "https://github.com/jatin-raghav/Schach/";
 const database_url = process.env.DATABASE_URL;
+console.log(database_url)
 const psql = postgres(database_url ? database_url : '');
 
 type Constructor<T extends object = object> =
@@ -40,9 +41,11 @@ const Database = <Tbase extends Constructor>(Base: Tbase) =>
         ): Promise<JWT_PAYLOAD> {
             const hashPass: string = Bun.password.hashSync(password);
             try {
+                console.log('trying ot create user')
                 await psql<
                     UserData[]
                     >`INSERT INTO Users (username,hashPass) VALUES(${username},${hashPass})`;
+                    console.log("user created")
 
                 const user = await this.getUser(username);
                 if (!(user instanceof Error)) {

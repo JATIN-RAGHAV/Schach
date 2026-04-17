@@ -5,6 +5,7 @@ import { userCreateZod } from '@schach/common/interfaces/userZodTypes';
 
 export const access = new Elysia({ prefix: '/user' })
 .post('/create', async ({ body }) => {
+    console.log('creating a new user')
     const res = userCreateZod.safeParse(body);
     if (!res.success) {
         return {
@@ -12,6 +13,7 @@ export const access = new Elysia({ prefix: '/user' })
             message: [...JSON.parse(res.error.message)],
         };
     }
+    console.log("zod verified")
     try {
         const { username, password: pass } = res.data;
         const payload = await Data.createUser(username, pass);

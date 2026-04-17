@@ -76,20 +76,25 @@ export const anonymousGameStartPlugin = new Elysia().use(errorPlugin).resolve({a
 // This adds user:{username,userId} to the context.
 export const authHeaderPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped'},async ({headers}) => {
     // Verify headers exists
+    console.log("request received")
     if (headers == undefined) {
         throw new Error('headers is absent.');
     }
+    console.log("headers present")
 
     // Get the token
     const splitted = headers['authorization']?.split(" ");
     if (splitted == undefined || splitted.length != 2) {
         throw new Error('No auth headers given in the headers.');
     }
+    console.log("got token")
     const token = splitted[1];
     let user: JWT_PAYLOAD | undefined;
     if(token){
         // Get the user
+        console.log('testing token')
         const res: JWT_PAYLOAD = await JWT.verify(token);
+        console.log('correct token')
         user = res;
     }
     else{
