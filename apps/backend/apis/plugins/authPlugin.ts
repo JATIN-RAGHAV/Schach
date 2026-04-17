@@ -55,6 +55,7 @@ export const authQueryPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped
 
 // Get colors, time and increment and also generates a random userId for anonymouse game play
 export const anonymousGameStartPlugin = new Elysia().use(errorPlugin).resolve({as:'scoped'},async ({ query,status}) => {
+    console.log("got request")
     const res = gameCreateZod.safeParse(query);
     if (!res.success) {
         return status(400);

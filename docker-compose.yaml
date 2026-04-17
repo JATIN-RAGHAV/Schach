@@ -37,14 +37,16 @@ services:
   tui:
     build:
       context: .
-      dockerfile: Dockerfile
       args:
         BACKEND_URL: localhost:2222
+      dockerfile: Dockerfile
       target: tui
     container_name: tui
     image: tui:latest
+    networks:
+      - schach
     environment:
-      BACKEND_API: localhost:2222
+      BACKEND_URL: backend:2222
     depends_on:
       - backend
     ports:
