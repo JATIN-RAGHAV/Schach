@@ -33,9 +33,9 @@ RUN bun run build:prod
 # Starting nginx for production
 FROM nginx:1.29.8-alpine AS nginxprod
 
-COPY --from=frontendprog /app/apps/frontend/dist /var/www/html
-COPY --from=frontendprog /app/infra/nginx/index.html /var/www/default/index.html
-COPY --from=frontendprog /app/infra/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY --from=frontendprod /app/apps/frontend/dist /var/www/html
+COPY --from=frontendprod /app/infra/nginx/index.html /var/www/default/index.html
+COPY --from=frontendprod /app/infra/nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
