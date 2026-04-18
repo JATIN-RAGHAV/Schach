@@ -6,7 +6,7 @@ on:
      - main
 
 jobs:
-  push_image:
+  push_images:
     runs-on: ubuntu-latest
 
     steps:
@@ -51,3 +51,18 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: |
             BACKEND_URL: ${{ secrets.BACKEND_URL }}
+
+  pull_and_RUN:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ssh
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            touch github_workflow_file.txt
+
