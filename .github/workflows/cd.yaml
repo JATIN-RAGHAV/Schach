@@ -6,7 +6,7 @@ on:
      - main
 
 jobs:
-  deploy:
+  push_image:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,3 +30,24 @@ jobs:
           push: true
           target: backend
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
+          platforms: linux/amd64,linux/arm64
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          target: nginxprod
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nginx:prod
+          platforms: linux/amd64,linux/arm64
+
+      - name: Build and push go tui
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          target: tui
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tui:latest
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            BACKEND_URL: ${{ secrets.BACKEND_URL }}
