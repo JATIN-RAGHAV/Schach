@@ -54,6 +54,10 @@ jobs:
     env:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      TF_VAR_namecom_username: ${{ secrets.TF_VAR_namecom_username }}
+      TF_VAR_namecom_api_token: ${{ secrets.TF_VAR_namecom_api_token }}
+      TF_VAR_private_key_ssh: ${{ secrets.SSH_KEY }}
+      TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
 
     steps:
       - name: Checkout
@@ -63,16 +67,21 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: terraform changes
-        id: terraform
         run: |
           cd ./infra/terraform
           terraform init
           terraform apply --auto-approve
+
+      - name: set terraform outputs
+        id: terraform
+        run: |
+          cd ./infra/terraform
           echo "ssh_host=$(terraform output -raw public_ip)" >> $GITHUB_OUTPUT
 
-      - name: Let terraform finish
-        run: |
-          sleep 3m
+      # - name: Let terraform finish
+      #   run: |
+      #     sleep 1m
+      #
 
       - name: ssh
         uses: appleboy/ssh-action@master

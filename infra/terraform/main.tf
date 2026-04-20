@@ -13,5 +13,25 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.0"
     }
+
+    acme = {
+      source  = "vancluever/acme"
+      version = "~> 2.0"
+    }
+
+    tls = {
+      source = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    
+    namedotcom = {
+      source = "lexfrei/namedotcom"
+      version = "~>1.1.6"
+    }
+
+    local = {
+      source = "hashicorp/local"
+      version = "~> 2.0"
+    }
   }
 }

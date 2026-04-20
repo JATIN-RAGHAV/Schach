@@ -10,7 +10,7 @@ console.log(baseUrl)
 // If userCreated successfully then return true else return false
 export const createUser = async (username: string, password: string):Promise<boolean> => {
     // Get the base url to make the request
-    const route = "http://" + baseUrl + "/user/create";
+    const route = "https://" + baseUrl + "/user/create";
 
     // Verify the payload before sending it to the server
     const payload = userCreateZod.safeParse({
