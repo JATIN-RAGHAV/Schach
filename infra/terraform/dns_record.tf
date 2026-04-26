@@ -18,3 +18,10 @@ resource "namedotcom_record" "walrus_schach_BE"{
   record_type = "A"
   answer = aws_instance.walrus.public_ip
 }
+
+resource "namedotcom_record" "walrus_schach_BE"{
+  domain_name = "walrus.codes"
+  host = "tui"
+  record_type = "A"
+  answer = aws_instance.walrus.public_ip
+}
