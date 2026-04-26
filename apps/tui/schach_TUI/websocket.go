@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 
 	websocket "github.com/gorilla/websocket"
 )
@@ -15,7 +14,7 @@ func startSocket(m *model) {
 	}
 	(*m).status = status_loading;
 	time := getTime(*m);
-	url := fmt.Sprintf("ws://"+os.Getenv("BACKEND_URL")+"/game/anonymous/run?color=Random&increment=0&time=%d",time)
+	url := fmt.Sprintf("ws://backend/game/anonymous/run?color=Random&increment=0&time=%d",time)
 	fmt.Println(url)
 
 	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
