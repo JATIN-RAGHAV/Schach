@@ -23,12 +23,12 @@ CMD ["bun","/apps/backend/index.ts"]
 # Building the development frontend
 FROM base AS frontenddev
 
-RUN bun run build:dev
+RUN bun run --filter '@schach/frontend' build:dev
 
 # Building the production frontend
 FROM base AS frontendprod
 
-RUN bun run build:prod
+RUN bun run --filter '@schach/frontend' build:prod
 
 # Starting nginx for production
 FROM nginx:1.29.8-alpine AS nginxprod

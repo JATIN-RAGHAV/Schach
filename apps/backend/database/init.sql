@@ -1,17 +1,17 @@
 CREATE SCHEMA IF NOT EXISTS chess;
 
-CREATE TABLE chess.Users (
+CREATE TABLE Users (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         username VARCHAR UNIQUE,
         hashPass VARCHAR
 );
-CREATE TABLE chess.Friends (
+CREATE TABLE Friends (
         user1 INT,
         user2 INT,
         FOREIGN KEY (user1) REFERENCES Users(id),
         FOREIGN KEY (user2) REFERENCES Users(id)
 );
-CREATE TABLE chess.RapidGames (
+CREATE TABLE RapidGames (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         moves TEXT,
         whiteId INT,
@@ -26,7 +26,7 @@ CREATE TABLE chess.RapidGames (
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (winnerId) REFERENCES Users(id)
 );
-CREATE TABLE chess.BulletGames (
+CREATE TABLE BulletGames (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         moves TEXT,
         whiteId INT,
@@ -41,7 +41,7 @@ CREATE TABLE chess.BulletGames (
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (winnerId) REFERENCES Users(id)
 );
-CREATE TABLE chess.BlitzGames (
+CREATE TABLE BlitzGames (
         id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         moves TEXT,
         whiteId INT,
@@ -56,7 +56,7 @@ CREATE TABLE chess.BlitzGames (
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (winnerId) REFERENCES Users(id)
 );
-CREATE TABLE chess.RapidRatings(
+CREATE TABLE RapidRatings(
         whiteRating INT,
         blackRating INT,
         gameId  INT,
@@ -66,7 +66,7 @@ CREATE TABLE chess.RapidRatings(
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (gameId) REFERENCES RapidGames(id)
 );
-CREATE TABLE chess.BulletRatings(
+CREATE TABLE BulletRatings(
         whiteRating INT,
         blackRating INT,
         gameId  INT,
@@ -76,7 +76,7 @@ CREATE TABLE chess.BulletRatings(
         FOREIGN KEY (blackId) REFERENCES Users(id),
         FOREIGN KEY (gameId) REFERENCES BulletGames(id)
 );
-CREATE TABLE chess.BlitzRatings(
+CREATE TABLE BlitzRatings(
         whiteRating INT,
         blackRating INT,
         gameId  INT,
